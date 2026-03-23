@@ -4,7 +4,12 @@ pragma solidity ^0.8.18;
 
 import {OpTest} from "test/abstract/OpTest.sol";
 
-import {NotAnExternContract, BadOutputsLength} from "../../../../../src/error/ErrExtern.sol";
+import {
+    NotAnExternContract,
+    BadOutputsLength,
+    ExternIntegrityInputsMismatch,
+    ExternIntegrityOutputsMismatch
+} from "../../../../../src/error/ErrExtern.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
@@ -46,6 +51,30 @@ contract LibOpExternTest is OpTest {
         );
     }
 
+    /// Sets up an extern for integrity testing: etches the extern address,
+    /// mocks ERC165, builds the operand/dispatch, and stores the encoded
+    /// dispatch in the constants array. Returns the operand and dispatch
+    /// for further mocking.
+    function setupExternIntegrity(
+        IntegrityCheckState memory state,
+        IInterpreterExternV4 extern,
+        uint16 constantIndex,
+        uint8 inputs,
+        uint8 outputs
+    ) internal returns (OperandV2 operand, ExternDispatchV2 externDispatch) {
+        assumeEtchable(address(extern));
+        vm.etch(address(extern), hex"fe");
+        mockImplementsERC165IInterpreterExternV4(extern);
+
+        vm.assume(state.constants.length > 0);
+        constantIndex = uint16(bound(constantIndex, 0, state.constants.length - 1));
+
+        operand = LibOperand.build(inputs, outputs, constantIndex);
+        externDispatch = LibExtern.encodeExternDispatch(0, operand);
+        EncodedExternDispatchV2 encodedExternDispatch = LibExtern.encodeExternCall(extern, externDispatch);
+        state.constants[constantIndex] = EncodedExternDispatchV2.unwrap(encodedExternDispatch);
+    }
+
     function testOpExternIntegrityHappy(
         IntegrityCheckState memory state,
         IInterpreterExternV4 extern,
@@ -56,33 +85,68 @@ contract LibOpExternTest is OpTest {
         inputs = uint8(bound(inputs, 0, 0x0F));
         outputs = uint8(bound(outputs, 0, 0x0F));
 
-        assumeEtchable(address(extern));
-        vm.etch(address(extern), hex"fe");
-        mockImplementsERC165IInterpreterExternV4(extern);
+        (OperandV2 operand, ExternDispatchV2 externDispatch) =
+            setupExternIntegrity(state, extern, constantIndex, inputs, outputs);
 
-        vm.assume(state.constants.length > 0);
-        constantIndex = uint16(bound(constantIndex, 0, state.constants.length - 1));
-
-        OperandV2 operand = LibOperand.build(inputs, outputs, constantIndex);
-        ExternDispatchV2 externDispatch = LibExtern.encodeExternDispatch(0, operand);
-        EncodedExternDispatchV2 encodedExternDispatch = LibExtern.encodeExternCall(extern, externDispatch);
-        state.constants[constantIndex] = EncodedExternDispatchV2.unwrap(encodedExternDispatch);
-
-        // Extern integrity needs to match the inputs and outputs.
         vm.mockCall(
             address(extern),
             abi.encodeWithSelector(IInterpreterExternV4.externIntegrity.selector, externDispatch),
-            // Have the mock modify the inputs and outputs slightly so we know
-            // the implementation is hitting the mock.
-            abi.encode(inputs + 1, outputs + 1)
-        );
-        vm.expectCall(
-            address(extern), abi.encodeWithSelector(IInterpreterExternV4.externIntegrity.selector, externDispatch), 1
+            abi.encode(inputs, outputs)
         );
         (uint256 calcInputs, uint256 calcOutputs) = LibOpExtern.integrity(state, operand);
 
-        assertEq(calcInputs, inputs + 1, "inputs");
-        assertEq(calcOutputs, outputs + 1, "outputs");
+        assertEq(calcInputs, inputs, "inputs");
+        assertEq(calcOutputs, outputs, "outputs");
+    }
+
+    /// When an extern returns more inputs than the operand specifies,
+    /// integrity must revert with ExternIntegrityInputsMismatch.
+    function testOpExternIntegrityInputsMismatch(
+        IntegrityCheckState memory state,
+        IInterpreterExternV4 extern,
+        uint16 constantIndex,
+        uint8 inputs,
+        uint8 outputs
+    ) external {
+        inputs = uint8(bound(inputs, 0, 0x0E));
+        outputs = uint8(bound(outputs, 0, 0x0F));
+
+        (OperandV2 operand, ExternDispatchV2 externDispatch) =
+            setupExternIntegrity(state, extern, constantIndex, inputs, outputs);
+
+        vm.mockCall(
+            address(extern),
+            abi.encodeWithSelector(IInterpreterExternV4.externIntegrity.selector, externDispatch),
+            abi.encode(inputs + 1, outputs)
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(ExternIntegrityInputsMismatch.selector, inputs, inputs + 1));
+        this.externalIntegrity(state, operand);
+    }
+
+    /// When an extern returns more outputs than the operand specifies,
+    /// integrity must revert with ExternIntegrityOutputsMismatch.
+    function testOpExternIntegrityOutputsMismatch(
+        IntegrityCheckState memory state,
+        IInterpreterExternV4 extern,
+        uint16 constantIndex,
+        uint8 inputs,
+        uint8 outputs
+    ) external {
+        inputs = uint8(bound(inputs, 0, 0x0F));
+        outputs = uint8(bound(outputs, 0, 0x0E));
+
+        (OperandV2 operand, ExternDispatchV2 externDispatch) =
+            setupExternIntegrity(state, extern, constantIndex, inputs, outputs);
+
+        vm.mockCall(
+            address(extern),
+            abi.encodeWithSelector(IInterpreterExternV4.externIntegrity.selector, externDispatch),
+            abi.encode(inputs, outputs + 1)
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(ExternIntegrityOutputsMismatch.selector, outputs, outputs + 1));
+        this.externalIntegrity(state, operand);
     }
 
     function testOpExternIntegrityNotAnExternContract(

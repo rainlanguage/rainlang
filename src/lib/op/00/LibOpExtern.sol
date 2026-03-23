@@ -2,7 +2,11 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {NotAnExternContract} from "../../../error/ErrExtern.sol";
+import {
+    NotAnExternContract,
+    ExternIntegrityInputsMismatch,
+    ExternIntegrityOutputsMismatch
+} from "../../../error/ErrExtern.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
@@ -37,8 +41,15 @@ library LibOpExtern {
         }
         uint256 expectedInputsLength = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
         uint256 expectedOutputsLength = uint256(OperandV2.unwrap(operand) >> 0x14) & 0x0F;
-        //slither-disable-next-line unused-return
-        return extern.externIntegrity(dispatch, expectedInputsLength, expectedOutputsLength);
+        (uint256 actualInputs, uint256 actualOutputs) =
+            extern.externIntegrity(dispatch, expectedInputsLength, expectedOutputsLength);
+        if (actualInputs != expectedInputsLength) {
+            revert ExternIntegrityInputsMismatch(expectedInputsLength, actualInputs);
+        }
+        if (actualOutputs != expectedOutputsLength) {
+            revert ExternIntegrityOutputsMismatch(expectedOutputsLength, actualOutputs);
+        }
+        return (actualInputs, actualOutputs);
     }
 
     /// @notice `extern` opcode. Calls an external contract's `extern` function with stack inputs and pushes its outputs.
