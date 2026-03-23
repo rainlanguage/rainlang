@@ -17,11 +17,11 @@ Source: Report_rain.interpreter_2.0_mar_2026.pdf
 
 ## External: Informational
 
-- [PENDING] I01: (INFO) Dead code: MalformedHexLiteral error is unreachable after boundHex filtering. Path: src/lib/parse/literal/LibParseLiteralHex.sol. Status in report: Acknowledged
-- [PENDING] I02: (INFO) Unused ParseState parameter in boundHex. Path: src/lib/parse/literal/LibParseLiteralHex.sol. Status in report: Acknowledged
-- [PENDING] I03: (INFO) Misleading documentation comment regarding non-ASCII characters — behavior is actually deterministic revert, not undefined. Path: src/lib/parse/literal/LibParseLiteralSubParseable.sol. Status in report: Fixed in 441e9b5b
-- [PENDING] I04: (INFO) Missing explicit constants index bounds check in LibOpExtern.integrity(). Path: src/lib/op/00/LibOpExtern.sol
-- [PENDING] I05: (INFO) Architectural fragility: hardcoded InterpreterState memory layout — mload(state) assumes stackBottoms is first struct field. Path: src/lib/op/00/LibOpStack.sol
+- [DOCUMENTED] I01: (INFO) Dead code: MalformedHexLiteral error is unreachable after boundHex filtering. Path: src/lib/parse/literal/LibParseLiteralHex.sol. Added comment noting defensive fallback.
+- [DISMISSED] I02: (INFO) Unused ParseState parameter in boundHex. Path: src/lib/parse/literal/LibParseLiteralHex.sol. The parameter is the implicit receiver from `using for` — called as `state.boundHex(cursor, end)`. Cannot be removed.
+- [FIXED] I03: (INFO) Misleading documentation comment regarding non-ASCII characters — behavior is actually deterministic revert, not undefined. Path: src/lib/parse/literal/LibParseLiteralSubParseable.sol. Misleading comment removed.
+- [FIXED] I04: (INFO) Missing explicit constants index bounds check in LibOpExtern.integrity(). Path: src/lib/op/00/LibOpExtern.sol. Added OutOfBoundsConstantRead check matching LibOpConstant pattern.
+- [FIXED] I05: (INFO) Architectural fragility: hardcoded InterpreterState memory layout — mload(state) assumes stackBottoms is first struct field. Path: src/lib/op/00/LibOpStack.sol. Now uses explicit field access matching LibOpCall pattern.
 - [PENDING] I06: (INFO) Float identity testing relies on implicit referenceFn() divergence in EVM block opcodes. Path: src/lib/op/evm/LibOpBlockNumber.sol, LibOpBlockTimestamp.sol, LibOpChainId.sol
-- [PENDING] I07: (INFO) Asymmetry between integrity() and run() bounds in variable-length logic opcodes — min-input clamp not duplicated in run(). Path: src/lib/op/logic/LibOpAny.sol, LibOpEvery.sol, LibOpConditions.sol
+- [DOCUMENTED] I07: (INFO) Asymmetry between integrity() and run() bounds in variable-length logic opcodes — min-input clamp not duplicated in run(). Path: src/lib/op/logic/LibOpAny.sol, LibOpEvery.sol, LibOpConditions.sol. By design: integrity reports IO, integrityCheck2 validates, run() trusts the result for gas efficiency. Documented in CLAUDE.md, README.md, and integrityCheck2 NatSpec.
 - [PENDING] I08: (INFO) Missing internal enforcement of memory bounds in parser — checkParseMemoryOverflow() never called by LibParse.parse(). Path: src/lib/parse/LibParse.sol, src/lib/parse/LibParseState.sol

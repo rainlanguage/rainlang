@@ -77,6 +77,8 @@ Each opcode is a library in `src/lib/op/<category>/` with three functions:
 - **`integrity(IntegrityCheckState, Operand) → (inputs, outputs)`** — Pre-execution validation
 - **Operand handler** — Parses operand bytes during parsing
 
+Integrity functions report accurate stack IO to `integrityCheck2`, which is the single validation authority. The `run()` functions trust that integrity has already validated the bytecode and do not duplicate those checks — runtime gas efficiency depends on this separation. Do not add redundant validation to `run()` for conditions that integrity already prevents.
+
 All opcodes are registered in `src/lib/op/LibAllStandardOps.sol` which maintains four parallel arrays (authoring meta, operand handlers, integrity pointers, opcode pointers). The ordering must be consistent across all four arrays.
 
 ### Extern System

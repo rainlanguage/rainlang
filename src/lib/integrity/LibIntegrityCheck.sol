@@ -81,6 +81,11 @@ library LibIntegrityCheck {
     /// the final stack depth matches the declared allocation and outputs.
     /// Reverts on any mismatch. Returns a packed `io` byte array with two
     /// bytes per source (inputs, outputs).
+    ///
+    /// This is the single validation authority for bytecode correctness.
+    /// Opcode `integrity()` functions report accurate stack IO here;
+    /// opcode `run()` functions trust that validation has already passed
+    /// and do not duplicate these checks, keeping runtime gas costs low.
     /// @param fPointers Packed 2-byte function pointers for each opcode's
     /// integrity function.
     /// @param bytecode The full bytecode containing all sources to check.
