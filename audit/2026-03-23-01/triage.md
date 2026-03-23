@@ -5,11 +5,11 @@ Source: Report_rain.interpreter_2.0_mar_2026.pdf
 ## External: Security
 
 - [FIXED] H01: (HIGH) Off-by-one in MAX_STACK_RHS_OFFSET causes LHS item count corruption — 63rd RHS item writes into LHS counter byte at offset 0x5F. Path: src/lib/parse/LibParseState.sol
-- [PENDING] M01: (MEDIUM) Out-of-bounds second-byte read causes valid decimals to revert — look-ahead past buffer boundary when literal ends with single digit. Path: src/lib/parse/literal/LibParseLiteral.sol. Status in report: Fixed in 441e9b5b
-- [PENDING] M02: (MEDIUM) Out-of-bounds memory read and garbage literal parsing in pragma — tryParseLiteral called when cursor == end after trailing whitespace. Path: src/lib/parse/LibParsePragma.sol. Status in report: Fixed in 441e9b5b
-- [PENDING] M03: (MEDIUM) Silent truncation of sub-parser dispatch length — dispatchLength >0xFFFF silently truncated to 16 bits during packing. Path: src/lib/parse/LibSubParse.sol. Status in report: Fixed in 441e9b5b
-- [PENDING] M04: (MEDIUM) LHS item count overflow causes bitwise carry-over and parser state corruption — 256 LHS items overflows packed byte in unchecked block. Path: src/lib/parse/LibParse.sol. Status in report: Fixed in 441e9b5b
-- [PENDING] M05: (MEDIUM) Unbounded LHS count in endLine() for empty-RHS lines — lineLHSItems added to totalRHSTopLevel without bounds check. Path: src/lib/parse/LibParseState.sol
+- [FIXED] M01: (MEDIUM) Out-of-bounds second-byte read causes valid decimals to revert — look-ahead past buffer boundary when literal ends with single digit. Path: src/lib/parse/literal/LibParseLiteral.sol. Fix at line 110, test: LibParseLiteral.dispatch.t.sol testTryParseLiteralOOBSecondBytePoison
+- [FIXED] M02: (MEDIUM) Out-of-bounds memory read and garbage literal parsing in pragma — tryParseLiteral called when cursor == end after trailing whitespace. Path: src/lib/parse/LibParsePragma.sol. Fix at line 88, test: LibParsePragma.keyword.t.sol testParsePragmaOOBAfterInterstitial
+- [FIXED] M03: (MEDIUM) Silent truncation of sub-parser dispatch length — dispatchLength >0xFFFF silently truncated to 16 bits during packing. Path: src/lib/parse/LibSubParse.sol. Fix at line 363, test: LibSubParse.subParseLiteral.t.sol testSubParseLiteralDispatchLengthOverflow
+- [FIXED] M04: (MEDIUM) LHS item count overflow causes bitwise carry-over and parser state corruption — 256 LHS items overflows packed byte in unchecked block. Path: src/lib/parse/LibParse.sol. Fix at line 182, test: LibParse.lhsOverflow.t.sol testLHSItemCountOverflow256
+- [FIXED] M05: (MEDIUM) Unbounded LHS count in endLine() for empty-RHS lines — lineLHSItems added to totalRHSTopLevel without bounds check. Path: src/lib/parse/LibParseState.sol
 - [PENDING] M06: (MEDIUM) Semantic manipulation and implicit validation via malicious extern contracts — LibOpExtern.integrity() blindly trusts external externIntegrity() return values. Path: src/lib/op/00/LibOpExtern.sol
 - [PENDING] L01: (LOW) Uppercase hexadecimal prefix bypasses hex parser and fails confusingly — 0X not recognized, routed to decimal parser. Path: src/lib/parse/literal/LibParseLiteral.sol. Status in report: Fixed in 441e9b5b
 - [PENDING] L02: (LOW) Missing bitwise mask on outputs in LibOpCall — unmasked right shift relies on upstream truncation. Path: src/lib/op/call/LibOpCall.sol

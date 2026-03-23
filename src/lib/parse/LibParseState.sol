@@ -452,6 +452,9 @@ library LibParseState {
                     // This is the only case where we defer to the LHS to tell
                     // us how many top level items there are.
                     totalRHSTopLevel += lineLHSItems;
+                    if (totalRHSTopLevel >= MAX_STACK_RHS_OFFSET) {
+                        revert ParseStackOverflow();
+                    }
                     state.topLevel0 = totalRHSTopLevel << 0xf8;
 
                     // Push the inputs onto the stack tracker.
