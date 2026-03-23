@@ -452,7 +452,9 @@ library LibParse {
                 }
             }
             //slither-disable-next-line unused-return
-            return state.subParseWords(state.buildBytecode());
+            (bytes memory built, bytes32[] memory constants) = state.subParseWords(state.buildBytecode());
+            LibParseState.checkParseMemoryOverflow();
+            return (built, constants);
         }
     }
 }

@@ -143,12 +143,10 @@ contract LibOpCallTest is OpTest, BytecodeTest {
     /// outputs in the operand are within the bounds set by the source, then the
     /// inputs is always specified by the source (callee), and the outputs are
     /// always specified by the operand (caller).
-    function testOpCallIntegrityIO(
-        IntegrityCheckState memory state,
-        uint256 outputs,
-        uint8 sourceCount,
-        bytes32 seed
-    ) external pure {
+    function testOpCallIntegrityIO(IntegrityCheckState memory state, uint256 outputs, uint8 sourceCount, bytes32 seed)
+        external
+        pure
+    {
         conformBytecode(state.bytecode, sourceCount, seed);
 
         uint256 sourcePosition = randomSourcePosition(state.bytecode, seed);

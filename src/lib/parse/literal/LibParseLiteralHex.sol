@@ -112,6 +112,10 @@ library LibParseLiteralHex {
                         // forge-lint: disable-next-line(unsafe-typecast)
                         nybble = bytes32(hexCharByte - uint256(uint8(bytes1("A"))) + 10);
                     } else {
+                        // Unreachable: boundHex already restricts the
+                        // cursor range to CMASK_HEX characters. Retained
+                        // as a defensive fallback in case the upstream
+                        // mask is ever modified.
                         revert MalformedHexLiteral(state.parseErrorOffset(cursor));
                     }
 

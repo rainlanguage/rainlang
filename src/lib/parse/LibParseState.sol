@@ -1058,9 +1058,9 @@ library LibParseState {
     /// any pointer stored after the overflow was silently truncated,
     /// corrupting the linked lists and producing invalid bytecode.
     ///
-    /// This check MUST run after any complete parse operation. Callers that
-    /// use `LibParse.parse` or `LibParsePragma.parsePragma` through a
-    /// concrete contract should apply this check (or the
+    /// `LibParse.parse` calls this internally before returning.
+    /// Callers that use `LibParsePragma.parsePragma` or other parse
+    /// operations outside `parse()` must still apply this check (or the
     /// `checkParseMemoryOverflow` modifier) after the call returns.
     function checkParseMemoryOverflow() internal pure {
         uint256 freeMemoryPointer;

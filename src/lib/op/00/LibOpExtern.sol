@@ -7,6 +7,7 @@ import {
     ExternIntegrityInputsMismatch,
     ExternIntegrityOutputsMismatch
 } from "../../../error/ErrExtern.sol";
+import {OutOfBoundsConstantRead} from "../../../error/ErrIntegrity.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
@@ -32,6 +33,9 @@ library LibOpExtern {
     /// @return The number of outputs.
     function integrity(IntegrityCheckState memory state, OperandV2 operand) internal view returns (uint256, uint256) {
         uint256 encodedExternDispatchIndex = uint256(OperandV2.unwrap(operand) & bytes32(uint256(0xFFFF)));
+        if (encodedExternDispatchIndex >= state.constants.length) {
+            revert OutOfBoundsConstantRead(state.opIndex, state.constants.length, encodedExternDispatchIndex);
+        }
 
         EncodedExternDispatchV2 encodedExternDispatch =
             EncodedExternDispatchV2.wrap(state.constants[encodedExternDispatchIndex]);
