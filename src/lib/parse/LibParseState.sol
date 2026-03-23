@@ -80,9 +80,11 @@ uint256 constant PARSE_STATE_LINE_TRACKER_OFFSET = 0xa0;
 
 /// @dev Maximum RHS offset value. The RHS offset is stored as a single
 /// byte within the topLevel0 field but shares the word with other packed
-/// fields, so it must not exceed 62 (0x3e). The check uses >= 0x3f (63)
-/// to reject offset 63 and above.
-uint256 constant MAX_STACK_RHS_OFFSET = 0x3f;
+/// fields, so it must not exceed 61 (0x3d). The check uses >= 0x3e (62)
+/// to reject offset 62 and above, because offset 62 would cause
+/// pushOpToSource to write into the LHS counter byte at the end of
+/// topLevel1 (state + 0x20 + 62 + 1 = state + 0x5F).
+uint256 constant MAX_STACK_RHS_OFFSET = 0x3e;
 
 /// @notice The parser is stateful. This struct keeps track of the entire state.
 /// @param activeSourcePtr The pointer to the current source being built.
@@ -109,7 +111,8 @@ uint256 constant MAX_STACK_RHS_OFFSET = 0x3f;
 /// stack item, which are incremented for every op pushed to the source. This is
 /// reset to 0 for every new source.
 /// @param topLevel1 31 additional bytes of stack words, allowing for 62 top
-/// level stack items total per source. The final byte is used to count the
+/// level stack items total per source (offsets 0-61). The final byte is used
+/// to count the
 /// stack height according to the LHS for the current source. This is reset to 0
 /// for every new source.
 /// @param parenTracker0 Memory region for tracking pointers to words in the
