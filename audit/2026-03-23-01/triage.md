@@ -11,9 +11,9 @@ Source: Report_rain.interpreter_2.0_mar_2026.pdf
 - [FIXED] M04: (MEDIUM) LHS item count overflow causes bitwise carry-over and parser state corruption — 256 LHS items overflows packed byte in unchecked block. Path: src/lib/parse/LibParse.sol. Fix at line 182, test: LibParse.lhsOverflow.t.sol testLHSItemCountOverflow256
 - [FIXED] M05: (MEDIUM) Unbounded LHS count in endLine() for empty-RHS lines — lineLHSItems added to totalRHSTopLevel without bounds check. Path: src/lib/parse/LibParseState.sol
 - [FIXED] M06: (MEDIUM) Semantic manipulation and implicit validation via malicious extern contracts — LibOpExtern.integrity() blindly trusts external externIntegrity() return values. Path: src/lib/op/00/LibOpExtern.sol
-- [PENDING] L01: (LOW) Uppercase hexadecimal prefix bypasses hex parser and fails confusingly — 0X not recognized, routed to decimal parser. Path: src/lib/parse/literal/LibParseLiteral.sol. Status in report: Fixed in 441e9b5b
-- [PENDING] L02: (LOW) Missing bitwise mask on outputs in LibOpCall — unmasked right shift relies on upstream truncation. Path: src/lib/op/call/LibOpCall.sol
-- [PENDING] L03: (LOW) Implicit operand/bytecode synchronisation in LibOpCall — integrity() ignores operand-encoded inputs, relies on external integrityCheck2. Path: src/lib/op/call/LibOpCall.sol
+- [FIXED] L01: (LOW) Uppercase hexadecimal prefix bypasses hex parser and fails confusingly — 0X not recognized, routed to decimal parser. Path: src/lib/parse/literal/LibParseLiteral.sol. Fix at line 121, test: LibParseLiteral.dispatch.t.sol testTryParseLiteralUppercaseXReverts
+- [FIXED] L02: (LOW) Missing bitwise mask on outputs in LibOpCall — unmasked right shift relies on upstream truncation. Path: src/lib/op/call/LibOpCall.sol
+- [FIXED] L03: (LOW) Implicit operand/bytecode synchronisation in LibOpCall — integrity() ignores operand-encoded inputs, relies on external integrityCheck2. Path: src/lib/op/call/LibOpCall.sol
 
 ## External: Informational
 

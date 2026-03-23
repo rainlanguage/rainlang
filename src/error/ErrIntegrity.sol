@@ -46,6 +46,12 @@ error OutOfBoundsStackRead(uint256 opIndex, uint256 stackTopIndex, uint256 stack
 /// @param outputs The number of outputs requested by the operand.
 error CallOutputsExceedSource(uint256 sourceOutputs, uint256 outputs);
 
+/// @notice Thrown when the inputs encoded in the operand do not match the
+/// inputs expected by the target source.
+/// @param operandInputs The number of inputs encoded in the operand.
+/// @param sourceInputs The number of inputs expected by the source.
+error CallInputsMismatchSource(uint256 operandInputs, uint256 sourceInputs);
+
 /// @notice Thrown when a bytecode opcode index is outside the function pointer table.
 /// @param opIndex The index of the op in the source.
 /// @param opcodeIndex The out-of-bounds opcode index from the bytecode.

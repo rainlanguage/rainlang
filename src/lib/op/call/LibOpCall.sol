@@ -8,7 +8,7 @@ import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {Pointer} from "rain.solmem/lib/LibPointer.sol";
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
 import {LibEval} from "../../eval/LibEval.sol";
-import {CallOutputsExceedSource} from "../../../error/ErrIntegrity.sol";
+import {CallOutputsExceedSource, CallInputsMismatchSource} from "../../../error/ErrIntegrity.sol";
 
 /// @title LibOpCall
 /// @notice Contains the call operation. This allows sources to be treated in a
@@ -84,11 +84,16 @@ library LibOpCall {
     /// @return The number of inputs and outputs for stack tracking.
     function integrity(IntegrityCheckState memory state, OperandV2 operand) internal pure returns (uint256, uint256) {
         uint256 sourceIndex = uint256(OperandV2.unwrap(operand) & bytes32(uint256(0xFFFF)));
-        uint256 outputs = uint256(OperandV2.unwrap(operand) >> 0x14);
+        uint256 outputs = uint256(OperandV2.unwrap(operand) >> 0x14) & 0x0F;
+
+        uint256 operandInputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
 
         (uint256 sourceInputs, uint256 sourceOutputs) =
             LibBytecode.sourceInputsOutputsLength(state.bytecode, sourceIndex);
 
+        if (operandInputs != sourceInputs) {
+            revert CallInputsMismatchSource(operandInputs, sourceInputs);
+        }
         if (sourceOutputs < outputs) {
             revert CallOutputsExceedSource(sourceOutputs, outputs);
         }
@@ -123,7 +128,7 @@ library LibOpCall {
         // Extract config from the operand.
         uint256 sourceIndex = uint256(OperandV2.unwrap(operand) & bytes32(uint256(0xFFFF)));
         uint256 inputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
-        uint256 outputs = uint256(OperandV2.unwrap(operand) >> 0x14);
+        uint256 outputs = uint256(OperandV2.unwrap(operand) >> 0x14) & 0x0F;
 
         // Copy inputs in. The inputs have to be copied in reverse order so that
         // the top of the stack from the perspective of `call`, i.e. the first

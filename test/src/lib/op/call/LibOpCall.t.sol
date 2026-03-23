@@ -13,7 +13,7 @@ import {OpTest} from "test/abstract/OpTest.sol";
 import {BytecodeTest} from "rain.interpreter.interface/../test/abstract/BytecodeTest.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibOpCall} from "../../../../../src/lib/op/call/LibOpCall.sol";
-import {CallOutputsExceedSource} from "../../../../../src/error/ErrIntegrity.sol";
+import {CallOutputsExceedSource, CallInputsMismatchSource} from "../../../../../src/error/ErrIntegrity.sol";
 import {LibBytecode, SourceIndexOutOfBounds} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
 import {BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {STACK_TRACER} from "../../../../../src/lib/state/LibInterpreterState.sol";
@@ -27,31 +27,88 @@ contract LibOpCallTest is OpTest, BytecodeTest {
         LibOpCall.integrity(state, operand);
     }
 
+    /// outputs is extracted via an unmasked right shift (>> 0x14). If bits
+    /// above position 23 are set, the shift reads them as part of outputs.
+    /// With the mask (& 0x0F), only bits 20-23 contribute. This test
+    /// crafts an operand with a stray bit at position 24 and verifies
+    /// integrity sees the correct 4-bit outputs value, not the inflated one.
+    function testOpCallIntegrityOutputsMasked() external pure {
+        // Build minimal bytecode: 1 source, 0 ops, 1 stack allocation,
+        // 1 input, 1 output. Source 0 at offset 0.
+        bytes memory bytecode = hex"01" // 1 source
+            hex"0000" // offset 0
+            hex"00" // 0 ops
+            hex"01" // 1 stack alloc
+            hex"01" // 1 input
+            hex"01"; // 1 output
+
+        IntegrityCheckState memory state;
+        state.bytecode = bytecode;
+
+        // Operand: sourceIndex = 0, inputs = 1 (bits 16-19), outputs = 1
+        // (bits 20-23), PLUS a stray bit at position 24.
+        // Without mask: outputs = (0x11_0000 >> 20) = 0x11 = 17.
+        // With mask: outputs = 0x11 & 0x0F = 1.
+        uint256 raw = (1 << 24) | (1 << 20) | (1 << 16) | 0;
+        OperandV2 operand = OperandV2.wrap(bytes32(raw));
+
+        // If the mask is missing, outputs = 17 > sourceOutputs = 1,
+        // causing CallOutputsExceedSource. With the mask, outputs = 1
+        // and integrity passes.
+        (uint256 calcInputs, uint256 calcOutputs) = LibOpCall.integrity(state, operand);
+        assertEq(calcInputs, 1, "inputs");
+        assertEq(calcOutputs, 1, "outputs should be masked to 4 bits");
+    }
+
+    /// The operand encodes inputs at bits 16-19, but integrity() returns
+    /// sourceInputs from the bytecode without comparing. If the operand
+    /// says 3 inputs but the source expects 1, integrity must revert
+    /// with CallInputsMismatchSource.
+    function testOpCallIntegrityInputsMismatch() external {
+        // Build minimal bytecode: 1 source, 0 ops, 1 stack allocation,
+        // 1 input, 1 output.
+        bytes memory bytecode = hex"01" // 1 source
+            hex"0000" // offset 0
+            hex"00" // 0 ops
+            hex"01" // 1 stack alloc
+            hex"01" // 1 input
+            hex"01"; // 1 output
+
+        IntegrityCheckState memory state;
+        state.bytecode = bytecode;
+
+        // Operand: sourceIndex = 0, inputs = 3 (bits 16-19), outputs = 1
+        // (bits 20-23). Source expects 1 input but operand says 3.
+        OperandV2 operand = OperandV2.wrap(bytes32(uint256(1 << 20 | 3 << 16)));
+
+        vm.expectRevert(abi.encodeWithSelector(CallInputsMismatchSource.selector, 3, 1));
+        this.integrityExternal(state, operand);
+    }
+
     /// Directly test the integrity logic of LibOpCall. This tests that if the
     /// outputs in the operand exceed the outputs available from the source, then
     /// the call will revert.
     function testOpCallIntegrityTooManyOutputs(
         IntegrityCheckState memory state,
-        uint256 inputs,
         uint256 outputs,
         uint8 sourceCount,
         bytes32 seed
     ) external {
-        inputs = bound(inputs, 0, 0x0F);
-
         conformBytecode(state.bytecode, sourceCount, seed);
 
         uint256 sourcePosition = randomSourcePosition(state.bytecode, seed);
+        uint256 sourceInputs = uint8(state.bytecode[sourcePosition + 2]);
         uint256 sourceOutputs = uint8(state.bytecode[sourcePosition + 3]);
         vm.assume(sourceOutputs < 0x0F);
+        vm.assume(sourceInputs <= 0x0F);
         outputs = bound(outputs, sourceOutputs + 1, 0x0F);
 
         uint256 sourceIndex = randomSourceIndex(state.bytecode, seed);
         assertTrue(sourceIndex <= type(uint16).max);
 
-        // Bounds above ensure safe typecast.
+        // Use sourceInputs so the inputs check passes; only outputs should fail.
         //forge-lint: disable-next-line(unsafe-typecast)
-        OperandV2 operand = LibOperand.build(uint8(inputs), uint8(outputs), uint16(sourceIndex));
+        OperandV2 operand = LibOperand.build(uint8(sourceInputs), uint8(outputs), uint16(sourceIndex));
         vm.expectRevert(abi.encodeWithSelector(CallOutputsExceedSource.selector, sourceOutputs, outputs));
         this.integrityExternal(state, operand);
     }
@@ -88,27 +145,25 @@ contract LibOpCallTest is OpTest, BytecodeTest {
     /// always specified by the operand (caller).
     function testOpCallIntegrityIO(
         IntegrityCheckState memory state,
-        uint256 inputs,
         uint256 outputs,
         uint8 sourceCount,
         bytes32 seed
     ) external pure {
-        inputs = bound(inputs, 0, 0x0F);
-
         conformBytecode(state.bytecode, sourceCount, seed);
 
         uint256 sourcePosition = randomSourcePosition(state.bytecode, seed);
+        uint256 sourceInputs = uint8(state.bytecode[sourcePosition + 2]);
         uint256 sourceOutputs = uint8(state.bytecode[sourcePosition + 3]);
+        vm.assume(sourceInputs <= 0x0F);
         outputs = bound(outputs, 0, sourceOutputs > 0x0F ? 0x0F : sourceOutputs);
 
         uint256 sourceIndex = randomSourceIndex(state.bytecode, seed);
         assertTrue(sourceIndex <= type(uint8).max);
 
-        // Bounds ensure typecast is safe.
+        // Use sourceInputs so the inputs check passes.
         // forge-lint: disable-next-line(unsafe-typecast)
-        OperandV2 operand = LibOperand.build(uint8(inputs), uint8(outputs), uint16(sourceIndex));
+        OperandV2 operand = LibOperand.build(uint8(sourceInputs), uint8(outputs), uint16(sourceIndex));
         (uint256 calcInputs, uint256 calcOutputs) = LibOpCall.integrity(state, operand);
-        uint256 sourceInputs = uint8(state.bytecode[sourcePosition + 2]);
         assertEq(calcInputs, sourceInputs, "inputs");
         assertEq(calcOutputs, outputs, "outputs");
     }
