@@ -1,8 +1,8 @@
 use crate::error::ParserError;
 use alloy::primitives::Address;
 use alloy_ethers_typecast::{ReadContractParametersBuilder, ReadableClient};
-use rain_interpreter_bindings::IParserPragmaV1::*;
-use rain_interpreter_bindings::IParserV2::*;
+use rainlang_bindings::IParserPragmaV1::*;
+use rainlang_bindings::IParserV2::*;
 use rain_interpreter_dispair::DISPaiR;
 
 /// Trait for interacting with the on-chain Rainlang parser contract.

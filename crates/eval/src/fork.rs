@@ -535,7 +535,7 @@ mod tests {
         primitives::{FixedBytes, U256},
         providers::Provider,
     };
-    use rain_interpreter_bindings::IInterpreterStoreV3::{getCall, setCall};
+    use rainlang_bindings::IInterpreterStoreV3::{getCall, setCall};
     use rain_interpreter_test_fixtures::LocalEvm;
 
     sol! {

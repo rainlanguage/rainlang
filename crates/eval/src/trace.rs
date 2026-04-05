@@ -4,7 +4,7 @@ use alloy::primitives::{Address, U256};
 #[cfg(not(target_family = "wasm"))]
 use foundry_evm::executors::RawCallResult;
 #[cfg(not(target_family = "wasm"))]
-use rain_interpreter_bindings::IInterpreterV4::{eval4Call, eval4Return};
+use rainlang_bindings::IInterpreterV4::{eval4Call, eval4Return};
 use revm::primitives::address;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -323,7 +323,7 @@ mod tests {
     use super::*;
     use crate::eval::ForkEvalArgs;
     use crate::fork::{Forker, NewForkedEvm};
-    use rain_interpreter_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
+    use rainlang_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
     use rain_interpreter_test_fixtures::LocalEvm;
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]

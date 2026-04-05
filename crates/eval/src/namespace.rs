@@ -1,5 +1,5 @@
 use alloy::primitives::{Address, B256, U256, keccak256};
-use rain_interpreter_bindings::IInterpreterV4::FullyQualifiedNamespace;
+use rainlang_bindings::IInterpreterV4::FullyQualifiedNamespace;
 
 /// Qualifies a state namespace by hashing it with the sender address,
 /// matching the on-chain `qualifyNamespace` logic in RainlangStore.

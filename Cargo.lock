@@ -5438,8 +5438,8 @@ dependencies = [
  "anyhow",
  "clap",
  "rain-interpreter-eval",
- "rain_interpreter_bindings",
  "rain_interpreter_test_fixtures",
+ "rainlang_bindings",
  "tempfile",
  "tokio",
  "tracing",
@@ -5454,8 +5454,8 @@ dependencies = [
  "eyre",
  "foundry-evm",
  "rain-error-decoding 0.1.0 (git+https://github.com/rainlanguage/rain.error?rev=3d2ed70fb2f7c6156706846e10f163d1e493a8d3)",
- "rain_interpreter_bindings",
  "rain_interpreter_test_fixtures",
+ "rainlang_bindings",
  "revm 24.0.1",
  "revm 25.0.0",
  "serde",
@@ -5463,13 +5463,6 @@ dependencies = [
  "tokio",
  "tracing",
  "wasm-bindgen-utils",
-]
-
-[[package]]
-name = "rain_interpreter_bindings"
-version = "0.1.0"
-dependencies = [
- "alloy",
 ]
 
 [[package]]
@@ -5485,8 +5478,8 @@ version = "0.1.0"
 dependencies = [
  "alloy",
  "alloy-ethers-typecast",
- "rain_interpreter_bindings",
  "rain_interpreter_dispair",
+ "rainlang_bindings",
  "thiserror 1.0.69",
  "tokio",
 ]
@@ -5497,6 +5490,13 @@ version = "0.0.0"
 dependencies = [
  "alloy",
  "getrandom 0.2.16",
+]
+
+[[package]]
+name = "rainlang_bindings"
+version = "0.1.0"
+dependencies = [
+ "alloy",
 ]
 
 [[package]]

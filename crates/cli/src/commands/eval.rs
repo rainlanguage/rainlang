@@ -6,7 +6,7 @@ use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
 use clap::Args;
-use rain_interpreter_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
+use rainlang_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
 use rain_interpreter_eval::trace::RainEvalResult;
 use rain_interpreter_eval::{eval::ForkEvalArgs, fork::Forker};
 use std::path::PathBuf;
