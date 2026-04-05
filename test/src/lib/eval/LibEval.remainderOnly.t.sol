@@ -3,8 +3,8 @@
 pragma solidity =0.8.25;
 
 import {
-    RainterpreterExpressionDeployerDeploymentTest
-} from "test/abstract/RainterpreterExpressionDeployerDeploymentTest.sol";
+    RainlangExpressionDeployerDeploymentTest
+} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 import {LibInterpreterState, InterpreterState} from "../../../../src/lib/state/LibInterpreterState.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 import {LibEval} from "../../../../src/lib/eval/LibEval.sol";
@@ -19,7 +19,7 @@ import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol
 /// @notice Tests that the evalLoop remainder path correctly dispatches
 /// opcodes when the total opcode count is less than 8, so the main
 /// 8-at-a-time loop never executes.
-contract LibEvalRemainderOnlyTest is RainterpreterExpressionDeployerDeploymentTest {
+contract LibEvalRemainderOnlyTest is RainlangExpressionDeployerDeploymentTest {
     /// 7 constant opcodes: all handled by the remainder loop (7 < 8, so the
     /// main loop body is never entered). Fuzz the constant values to verify
     /// they flow through correctly.

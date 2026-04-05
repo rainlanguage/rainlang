@@ -2,7 +2,7 @@ use alloy::primitives::{Address, B256, U256, keccak256};
 use rain_interpreter_bindings::IInterpreterV4::FullyQualifiedNamespace;
 
 /// Qualifies a state namespace by hashing it with the sender address,
-/// matching the on-chain `qualifyNamespace` logic in RainterpreterStore.
+/// matching the on-chain `qualifyNamespace` logic in RainlangStore.
 pub fn qualify_namespace(state_namespace: B256, sender: Address) -> FullyQualifiedNamespace {
     // Combine state namespace and sender into a single 64-byte array
     let mut combined = [0u8; 64];

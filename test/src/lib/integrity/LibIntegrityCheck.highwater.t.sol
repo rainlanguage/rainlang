@@ -3,12 +3,12 @@
 pragma solidity =0.8.25;
 
 import {
-    RainterpreterExpressionDeployerDeploymentTest
-} from "test/abstract/RainterpreterExpressionDeployerDeploymentTest.sol";
+    RainlangExpressionDeployerDeploymentTest
+} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 
 /// @title LibIntegrityCheckHighwaterTest
 /// @notice Tests that readHighwater advances after a multi-output opcode.
-contract LibIntegrityCheckHighwaterTest is RainterpreterExpressionDeployerDeploymentTest {
+contract LibIntegrityCheckHighwaterTest is RainlangExpressionDeployerDeploymentTest {
     /// A multi-output call (2 outputs) must pass the integrity check.
     /// The call opcode returns (sourceInputs, outputs) where outputs > 1,
     /// which triggers readHighwater advancement in the multi-output

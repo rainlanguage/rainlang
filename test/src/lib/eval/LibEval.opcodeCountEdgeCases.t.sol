@@ -3,8 +3,8 @@
 pragma solidity =0.8.25;
 
 import {
-    RainterpreterExpressionDeployerDeploymentTest
-} from "test/abstract/RainterpreterExpressionDeployerDeploymentTest.sol";
+    RainlangExpressionDeployerDeploymentTest
+} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 import {StateNamespace} from "rain.interpreter.interface/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {LibNamespace} from "rain.interpreter.interface/lib/ns/LibNamespace.sol";
@@ -14,7 +14,7 @@ import {LibNamespace} from "rain.interpreter.interface/lib/ns/LibNamespace.sol";
 /// (count mod 8) are handled by a separate remainder loop. These tests
 /// exercise opcode-count edge cases: zero opcodes (neither loop body runs),
 /// and exact multiples of 8 (remainder is zero, only the unrolled loop runs).
-contract LibEvalOpcodeCountEdgeCasesTest is RainterpreterExpressionDeployerDeploymentTest {
+contract LibEvalOpcodeCountEdgeCasesTest is RainlangExpressionDeployerDeploymentTest {
     /// Evaluating a zero-opcode source (no inputs, no ops) must succeed
     /// and return no outputs.
     function testEvalZeroOpcodeSource() external view {

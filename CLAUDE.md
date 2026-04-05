@@ -57,13 +57,13 @@ After any source change affecting bytecode: run `nix develop -c i9r-prelude` →
 
 ### Core Components
 
-1. **RainterpreterParser** (`src/concrete/RainterpreterParser.sol`) — Converts Rainlang text to bytecode. Uses bloom filter + fingerprint table for word lookup.
+1. **RainlangParser** (`src/concrete/RainlangParser.sol`) — Converts Rainlang text to bytecode. Uses bloom filter + fingerprint table for word lookup.
 
-2. **RainterpreterStore** (`src/concrete/RainterpreterStore.sol`) — Sandboxed key-value storage. Namespaced by `msg.sender` + `StateNamespace`.
+2. **RainlangStore** (`src/concrete/RainlangStore.sol`) — Sandboxed key-value storage. Namespaced by `msg.sender` + `StateNamespace`.
 
-3. **Rainterpreter** (`src/concrete/Rainterpreter.sol`) — Stack-based evaluation runtime. Entry point: `eval4()`. Dispatches opcodes via function pointer tables.
+3. **RainlangInterpreter** (`src/concrete/RainlangInterpreter.sol`) — Stack-based evaluation runtime. Entry point: `eval4()`. Dispatches opcodes via function pointer tables.
 
-4. **RainterpreterExpressionDeployer** (`src/concrete/RainterpreterExpressionDeployer.sol`) — Coordinates parse → integrity check → serialize. Implements `IParserV2`.
+4. **RainlangExpressionDeployer** (`src/concrete/RainlangExpressionDeployer.sol`) — Coordinates parse → integrity check → serialize. Implements `IParserV2`.
 
 5. **Rainlang** (`src/concrete/Rainlang.sol`) — On-chain registry and single discovery point for the deployer, interpreter, store, and parser. External tooling discovers all component addresses by querying a single known Rainlang address.
 
@@ -81,7 +81,7 @@ All opcodes are registered in `src/lib/op/LibAllStandardOps.sol` which maintains
 
 ### Extern System
 
-External contracts can extend the interpreter with additional opcodes. `src/concrete/extern/RainterpreterReferenceExtern.sol` is the reference implementation. Externs implement `IInterpreterExternV4` and have their own function pointer tables.
+External contracts can extend the interpreter with additional opcodes. `src/concrete/extern/RainlangReferenceExtern.sol` is the reference implementation. Externs implement `IInterpreterExternV4` and have their own function pointer tables.
 
 ### Rust Crates (`crates/`)
 

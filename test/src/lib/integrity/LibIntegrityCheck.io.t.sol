@@ -3,14 +3,14 @@
 pragma solidity =0.8.25;
 
 import {
-    RainterpreterExpressionDeployerDeploymentTest
-} from "test/abstract/RainterpreterExpressionDeployerDeploymentTest.sol";
+    RainlangExpressionDeployerDeploymentTest
+} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 import {LibIntegrityCheck} from "../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 
 /// @title LibIntegrityCheckIoTest
 /// @notice Verifies that integrityCheck2 returns correctly encoded io bytes.
-contract LibIntegrityCheckIoTest is RainterpreterExpressionDeployerDeploymentTest {
+contract LibIntegrityCheckIoTest is RainlangExpressionDeployerDeploymentTest {
     /// External wrapper so the library call can be used with parser-built bytecode.
     function externalIntegrityCheck(bytes memory bytecode, bytes32[] memory constants)
         external

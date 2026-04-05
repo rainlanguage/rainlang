@@ -3,13 +3,13 @@
 pragma solidity =0.8.25;
 
 import {
-    RainterpreterExpressionDeployerDeploymentTest
-} from "test/abstract/RainterpreterExpressionDeployerDeploymentTest.sol";
+    RainlangExpressionDeployerDeploymentTest
+} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 import {OpcodeIOOverflow} from "../../../../src/error/ErrParse.sol";
 
 /// @title LibParseStateOpcodeIOOverflowTest
 /// @notice Tests for OpcodeIOOverflow in endLine.
-contract LibParseStateOpcodeIOOverflowTest is RainterpreterExpressionDeployerDeploymentTest {
+contract LibParseStateOpcodeIOOverflowTest is RainlangExpressionDeployerDeploymentTest {
     /// A word with 16 paren-enclosed inputs overflows the 4-bit ioByte
     /// input nybble (max 15), triggering OpcodeIOOverflow.
     function testOpcodeIOOverflowInputs() external {
