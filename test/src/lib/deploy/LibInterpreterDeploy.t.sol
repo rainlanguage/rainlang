@@ -230,9 +230,7 @@ contract LibInterpreterDeployTest is Test {
     /// The precompiled creation code constant for the expression deployer MUST
     /// match the compiler's creation code.
     function testCreationCodeExpressionDeployer() external pure {
-        assertEq(
-            keccak256(EXPRESSION_DEPLOYER_CREATION_CODE), keccak256(type(RainlangExpressionDeployer).creationCode)
-        );
+        assertEq(keccak256(EXPRESSION_DEPLOYER_CREATION_CODE), keccak256(type(RainlangExpressionDeployer).creationCode));
     }
 
     /// The precompiled creation code constant for Rainlang MUST match the

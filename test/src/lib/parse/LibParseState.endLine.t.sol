@@ -2,9 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {
-    RainlangExpressionDeployerDeploymentTest
-} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 import {NotAcceptingInputs} from "../../../../src/error/ErrParse.sol";
 
 /// @title LibParseStateEndLineTest

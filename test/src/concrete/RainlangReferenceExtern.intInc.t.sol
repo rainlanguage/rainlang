@@ -146,11 +146,9 @@ contract RainlangReferenceExternIntIncTest is OpTest {
     /// Direct call to externIntegrity() with a valid opcode. Verifies the base
     /// contract dispatch returns the same result as calling the library directly.
     /// forge-config: default.fuzz.runs = 100
-    function testRainlangReferenceExternIntegrityDirect(
-        uint16 operand,
-        uint256 expectedInputs,
-        uint256 expectedOutputs
-    ) external {
+    function testRainlangReferenceExternIntegrityDirect(uint16 operand, uint256 expectedInputs, uint256 expectedOutputs)
+        external
+    {
         RainlangReferenceExtern ext = new RainlangReferenceExtern();
 
         OperandV2 op = OperandV2.wrap(bytes32(uint256(operand)));

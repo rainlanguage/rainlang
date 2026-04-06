@@ -18,8 +18,7 @@ contract BuildAuthoringMeta is Script {
     function run() external {
         vm.writeFileBinary("meta/AuthoringMeta.rain.meta", LibAllStandardOps.authoringMetaV2());
         vm.writeFileBinary(
-            "meta/RainlangReferenceExternAuthoringMeta.rain.meta",
-            LibRainlangReferenceExtern.authoringMetaV2()
+            "meta/RainlangReferenceExternAuthoringMeta.rain.meta", LibRainlangReferenceExtern.authoringMetaV2()
         );
     }
 }

@@ -23,13 +23,7 @@ import {LibInterpreterDeploy} from "../lib/deploy/LibInterpreterDeploy.sol";
 /// @title RainlangExpressionDeployer
 /// @notice Coordinates parse, integrity check, and serialization for
 /// deploying Rainlang expressions.
-contract RainlangExpressionDeployer is
-    IDescribedByMetaV1,
-    IParserV2,
-    IParserPragmaV1,
-    IIntegrityToolingV1,
-    ERC165
-{
+contract RainlangExpressionDeployer is IDescribedByMetaV1, IParserV2, IParserPragmaV1, IIntegrityToolingV1, ERC165 {
     /// @inheritdoc ERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == type(IDescribedByMetaV1).interfaceId || interfaceId == type(IParserV2).interfaceId

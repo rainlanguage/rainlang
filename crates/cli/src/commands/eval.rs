@@ -6,9 +6,9 @@ use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
 use clap::Args;
-use rainlang_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
 use rain_interpreter_eval::trace::RainEvalResult;
 use rain_interpreter_eval::{eval::ForkEvalArgs, fork::Forker};
+use rainlang_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
 use std::path::PathBuf;
 
 /// CLI arguments for evaluating a Rainlang expression.
