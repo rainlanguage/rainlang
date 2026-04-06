@@ -2,14 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {
-    RainterpreterExpressionDeployerDeploymentTest
-} from "test/abstract/RainterpreterExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 import {NotAcceptingInputs} from "../../../../src/error/ErrParse.sol";
 
 /// @title LibParseStateEndLineTest
 /// @notice Tests for endLine in LibParseState.
-contract LibParseStateEndLineTest is RainterpreterExpressionDeployerDeploymentTest {
+contract LibParseStateEndLineTest is RainlangExpressionDeployerDeploymentTest {
     /// A second input-only line (no RHS) after the first line has RHS items
     /// must revert with NotAcceptingInputs. The FSM stops accepting inputs
     /// after the first RHS opcode.

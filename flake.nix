@@ -29,16 +29,16 @@
                 -t cbor \
                 -e deflate \
                 -l none \
-                -o meta/RainterpreterExpressionDeployer.rain.meta \
+                -o meta/RainlangExpressionDeployer.rain.meta \
               ;
 
               rain meta build \
-                -i <(cat ./meta/RainterpreterReferenceExternAuthoringMeta.rain.meta) \
+                -i <(cat ./meta/RainlangReferenceExternAuthoringMeta.rain.meta) \
                 -m authoring-meta-v2 \
                 -t cbor \
                 -e deflate \
                 -l none \
-                -o meta/RainterpreterReferenceExtern.rain.meta \
+                -o meta/RainlangReferenceExtern.rain.meta \
             '';
             additionalBuildInputs = rainix.sol-build-inputs.${system}
               ++ [ rain.defaultPackage.${system} ];

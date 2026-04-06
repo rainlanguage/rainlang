@@ -12,7 +12,7 @@ import {
     StackOutputsMismatch
 } from "../../../../src/error/ErrIntegrity.sol";
 import {BadOpInputsLength, BadOpOutputsLength} from "rain.interpreter.interface/error/ErrIntegrity.sol";
-import {INTEGRITY_FUNCTION_POINTERS} from "../../../../src/generated/RainterpreterExpressionDeployer.pointers.sol";
+import {INTEGRITY_FUNCTION_POINTERS} from "../../../../src/generated/RainlangExpressionDeployer.pointers.sol";
 import {ALL_STANDARD_OPS_LENGTH} from "../../../../src/lib/op/LibAllStandardOps.sol";
 import {LibConvert} from "rain.lib.typecast/LibConvert.sol";
 import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";

@@ -2,14 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {
-    RainterpreterExpressionDeployerDeploymentTest
-} from "test/abstract/RainterpreterExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 import {ParseStackOverflow} from "../../../../src/error/ErrParse.sol";
 
 /// @title LibParseStateHighwaterTest
 /// @notice Tests for highwater in LibParseState.
-contract LibParseStateHighwaterTest is RainterpreterExpressionDeployerDeploymentTest {
+contract LibParseStateHighwaterTest is RainlangExpressionDeployerDeploymentTest {
     /// 63 top-level RHS items overflows the stack RHS offset (>= 0x3f),
     /// triggering ParseStackOverflow. Items are spread across multiple
     /// lines (max 14 per line) to avoid LineRHSItemsOverflow, and LHS

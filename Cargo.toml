@@ -43,7 +43,7 @@ path = "crates/parser"
 [workspace.dependencies.rain_interpreter_dispair]
 path = "crates/dispair"
 
-[workspace.dependencies.rain_interpreter_bindings]
+[workspace.dependencies.rainlang_bindings]
 path = "crates/bindings"
 
 [workspace.dependencies.rain-interpreter-eval]

@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {Script} from "forge-std/Script.sol";
 import {LibAllStandardOps} from "../src/lib/op/LibAllStandardOps.sol";
-import {LibRainterpreterReferenceExtern} from "../src/concrete/extern/RainterpreterReferenceExtern.sol";
+import {LibRainlangReferenceExtern} from "../src/concrete/extern/RainlangReferenceExtern.sol";
 
 /// @title BuildAuthoringMeta
 /// @notice Forge script that writes raw ABI-encoded AuthoringMeta bytes to
@@ -18,8 +18,7 @@ contract BuildAuthoringMeta is Script {
     function run() external {
         vm.writeFileBinary("meta/AuthoringMeta.rain.meta", LibAllStandardOps.authoringMetaV2());
         vm.writeFileBinary(
-            "meta/RainterpreterReferenceExternAuthoringMeta.rain.meta",
-            LibRainterpreterReferenceExtern.authoringMetaV2()
+            "meta/RainlangReferenceExternAuthoringMeta.rain.meta", LibRainlangReferenceExtern.authoringMetaV2()
         );
     }
 }

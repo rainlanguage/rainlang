@@ -8,7 +8,7 @@ homepage.workspace = true
 [dependencies]
 alloy = { workspace = true }
 thiserror = { workspace = true }
-rain_interpreter_bindings = { workspace = true }
+rainlang_bindings = { workspace = true }
 serde = { workspace = true }
 eyre = { workspace = true }
 rain-error-decoding = { workspace = true }
