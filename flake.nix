@@ -7,10 +7,19 @@
     rain.url = "github:rainlanguage/rain.cli";
   };
 
-  outputs = { self, flake-utils, rainix, rain }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = rainix.pkgs.${system};
-      in rec {
+  outputs =
+    {
+      flake-utils,
+      rainix,
+      rain,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = rainix.pkgs.${system};
+      in
+      rec {
         packages = rec {
           i9r-prelude = rainix.mkTask.${system} {
             name = "i9r-prelude";
@@ -40,8 +49,7 @@
                 -l none \
                 -o meta/RainlangReferenceExtern.rain.meta \
             '';
-            additionalBuildInputs = rainix.sol-build-inputs.${system}
-              ++ [ rain.defaultPackage.${system} ];
+            additionalBuildInputs = rainix.sol-build-inputs.${system} ++ [ rain.defaultPackage.${system} ];
           };
 
           test-wasm-build = rainix.mkTask.${system} {
@@ -49,15 +57,20 @@
             body = ''
               set -euxo pipefail
 
-              cargo build --target wasm32-unknown-unknown --exclude rain-i9r-cli --exclude rain-interpreter-env --workspace
+              cargo build --target wasm32-unknown-unknown --exclude rain-i9r-cli --workspace
             '';
           };
-        } // rainix.packages.${system};
+        }
+        // rainix.packages.${system};
 
         devShells.default = pkgs.mkShell {
-          shellHook = rainix.devShells.${system}.default.shellHook;
-          packages = [ packages.i9r-prelude packages.test-wasm-build ];
+          inherit (rainix.devShells.${system}.default) shellHook;
+          packages = [
+            packages.i9r-prelude
+            packages.test-wasm-build
+          ];
           inputsFrom = [ rainix.devShells.${system}.default ];
         };
-      });
+      }
+    );
 }
