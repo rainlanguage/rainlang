@@ -28,7 +28,7 @@ revm = { version = "25.0.0", default-features = false, features = [
 
 [dev-dependencies]
 tracing = { workspace = true }
-rain_interpreter_test_fixtures = { workspace = true }
+rainlang_test_fixtures = { workspace = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 tokio = { version = "1.28.0", features = ["full"] }
