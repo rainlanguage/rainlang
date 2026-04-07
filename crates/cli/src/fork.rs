@@ -1,6 +1,6 @@
 use alloy::primitives::BlockNumber;
 use clap::Args;
-use rain_interpreter_eval::fork::NewForkedEvm;
+use rainlang_eval::fork::NewForkedEvm;
 
 /// CLI arguments for connecting to a forked EVM via RPC.
 #[derive(Args, Clone, Debug)]

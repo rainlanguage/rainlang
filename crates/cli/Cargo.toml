@@ -10,7 +10,7 @@ homepage.workspace = true
 
 [dependencies]
 rainlang_bindings = { workspace = true }
-rain-interpreter-eval = { workspace = true }
+rainlang-eval = { workspace = true }
 anyhow = { workspace = true }
 clap = { workspace = true }
 tracing = { workspace = true }
@@ -22,11 +22,11 @@ tokio = { version = "1.28.0", features = ["full"] }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 tokio = { version = "1.28.0", features = [
-    "sync",
-    "macros",
-    "io-util",
-    "rt",
-    "time",
+  "sync",
+  "macros",
+  "io-util",
+  "rt",
+  "time",
 ] }
 
 [dev-dependencies]

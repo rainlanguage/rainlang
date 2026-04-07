@@ -6,9 +6,9 @@ use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
 use clap::Args;
-use rain_interpreter_eval::trace::RainEvalResult;
-use rain_interpreter_eval::{eval::ForkEvalArgs, fork::Forker};
 use rainlang_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
+use rainlang_eval::trace::RainEvalResult;
+use rainlang_eval::{eval::ForkEvalArgs, fork::Forker};
 use std::path::PathBuf;
 
 /// CLI arguments for evaluating a Rainlang expression.
@@ -117,9 +117,7 @@ impl Execute for Eval {
         match result {
             Ok(res) => {
                 let rain_eval_result: RainEvalResult = res.try_into().map_err(
-                    |e: rain_interpreter_eval::trace::RainEvalResultFromRawCallResultError| {
-                        anyhow!(e)
-                    },
+                    |e: rainlang_eval::trace::RainEvalResultFromRawCallResultError| anyhow!(e),
                 )?;
                 crate::output::output(
                     &self.output_path,
