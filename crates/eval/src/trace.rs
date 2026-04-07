@@ -323,8 +323,8 @@ mod tests {
     use super::*;
     use crate::eval::ForkEvalArgs;
     use crate::fork::{Forker, NewForkedEvm};
-    use rain_interpreter_test_fixtures::LocalEvm;
     use rainlang_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
+    use rainlang_test_fixtures::LocalEvm;
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn test_fork_trace() {

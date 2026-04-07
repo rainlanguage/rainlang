@@ -133,7 +133,7 @@ impl Execute for Eval {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rain_interpreter_test_fixtures::LocalEvm;
+    use rainlang_test_fixtures::LocalEvm;
 
     #[test]
     fn test_parse_int_or_hex() {

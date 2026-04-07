@@ -30,5 +30,5 @@ tokio = { version = "1.28.0", features = [
 ] }
 
 [dev-dependencies]
-rain_interpreter_test_fixtures = { workspace = true }
+rainlang_test_fixtures = { workspace = true }
 tempfile = "3"

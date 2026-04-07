@@ -69,7 +69,7 @@ impl Execute for Parse {
 mod tests {
     use super::*;
     use crate::fork::NewForkedEvmCliArgs;
-    use rain_interpreter_test_fixtures::LocalEvm;
+    use rainlang_test_fixtures::LocalEvm;
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn test_execute() {

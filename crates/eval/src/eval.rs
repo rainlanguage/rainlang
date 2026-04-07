@@ -170,7 +170,7 @@ mod tests {
     use super::*;
     use crate::fork::NewForkedEvm;
     use alloy::primitives::FixedBytes;
-    use rain_interpreter_test_fixtures::LocalEvm;
+    use rainlang_test_fixtures::LocalEvm;
     use std::{ops::Deref, sync::Arc};
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]

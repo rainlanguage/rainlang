@@ -1,4 +1,4 @@
-//! Shared test fixtures for rain.interpreter Rust crates.
+//! Shared test fixtures for Rainlang Rust crates.
 
 use alloy::{
     contract::SolCallBuilder,
