@@ -5,7 +5,7 @@ resolver = "2"
 [workspace.package]
 edition = "2024"
 license = "CAL-1.0"
-homepage = "https://github.com/rainlanguage/rain.interpreter"
+homepage = "https://github.com/rainlanguage/rainlang"
 
 [workspace.dependencies]
 alloy = { version = "1.0.9", features = ["sol-types", "json", "json-abi"] }
