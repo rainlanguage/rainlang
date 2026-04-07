@@ -46,7 +46,7 @@ path = "crates/dispair"
 [workspace.dependencies.rainlang_bindings]
 path = "crates/bindings"
 
-[workspace.dependencies.rain-interpreter-eval]
+[workspace.dependencies.rainlang-eval]
 path = "crates/eval"
 
 [workspace.dependencies.rain_interpreter_test_fixtures]

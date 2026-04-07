@@ -5,8 +5,8 @@ use alloy::primitives::Address;
 use anyhow::Result;
 use anyhow::anyhow;
 use clap::Args;
-use rain_interpreter_eval::eval::ForkParseArgs;
-use rain_interpreter_eval::fork::Forker;
+use rainlang_eval::eval::ForkParseArgs;
+use rainlang_eval::fork::Forker;
 use std::path::PathBuf;
 
 /// CLI arguments for parsing a Rainlang expression.
