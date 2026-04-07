@@ -16,13 +16,13 @@ foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "ed86c
 foundry-fork-db = "0.15.0"
 foundry-block-explorers = "0.18.0"
 revm = { version = "24.0.1", default-features = false, features = [
-    "std",
-    "serde",
-    "memory_limit",
-    "optional_eip3607",
-    "optional_block_gas_limit",
-    "optional_no_base_fee",
-    "arbitrary",
+  "std",
+  "serde",
+  "memory_limit",
+  "optional_eip3607",
+  "optional_block_gas_limit",
+  "optional_no_base_fee",
+  "arbitrary",
 ] }
 serde = "1.0.160"
 serde_bytes = "0.11.9"
@@ -37,7 +37,7 @@ eyre = "0.6"
 rain-error-decoding = { git = "https://github.com/rainlanguage/rain.error", rev = "3d2ed70fb2f7c6156706846e10f163d1e493a8d3" }
 wasm-bindgen-utils = "0.0.10"
 
-[workspace.dependencies.rain_interpreter_parser]
+[workspace.dependencies.rainlang_parser]
 path = "crates/parser"
 
 [workspace.dependencies.rain_interpreter_dispair]

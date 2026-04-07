@@ -1,9 +1,9 @@
 [package]
-name = "rain_interpreter_parser"
+name = "rainlang_parser"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
-description = "Rain Interpreter Parser Rust Crate."
+description = "Rainlang Parser Rust Crate."
 homepage.workspace = true
 
 [dependencies]
