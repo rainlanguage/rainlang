@@ -8,7 +8,7 @@ homepage.workspace = true
 
 [dependencies]
 alloy-ethers-typecast = { workspace = true }
-rain_interpreter_dispair = { workspace = true }
+rainlang_dispair = { workspace = true }
 rainlang_bindings = { workspace = true }
 alloy = { workspace = true }
 thiserror = { workspace = true }

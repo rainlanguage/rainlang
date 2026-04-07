@@ -40,7 +40,7 @@ wasm-bindgen-utils = "0.0.10"
 [workspace.dependencies.rainlang_parser]
 path = "crates/parser"
 
-[workspace.dependencies.rain_interpreter_dispair]
+[workspace.dependencies.rainlang_dispair]
 path = "crates/dispair"
 
 [workspace.dependencies.rainlang_bindings]
