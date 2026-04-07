@@ -57,7 +57,7 @@
             body = ''
               set -euxo pipefail
 
-              cargo build --target wasm32-unknown-unknown --exclude rain-i9r-cli --workspace
+              cargo build --target wasm32-unknown-unknown --exclude rainlang-cli --workspace
             '';
           };
         }
