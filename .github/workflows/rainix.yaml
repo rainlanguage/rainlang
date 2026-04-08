@@ -1,10 +1,8 @@
 name: Rainix CI
 on: [push]
-
 concurrency:
   group: ${{ github.ref }}-rainix
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-
 jobs:
   rainix:
     strategy:
@@ -32,7 +30,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
       - uses: nixbuild/nix-quick-install-action@v30
         with:
           nix_conf: |
@@ -49,10 +46,9 @@ jobs:
           # before trying to save a new cache
           # 1G = 1073741824
           gc-max-store-size-linux: 1G
-
       - run: nix develop -c rainix-sol-prelude
       - run: nix develop -c rainix-rs-prelude
-      - run: nix develop -c i9r-prelude
+      - run: nix develop -c rainlang-prelude
       - name: Run ${{ matrix.task }}
         env:
           ETH_RPC_URL: ${{ secrets.CI_DEPLOY_SEPOLIA_RPC_URL || vars.CI_DEPLOY_SEPOLIA_RPC_URL }}

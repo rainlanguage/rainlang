@@ -21,8 +21,8 @@
       in
       rec {
         packages = rec {
-          i9r-prelude = rainix.mkTask.${system} {
-            name = "i9r-prelude";
+          rainlang-prelude = rainix.mkTask.${system} {
+            name = "rainlang-prelude";
             body = ''
               set -euxo pipefail
 
@@ -66,7 +66,7 @@
         devShells.default = pkgs.mkShell {
           inherit (rainix.devShells.${system}.default) shellHook;
           packages = [
-            packages.i9r-prelude
+            packages.rainlang-prelude
             packages.test-wasm-build
           ];
           inputsFrom = [ rainix.devShells.${system}.default ];
