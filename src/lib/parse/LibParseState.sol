@@ -27,6 +27,12 @@ import {
 import {LibParseLiteral} from "./literal/LibParseLiteral.sol";
 import {LibParseError} from "./LibParseError.sol";
 
+/// @dev The sub-parser linked list packs an address (160 bits, low) and a
+/// memory pointer (96 bits, high) into a single bytes32. This constant is the
+/// bit shift used to pack/unpack the pointer portion. It equals the address
+/// width (160 bits = 0xA0).
+uint256 constant SUB_PARSER_POINTER_SHIFT = 0xA0;
+
 /// @dev Initial state of an active source is just the starting offset which is
 /// 0x20.
 uint256 constant EMPTY_ACTIVE_SOURCE = 0x20;
@@ -329,7 +335,7 @@ library LibParseState {
             mstore(tailPointer, tail)
         }
         // Put the tail pointer in the high bits of the new head.
-        state.subParsers = subParser | bytes32(tailPointer << 0xF0);
+        state.subParsers = subParser | bytes32(tailPointer << SUB_PARSER_POINTER_SHIFT);
     }
 
     /// @notice Builds a memory array of sub parsers from the linked list of sub parsers.
@@ -346,7 +352,7 @@ library LibParseState {
             for {} gt(tail, 0) {} {
                 mstore(cursor, and(tail, addressMask))
                 cursor := add(cursor, 0x20)
-                tail := mload(shr(0xF0, tail))
+                tail := mload(shr(SUB_PARSER_POINTER_SHIFT, tail))
                 len := add(len, 1)
             }
             mstore(subParsersUint256, len)

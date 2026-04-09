@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {LibParseState, ParseState} from "./LibParseState.sol";
+import {LibParseState, ParseState, SUB_PARSER_POINTER_SHIFT} from "./LibParseState.sol";
 import {
     OPCODE_UNKNOWN,
     OPCODE_EXTERN,
@@ -225,7 +225,7 @@ library LibSubParse {
                     while (deref != 0) {
                         ISubParserV4 subParser = ISubParserV4(address(uint160(uint256(deref))));
                         assembly ("memory-safe") {
-                            deref := mload(shr(0xf0, deref))
+                            deref := mload(shr(SUB_PARSER_POINTER_SHIFT, deref))
                         }
 
                         // Subparse data is a fixed length header that provides the
@@ -386,7 +386,7 @@ library LibSubParse {
             while (deref != 0) {
                 ISubParserV4 subParser = ISubParserV4(address(uint160(uint256(deref))));
                 assembly ("memory-safe") {
-                    deref := mload(shr(0xf0, deref))
+                    deref := mload(shr(SUB_PARSER_POINTER_SHIFT, deref))
                 }
 
                 (bool success, bytes32 value) = subParser.subParseLiteral2(data);
