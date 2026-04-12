@@ -20,6 +20,18 @@ possible exception of debugging logic), while relatively short in terms of lines
 of code, are surprisingly fragile to maintain in a gas efficient way so we don't
 recommend reinventing this wheel.
 
+### Integrity / Runtime Separation
+
+Bytecode correctness is validated once at deploy time by `integrityCheck2`. Each
+opcode's `integrity()` function reports accurate stack IO (inputs and outputs)
+to the checker, which enforces that the bytecode-declared IO matches, the stack
+never underflows, and the final depth is correct.
+
+At runtime, `run()` functions trust that integrity has already validated the
+bytecode. They do not duplicate integrity checks — runtime gas efficiency
+depends on this separation. Adding redundant validation to `run()` for
+conditions that `integrityCheck2` already prevents is unnecessary overhead.
+
 ## Versioning
 
 Stability and versioning is achieved at the interface level. All interfaces and

@@ -2,7 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {NotAnExternContract} from "../../../error/ErrExtern.sol";
+import {
+    NotAnExternContract,
+    ExternIntegrityInputsMismatch,
+    ExternIntegrityOutputsMismatch
+} from "../../../error/ErrExtern.sol";
+import {OutOfBoundsConstantRead} from "../../../error/ErrIntegrity.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
@@ -28,6 +33,9 @@ library LibOpExtern {
     /// @return The number of outputs.
     function integrity(IntegrityCheckState memory state, OperandV2 operand) internal view returns (uint256, uint256) {
         uint256 encodedExternDispatchIndex = uint256(OperandV2.unwrap(operand) & bytes32(uint256(0xFFFF)));
+        if (encodedExternDispatchIndex >= state.constants.length) {
+            revert OutOfBoundsConstantRead(state.opIndex, state.constants.length, encodedExternDispatchIndex);
+        }
 
         EncodedExternDispatchV2 encodedExternDispatch =
             EncodedExternDispatchV2.wrap(state.constants[encodedExternDispatchIndex]);
@@ -37,8 +45,15 @@ library LibOpExtern {
         }
         uint256 expectedInputsLength = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
         uint256 expectedOutputsLength = uint256(OperandV2.unwrap(operand) >> 0x14) & 0x0F;
-        //slither-disable-next-line unused-return
-        return extern.externIntegrity(dispatch, expectedInputsLength, expectedOutputsLength);
+        (uint256 actualInputs, uint256 actualOutputs) =
+            extern.externIntegrity(dispatch, expectedInputsLength, expectedOutputsLength);
+        if (actualInputs != expectedInputsLength) {
+            revert ExternIntegrityInputsMismatch(expectedInputsLength, actualInputs);
+        }
+        if (actualOutputs != expectedOutputsLength) {
+            revert ExternIntegrityOutputsMismatch(expectedOutputsLength, actualOutputs);
+        }
+        return (actualInputs, actualOutputs);
     }
 
     /// @notice `extern` opcode. Calls an external contract's `extern` function with stack inputs and pushes its outputs.

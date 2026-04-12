@@ -54,13 +54,7 @@ contract RainlangParser is ERC165, IParserToolingV1 {
     /// @param data The Rainlang source bytes to parse.
     /// @return The compiled bytecode.
     /// @return The constants array extracted during parsing.
-    function unsafeParse(bytes memory data)
-        external
-        view
-        virtual
-        checkParseMemoryOverflow
-        returns (bytes memory, bytes32[] memory)
-    {
+    function unsafeParse(bytes memory data) external view virtual returns (bytes memory, bytes32[] memory) {
         // The return is used by returning it, so this is a false positive.
         //slither-disable-next-line unused-return
         return LibParseState.newState(

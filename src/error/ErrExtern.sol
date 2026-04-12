@@ -24,5 +24,17 @@ error ExternPointersMismatch(uint256 opcodeCount, uint256 integrityCount);
 /// @param actualLength The number of outputs actually returned.
 error BadOutputsLength(uint256 expectedLength, uint256 actualLength);
 
+/// @notice Thrown when an extern contract's integrity check returns a
+/// different number of inputs than the operand specifies.
+/// @param expected The number of inputs encoded in the operand.
+/// @param actual The number of inputs returned by externIntegrity.
+error ExternIntegrityInputsMismatch(uint256 expected, uint256 actual);
+
+/// @notice Thrown when an extern contract's integrity check returns a
+/// different number of outputs than the operand specifies.
+/// @param expected The number of outputs encoded in the operand.
+/// @param actual The number of outputs returned by externIntegrity.
+error ExternIntegrityOutputsMismatch(uint256 expected, uint256 actual);
+
 /// @notice Thrown at construction when there are no opcode function pointers.
 error ExternOpcodePointersEmpty();

@@ -40,8 +40,9 @@ library LibOpStack {
     /// @return The new stack top pointer after execution.
     function run(InterpreterState memory state, OperandV2 operand, Pointer stackTop) internal pure returns (Pointer) {
         uint256 sourceIndex = state.sourceIndex;
+        Pointer[] memory stackBottoms = state.stackBottoms;
         assembly ("memory-safe") {
-            let stackBottom := mload(add(mload(state), mul(0x20, add(sourceIndex, 1))))
+            let stackBottom := mload(add(stackBottoms, mul(0x20, add(sourceIndex, 1))))
             let stackValue := mload(sub(stackBottom, mul(0x20, add(and(operand, 0xFFFF), 1))))
             stackTop := sub(stackTop, 0x20)
             mstore(stackTop, stackValue)
