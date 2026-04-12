@@ -313,11 +313,9 @@ library LibParseState {
 
     /// @notice Pushes a `uint256` representation of a sub parser onto the linked list of
     /// sub parsers in memory. The sub parser is expected to be an `address` so
-    /// the pointer for the linked list is ORed in the 16 high bits of the
-    /// `uint256`. Only 16 bits are available for the linked-list pointer, so
-    /// this function relies on `checkParseMemoryOverflow` keeping the free
-    /// memory pointer below `0x10000`. If that invariant is violated, the
-    /// tail pointer will be silently truncated and the linked list corrupted.
+    /// the pointer for the linked list is ORed in the high 96 bits of the
+    /// `uint256` (above the 160-bit address). This provides ample space for
+    /// any practical memory pointer.
     /// @param state The parse state containing the sub parser linked list.
     /// @param cursor The current cursor for error reporting.
     /// @param subParser The sub parser address as a bytes32.
