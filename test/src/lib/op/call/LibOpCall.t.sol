@@ -404,7 +404,7 @@ contract LibOpCallTest is OpTest, BytecodeTest {
 
     /// Test a mismatch in the inputs from caller and callee.
     function testOpCallRunInputsMismatch() external {
-        vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 2, 1, 2));
+        vm.expectRevert(abi.encodeWithSelector(CallInputsMismatchSource.selector, 2, 1));
         bytes memory bytecode = I_DEPLOYER.parse2("a: call<1>(10 11); ten:,a b c:ten 11 12;");
         (bytecode);
     }
