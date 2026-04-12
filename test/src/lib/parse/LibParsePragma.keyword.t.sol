@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
 
-import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {LibParseState, ParseState, SUB_PARSER_POINTER_SHIFT} from "../../../../src/lib/parse/LibParseState.sol";
 import {
     LibParsePragma,
     PRAGMA_KEYWORD_BYTES_LENGTH,
@@ -46,14 +46,14 @@ contract LibParsePragmaKeywordTest is Test {
         if (values.length > 0) {
             uint256 j = values.length - 1;
             bytes32 deref = state.subParsers;
-            uint256 pointer = uint256(deref) >> 0xF0;
+            uint256 pointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
             while (deref != 0) {
                 assertEq(uint160(uint256(deref)), uint160(values[j]));
 
                 assembly ("memory-safe") {
                     deref := mload(pointer)
                 }
-                pointer = uint256(deref) >> 0xF0;
+                pointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
                 // This underflows exactly when deref is zero and the loop
                 // terminates.
                 unchecked {
@@ -165,7 +165,7 @@ contract LibParsePragmaKeywordTest is Test {
         // The sub parser should be pushed to the state.
         bytes32 deref = state.subParsers;
         assertEq(uint160(uint256(deref)), uint160(subParser));
-        uint256 pointer = uint256(deref) >> 0xF0;
+        uint256 pointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
         assembly ("memory-safe") {
             deref := mload(pointer)
         }
@@ -218,12 +218,12 @@ contract LibParsePragmaKeywordTest is Test {
         // The sub parsers should both be pushed to the state.
         bytes32 deref = state.subParsers;
         assertEq(uint160(uint256(deref)), uint160(subParser1));
-        uint256 pointer = uint256(deref) >> 0xF0;
+        uint256 pointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
         assembly ("memory-safe") {
             deref := mload(pointer)
         }
         assertEq(uint160(uint256(deref)), uint160(subParser0));
-        pointer = uint256(deref) >> 0xF0;
+        pointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
         assembly ("memory-safe") {
             deref := mload(pointer)
         }
@@ -253,14 +253,14 @@ contract LibParsePragmaKeywordTest is Test {
         // Both sub parsers should be in the linked list.
         bytes32 deref = state.subParsers;
         assertEq(uint160(uint256(deref)), uint160(addr2), "second address");
-        uint256 pointer = uint256(deref) >> 0xF0;
+        uint256 pointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
         assembly ("memory-safe") {
             deref := mload(pointer)
         }
         assertEq(uint160(uint256(deref)), uint160(addr1), "first address");
         // The list must terminate: dereferencing the first node's next pointer
         // yields zero (the initial empty subParsers value).
-        uint256 nextPointer = uint256(deref) >> 0xF0;
+        uint256 nextPointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
         bytes32 nextDeref;
         assembly ("memory-safe") {
             nextDeref := mload(nextPointer)
@@ -313,7 +313,7 @@ contract LibParsePragmaKeywordTest is Test {
         bytes32 deref = state.subParsers;
         assertEq(uint160(uint256(deref)), uint160(0x1234567890123456789012345678901234567890), "real address");
         // The linked list must terminate: no garbage sub-parser was pushed.
-        uint256 pointer = uint256(deref) >> 0xF0;
+        uint256 pointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
         assembly ("memory-safe") {
             deref := mload(pointer)
         }

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LicenseRef-DCL-1.0
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
-pragma solidity ^0.8.18;
+pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
-import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {LibParseState, ParseState, SUB_PARSER_POINTER_SHIFT} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
 import {InvalidSubParser} from "../../../../src/error/ErrParse.sol";
 
@@ -35,7 +35,7 @@ contract LibParseStatePushSubParserTest is Test {
         state.pushSubParser(cursor, bytes32(uint256(uint160(value))));
 
         assertEq(uint160(uint256(state.subParsers)), uint160(value));
-        uint256 pointer = uint256(state.subParsers) >> 0xF0;
+        uint256 pointer = uint256(state.subParsers) >> SUB_PARSER_POINTER_SHIFT;
         bytes32 deref;
         assembly ("memory-safe") {
             deref := mload(pointer)
@@ -57,20 +57,20 @@ contract LibParseStatePushSubParserTest is Test {
         }
 
         assertEq(uint160(uint256(state.subParsers)), uint256(uint160(value2)));
-        uint256 pointer = uint256(state.subParsers) >> 0xF0;
+        uint256 pointer = uint256(state.subParsers) >> SUB_PARSER_POINTER_SHIFT;
         bytes32 deref;
         assembly ("memory-safe") {
             deref := mload(pointer)
         }
         assertEq(uint160(uint256(deref)), uint256(uint160(value1)));
 
-        pointer = uint256(deref) >> 0xF0;
+        pointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
         assembly ("memory-safe") {
             deref := mload(pointer)
         }
         assertEq(uint160(uint256(deref)), uint256(uint160(value0)));
 
-        pointer = uint256(deref) >> 0xF0;
+        pointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
         assembly ("memory-safe") {
             deref := mload(pointer)
         }
@@ -88,14 +88,14 @@ contract LibParseStatePushSubParserTest is Test {
 
         uint256 j = values.length - 1;
         bytes32 deref = state.subParsers;
-        uint256 pointer = uint256(deref) >> 0xF0;
+        uint256 pointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
         while (deref != 0) {
             assertEq(uint160(uint256(deref)), uint160(values[j]));
 
             assembly ("memory-safe") {
                 deref := mload(pointer)
             }
-            pointer = uint256(deref) >> 0xF0;
+            pointer = uint256(deref) >> SUB_PARSER_POINTER_SHIFT;
             // This underflows exactly when deref is zero and the loop
             // terminates.
             unchecked {

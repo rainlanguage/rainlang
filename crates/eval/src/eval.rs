@@ -1,10 +1,10 @@
 use crate::error::ForkCallError;
 use crate::fork::{ForkTypedReturn, Forker};
 use alloy::primitives::{Address, U256};
-use rain_interpreter_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
-use rain_interpreter_bindings::IInterpreterV4::{EvalV4, eval4Call};
-use rain_interpreter_bindings::IParserV2::parse2Call;
-use rain_interpreter_bindings::Rainlang::{
+use rainlang_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
+use rainlang_bindings::IInterpreterV4::{EvalV4, eval4Call};
+use rainlang_bindings::IParserV2::parse2Call;
+use rainlang_bindings::Rainlang::{
     expressionDeployerAddressCall, interpreterAddressCall, storeAddressCall,
 };
 
@@ -170,7 +170,7 @@ mod tests {
     use super::*;
     use crate::fork::NewForkedEvm;
     use alloy::primitives::FixedBytes;
-    use rain_interpreter_test_fixtures::LocalEvm;
+    use rainlang_test_fixtures::LocalEvm;
     use std::{ops::Deref, sync::Arc};
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]

@@ -1,16 +1,16 @@
 [package]
-name = "rain-i9r-cli"
+name = "rainlang-cli"
 version = "0.0.1"
 edition.workspace = true
 license.workspace = true
-description = "Rain Interpreter CLI."
+description = "Rainlang CLI."
 homepage.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rain_interpreter_bindings = { workspace = true }
-rain-interpreter-eval = { workspace = true }
+rainlang_bindings = { workspace = true }
+rainlang-eval = { workspace = true }
 anyhow = { workspace = true }
 clap = { workspace = true }
 tracing = { workspace = true }
@@ -22,13 +22,13 @@ tokio = { version = "1.28.0", features = ["full"] }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 tokio = { version = "1.28.0", features = [
-    "sync",
-    "macros",
-    "io-util",
-    "rt",
-    "time",
+  "sync",
+  "macros",
+  "io-util",
+  "rt",
+  "time",
 ] }
 
 [dev-dependencies]
-rain_interpreter_test_fixtures = { workspace = true }
+rainlang_test_fixtures = { workspace = true }
 tempfile = "3"

@@ -5,8 +5,8 @@ use alloy::primitives::Address;
 use anyhow::Result;
 use anyhow::anyhow;
 use clap::Args;
-use rain_interpreter_eval::eval::ForkParseArgs;
-use rain_interpreter_eval::fork::Forker;
+use rainlang_eval::eval::ForkParseArgs;
+use rainlang_eval::fork::Forker;
 use std::path::PathBuf;
 
 /// CLI arguments for parsing a Rainlang expression.
@@ -69,7 +69,7 @@ impl Execute for Parse {
 mod tests {
     use super::*;
     use crate::fork::NewForkedEvmCliArgs;
-    use rain_interpreter_test_fixtures::LocalEvm;
+    use rainlang_test_fixtures::LocalEvm;
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn test_execute() {

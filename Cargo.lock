@@ -5431,15 +5431,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "rain-i9r-cli"
+name = "rainlang-cli"
 version = "0.0.1"
 dependencies = [
  "alloy",
  "anyhow",
  "clap",
- "rain-interpreter-eval",
- "rain_interpreter_bindings",
- "rain_interpreter_test_fixtures",
+ "rainlang-eval",
+ "rainlang_bindings",
+ "rainlang_test_fixtures",
  "tempfile",
  "tokio",
  "tracing",
@@ -5447,15 +5447,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "rain-interpreter-eval"
+name = "rainlang-eval"
 version = "0.1.0"
 dependencies = [
  "alloy",
  "eyre",
  "foundry-evm",
  "rain-error-decoding 0.1.0 (git+https://github.com/rainlanguage/rain.error?rev=3d2ed70fb2f7c6156706846e10f163d1e493a8d3)",
- "rain_interpreter_bindings",
- "rain_interpreter_test_fixtures",
+ "rainlang_bindings",
+ "rainlang_test_fixtures",
  "revm 24.0.1",
  "revm 25.0.0",
  "serde",
@@ -5466,33 +5466,33 @@ dependencies = [
 ]
 
 [[package]]
-name = "rain_interpreter_bindings"
+name = "rainlang_bindings"
 version = "0.1.0"
 dependencies = [
  "alloy",
 ]
 
 [[package]]
-name = "rain_interpreter_dispair"
+name = "rainlang_dispair"
 version = "0.1.0"
 dependencies = [
  "alloy",
 ]
 
 [[package]]
-name = "rain_interpreter_parser"
+name = "rainlang_parser"
 version = "0.1.0"
 dependencies = [
  "alloy",
  "alloy-ethers-typecast",
- "rain_interpreter_bindings",
- "rain_interpreter_dispair",
+ "rainlang_bindings",
+ "rainlang_dispair",
  "thiserror 1.0.69",
  "tokio",
 ]
 
 [[package]]
-name = "rain_interpreter_test_fixtures"
+name = "rainlang_test_fixtures"
 version = "0.0.0"
 dependencies = [
  "alloy",

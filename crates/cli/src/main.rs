@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::Parser;
-use rain_i9r_cli::Interpreter;
+use rainlang_cli::Interpreter;
 use tracing_subscriber::filter::{EnvFilter, LevelFilter};
 
 #[derive(Parser)]

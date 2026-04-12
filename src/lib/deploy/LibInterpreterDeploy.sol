@@ -8,22 +8,22 @@ import {
     BYTECODE_HASH as PARSER_HASH,
     DEPLOYED_ADDRESS as PARSER_ADDR,
     RUNTIME_CODE as PARSER_RUNTIME_CODE
-} from "../../generated/RainterpreterParser.pointers.sol";
+} from "../../generated/RainlangParser.pointers.sol";
 import {
     BYTECODE_HASH as STORE_HASH,
     DEPLOYED_ADDRESS as STORE_ADDR,
     RUNTIME_CODE as STORE_RUNTIME_CODE
-} from "../../generated/RainterpreterStore.pointers.sol";
+} from "../../generated/RainlangStore.pointers.sol";
 import {
     BYTECODE_HASH as INTERPRETER_HASH,
     DEPLOYED_ADDRESS as INTERPRETER_ADDR,
     RUNTIME_CODE as INTERPRETER_RUNTIME_CODE
-} from "../../generated/Rainterpreter.pointers.sol";
+} from "../../generated/RainlangInterpreter.pointers.sol";
 import {
     BYTECODE_HASH as EXPRESSION_DEPLOYER_HASH,
     DEPLOYED_ADDRESS as EXPRESSION_DEPLOYER_ADDR,
     RUNTIME_CODE as EXPRESSION_DEPLOYER_RUNTIME_CODE
-} from "../../generated/RainterpreterExpressionDeployer.pointers.sol";
+} from "../../generated/RainlangExpressionDeployer.pointers.sol";
 import {
     BYTECODE_HASH as RAINLANG_HASH,
     DEPLOYED_ADDRESS as RAINLANG_ADDR,
@@ -37,41 +37,41 @@ import {
 /// easily verified automatically in tests and scripts rather than relying on
 /// registries or manual verification.
 library LibInterpreterDeploy {
-    /// The address of the `RainterpreterParser` contract when deployed with the
+    /// The address of the `RainlangParser` contract when deployed with the
     /// rain standard zoltu deployer.
     address constant PARSER_DEPLOYED_ADDRESS = PARSER_ADDR;
 
-    /// The code hash of the `RainterpreterParser` contract when deployed with
+    /// The code hash of the `RainlangParser` contract when deployed with
     /// the rain standard zoltu deployer. This can be used to verify that the
     /// deployed contract has the expected bytecode, which provides stronger
     /// guarantees than just checking the address.
     bytes32 constant PARSER_DEPLOYED_CODEHASH = PARSER_HASH;
 
-    /// The address of the `RainterpreterStore` contract when deployed with the
+    /// The address of the `RainlangStore` contract when deployed with the
     /// rain standard zoltu deployer.
     address constant STORE_DEPLOYED_ADDRESS = STORE_ADDR;
 
-    /// The code hash of the `RainterpreterStore` contract when deployed with
+    /// The code hash of the `RainlangStore` contract when deployed with
     /// the rain standard zoltu deployer. This can be used to verify that the
     /// deployed contract has the expected bytecode, which provides stronger
     /// guarantees than just checking the address.
     bytes32 constant STORE_DEPLOYED_CODEHASH = STORE_HASH;
 
-    /// The address of the `Rainterpreter` contract when deployed with the rain
+    /// The address of the `RainlangInterpreter` contract when deployed with the rain
     /// standard zoltu deployer.
     address constant INTERPRETER_DEPLOYED_ADDRESS = INTERPRETER_ADDR;
 
-    /// The code hash of the `Rainterpreter` contract when deployed with the rain
+    /// The code hash of the `RainlangInterpreter` contract when deployed with the rain
     /// standard zoltu deployer. This can be used to verify that the deployed
     /// contract has the expected bytecode, which provides stronger guarantees
     /// than just checking the address.
     bytes32 constant INTERPRETER_DEPLOYED_CODEHASH = INTERPRETER_HASH;
 
-    /// The address of the `RainterpreterExpressionDeployer` contract when
+    /// The address of the `RainlangExpressionDeployer` contract when
     /// deployed with the rain standard zoltu deployer.
     address constant EXPRESSION_DEPLOYER_DEPLOYED_ADDRESS = EXPRESSION_DEPLOYER_ADDR;
 
-    /// The code hash of the `RainterpreterExpressionDeployer` contract when
+    /// The code hash of the `RainlangExpressionDeployer` contract when
     /// deployed with the rain standard zoltu deployer. This can be used to
     /// verify that the deployed contract has the expected bytecode, which
     /// provides stronger guarantees than just checking the address.

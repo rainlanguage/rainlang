@@ -89,7 +89,7 @@ impl Forker {
     /// # Examples
     ///
     /// ```ignore
-    /// use rain_interpreter_eval::fork::{Forker, NewForkedEvm};
+    /// use rainlang_eval::fork::{Forker, NewForkedEvm};
     ///
     /// let args = NewForkedEvm {
     ///     fork_url: "https://example.com/fork".to_owned(),
@@ -535,8 +535,8 @@ mod tests {
         primitives::{FixedBytes, U256},
         providers::Provider,
     };
-    use rain_interpreter_bindings::IInterpreterStoreV3::{getCall, setCall};
-    use rain_interpreter_test_fixtures::LocalEvm;
+    use rainlang_bindings::IInterpreterStoreV3::{getCall, setCall};
+    use rainlang_test_fixtures::LocalEvm;
 
     sol! {
         interface IERC20 {

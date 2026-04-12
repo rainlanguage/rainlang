@@ -1,10 +1,8 @@
 name: Git is clean
 on: [push]
-
 concurrency:
   group: ${{ github.ref }}-git-clean
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-
 jobs:
   git-clean:
     runs-on: ubuntu-latest
@@ -13,7 +11,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
       - uses: nixbuild/nix-quick-install-action@v30
         with:
           nix_conf: |
@@ -30,15 +27,11 @@ jobs:
           # before trying to save a new cache
           # 1G = 1073741824
           gc-max-store-size-linux: 1G
-
       # Build metas etc. required to do a correct pointer build.
-      - run: nix develop -c i9r-prelude
-
+      - run: nix develop -c rainlang-prelude
       - run: nix develop -c forge script ./script/BuildPointers.sol
-
       # Format the repo after generating pointers so that the pointer files are
       # formatted too.
       - run: nix develop -c forge fmt
-
       # Check if the repo is clean after generating pointers and formatting.
       - run: git diff --exit-code

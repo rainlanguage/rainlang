@@ -1,4 +1,4 @@
-//! Shared test fixtures for rain.interpreter Rust crates.
+//! Shared test fixtures for Rainlang Rust crates.
 
 use alloy::{
     contract::SolCallBuilder,
@@ -28,25 +28,25 @@ sol!(
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Interpreter,
-    "../../out/Rainterpreter.sol/Rainterpreter.json"
+    "../../out/RainlangInterpreter.sol/RainlangInterpreter.json"
 );
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Store,
-    "../../out/RainterpreterStore.sol/RainterpreterStore.json"
+    "../../out/RainlangStore.sol/RainlangStore.json"
 );
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Parser,
-    "../../out/RainterpreterParser.sol/RainterpreterParser.json"
+    "../../out/RainlangParser.sol/RainlangParser.json"
 );
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Deployer,
-    "../../out/RainterpreterExpressionDeployer.sol/RainterpreterExpressionDeployer.json"
+    "../../out/RainlangExpressionDeployer.sol/RainlangExpressionDeployer.json"
 );
 
 sol!(

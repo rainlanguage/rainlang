@@ -2,9 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {
-    RainterpreterExpressionDeployerDeploymentTest
-} from "test/abstract/RainterpreterExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 import {LibInterpreterState, InterpreterState} from "../../../../src/lib/state/LibInterpreterState.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 import {LibEval} from "../../../../src/lib/eval/LibEval.sol";
@@ -17,7 +15,7 @@ import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol
 
 /// @title LibEvalMaxOutputsTest
 /// @notice Tests that eval4 truncates outputs when maxOutputs < sourceOutputs.
-contract LibEvalMaxOutputsTest is RainterpreterExpressionDeployerDeploymentTest {
+contract LibEvalMaxOutputsTest is RainlangExpressionDeployerDeploymentTest {
     /// When maxOutputs < sourceOutputs, the returned array length must
     /// equal maxOutputs and contain the topmost stack items.
     function testMaxOutputsTruncation(uint8 maxOutputs, bytes32 c0, bytes32 c1, bytes32 c2) external view {
