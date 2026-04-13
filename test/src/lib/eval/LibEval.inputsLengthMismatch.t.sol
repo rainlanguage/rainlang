@@ -30,7 +30,7 @@ contract LibEvalInputsLengthMismatchTest is Test {
 
     /// Build an InterpreterState with a single source that expects
     /// `sourceInputs` inputs and has 0 ops / 0 outputs.
-    function buildState(uint8 sourceInputs) internal view returns (InterpreterState memory) {
+    function buildState(uint8 sourceInputs) internal pure returns (InterpreterState memory) {
         bytes memory fs = LibAllStandardOps.opcodeFunctionPointers();
 
         // Bytecode: 1 source, 0 offset, 0 ops, sourceInputs stack allocation,

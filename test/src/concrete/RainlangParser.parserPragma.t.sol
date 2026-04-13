@@ -6,6 +6,7 @@ import {Test} from "forge-std/Test.sol";
 import {RainlangParser} from "../../../src/concrete/RainlangParser.sol";
 import {PragmaV1} from "rain.interpreter.interface/interface/IParserPragmaV1.sol";
 import {NoWhitespaceAfterUsingWordsFrom} from "../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../src/lib/parse/LibParseError.sol";
 
 contract RainlangParserParserPragma is Test {
     function checkPragma(bytes memory source, address[] memory expectedAddresses) internal {
@@ -44,7 +45,9 @@ contract RainlangParserParserPragma is Test {
     /// must revert.
     function testParsePragmaNoWhitespaceAfterKeyword() external {
         RainlangParser parser = new RainlangParser();
-        vm.expectRevert(abi.encodeWithSelector(NoWhitespaceAfterUsingWordsFrom.selector, 16));
+        vm.expectRevert(
+            abi.encodeWithSelector(NoWhitespaceAfterUsingWordsFrom.selector, LibParseError.tagErrorOffset(16))
+        );
         parser.parsePragma1("using-words-from");
     }
 

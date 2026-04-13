@@ -6,6 +6,7 @@ import {Test} from "forge-std/Test.sol";
 import {LibParseState, ParseState, SUB_PARSER_POINTER_SHIFT} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
 import {InvalidSubParser} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseStatePushSubParserTest
 /// @notice Tests for pushing sub parsers onto the parse state.
@@ -23,7 +24,7 @@ contract LibParseStatePushSubParserTest is Test {
         value = bound(value, uint256(type(uint160).max) + 1, type(uint256).max);
 
         state.subParsers = 0;
-        vm.expectRevert(abi.encodeWithSelector(InvalidSubParser.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(InvalidSubParser.selector, LibParseError.tagErrorOffset(0)));
         this.pushSubParserExternal(state, bytes32(value));
     }
 

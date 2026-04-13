@@ -7,6 +7,7 @@ import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
 import {UnsupportedLiteralType} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseStatePushLiteralTest
 /// @notice Direct unit tests for pushLiteral.
@@ -134,7 +135,7 @@ contract LibParseStatePushLiteralTest is Test {
     /// Unrecognized literal type should revert with UnsupportedLiteralType.
     function testPushLiteralUnsupported() external {
         // 'z' is not a valid literal start character.
-        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, LibParseError.tagErrorOffset(0)));
         this.pushLiteralExternal(bytes("zzz"), 0);
     }
 }

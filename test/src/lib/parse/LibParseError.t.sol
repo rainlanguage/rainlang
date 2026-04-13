@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
 import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
-import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
+import {LibParseError, MAGIC_NUMBER_RAIN_PARSE_ERROR_V1} from "../../../../src/lib/parse/LibParseError.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 
 /// @title LibParseErrorTest
@@ -20,10 +20,13 @@ contract LibParseErrorTest is Test {
         assembly ("memory-safe") {
             cursor := add(data, 0x20)
         }
-        assertEq(state.parseErrorOffset(cursor), 0);
+        uint256 offset = state.parseErrorOffset(cursor);
+        assertTrue(LibParseError.isRainParseError(offset));
+        assertEq(LibParseError.parseOffset(offset), 0);
     }
 
-    /// parseErrorOffset returns data.length - 1 when cursor points to the last byte.
+    /// parseErrorOffset returns magic-tagged data.length - 1 when cursor
+    /// points to the last byte.
     function testParseErrorOffsetLastByte() external pure {
         bytes memory data = "hello";
         ParseState memory state = LibParseState.newState(data, "", "", "");
@@ -31,10 +34,13 @@ contract LibParseErrorTest is Test {
         assembly ("memory-safe") {
             cursor := add(add(data, 0x20), sub(mload(data), 1))
         }
-        assertEq(state.parseErrorOffset(cursor), 4);
+        uint256 offset = state.parseErrorOffset(cursor);
+        assertTrue(LibParseError.isRainParseError(offset));
+        assertEq(LibParseError.parseOffset(offset), 4);
     }
 
     /// parseErrorOffset works with a fuzzed cursor within data bounds.
+    /// The raw offset always equals the cursor index.
     function testParseErrorOffsetFuzz(uint8 dataLength, uint8 cursorIndex) external pure {
         dataLength = uint8(bound(dataLength, 1, 255));
         cursorIndex = uint8(bound(cursorIndex, 0, dataLength - 1));
@@ -44,7 +50,16 @@ contract LibParseErrorTest is Test {
         assembly ("memory-safe") {
             cursor := add(add(data, 0x20), cursorIndex)
         }
-        assertEq(state.parseErrorOffset(cursor), cursorIndex);
+        uint256 offset = state.parseErrorOffset(cursor);
+        assertTrue(LibParseError.isRainParseError(offset));
+        assertEq(LibParseError.parseOffset(offset), cursorIndex);
+    }
+
+    /// A value without the magic number must not be identified as a Rain
+    /// parse error.
+    function testIsRainParseErrorFalse(uint256 value) external pure {
+        vm.assume(!LibParseError.isRainParseError(value));
+        assertFalse(LibParseError.isRainParseError(value));
     }
 
     /// External wrapper for handleErrorSelector so expectRevert works.
@@ -57,12 +72,20 @@ contract LibParseErrorTest is Test {
         state.handleErrorSelector(cursor, errorSelector);
     }
 
+    /// tagErrorOffset round-trips with parseOffset.
+    function testTagErrorOffsetRoundTrip(uint256 offset) external pure {
+        offset = bound(offset, 0, type(uint16).max);
+        uint256 tagged = LibParseError.tagErrorOffset(offset);
+        assertTrue(LibParseError.isRainParseError(tagged));
+        assertEq(LibParseError.parseOffset(tagged), offset);
+    }
+
     /// handleErrorSelector with a non-zero selector reverts with the selector
     /// and the cursor offset.
     function testHandleErrorSelectorReverts() external {
         bytes memory data = "abcdefgh";
         bytes4 selector = bytes4(keccak256("TestError(uint256)"));
-        vm.expectRevert(abi.encodeWithSelector(selector, 5));
+        vm.expectRevert(abi.encodeWithSelector(selector, LibParseError.tagErrorOffset(5)));
         this.externalHandleErrorSelector(data, 5, selector);
     }
 

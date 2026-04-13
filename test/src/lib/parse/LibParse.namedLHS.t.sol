@@ -12,6 +12,7 @@ import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState
 import {OperandV2, LibParseOperand} from "../../../../src/lib/parse/LibParseOperand.sol";
 import {LibConvert} from "rain.lib.typecast/LibConvert.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 import {LibGenParseMeta} from "rain.interpreter.interface/lib/codegen/LibGenParseMeta.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
 
@@ -227,7 +228,7 @@ contract LibParseNamedLHSTest is ParseTest {
 
     /// Duplicate names are disallowed in the same source.
     function testParseNamedErrorDuplicateSameSource() external {
-        vm.expectRevert(abi.encodeWithSelector(DuplicateLHSItem.selector, 4));
+        vm.expectRevert(abi.encodeWithSelector(DuplicateLHSItem.selector, LibParseError.tagErrorOffset(4)));
         this.parseExternal("a:,a:;");
     }
 

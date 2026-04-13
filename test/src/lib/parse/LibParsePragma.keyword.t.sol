@@ -19,6 +19,7 @@ import {
 } from "rain.string/lib/parse/LibParseCMask.sol";
 import {LibConformString} from "rain.string/lib/mut/LibConformString.sol";
 import {NoWhitespaceAfterUsingWordsFrom} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 
@@ -90,7 +91,11 @@ contract LibParsePragmaKeywordTest is Test {
     /// Input ends exactly at the keyword boundary with no trailing bytes.
     /// Hits the `cursor >= end` revert at line 55.
     function testPragmaKeywordEndAtKeyword() external {
-        vm.expectRevert(abi.encodeWithSelector(NoWhitespaceAfterUsingWordsFrom.selector, PRAGMA_KEYWORD_BYTES_LENGTH));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                NoWhitespaceAfterUsingWordsFrom.selector, LibParseError.tagErrorOffset(PRAGMA_KEYWORD_BYTES_LENGTH)
+            )
+        );
         this.externalParsePragma(string(PRAGMA_KEYWORD_BYTES));
     }
 
@@ -101,7 +106,11 @@ contract LibParsePragmaKeywordTest is Test {
         bytes1 notWhitespace = LibConformString.charFromMask(seed, ~CMASK_WHITESPACE);
         string memory fullString =
             string.concat(string(PRAGMA_KEYWORD_BYTES), string(abi.encodePacked(notWhitespace)), str);
-        vm.expectRevert(abi.encodeWithSelector(NoWhitespaceAfterUsingWordsFrom.selector, PRAGMA_KEYWORD_BYTES_LENGTH));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                NoWhitespaceAfterUsingWordsFrom.selector, LibParseError.tagErrorOffset(PRAGMA_KEYWORD_BYTES_LENGTH)
+            )
+        );
         this.externalParsePragma(fullString);
     }
 

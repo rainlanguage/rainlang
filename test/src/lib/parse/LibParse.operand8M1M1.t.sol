@@ -5,6 +5,7 @@ pragma solidity =0.8.25;
 import {ExpectedOperand, UnclosedOperand} from "../../../../src/error/ErrParse.sol";
 import {OperandTest} from "test/abstract/OperandTest.sol";
 import {OperandOverflow} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 contract LibParseOperand8M1M1Test is OperandTest {
     /// Default is disallowed.
@@ -76,12 +77,12 @@ contract LibParseOperand8M1M1Test is OperandTest {
 
     /// Unclosed operand is disallowed.
     function testOperand8M1M1Unclosed() external {
-        checkParseError("_:e<1 1();", abi.encodeWithSelector(UnclosedOperand.selector, 7));
-        checkParseError("_:e<1 0()", abi.encodeWithSelector(UnclosedOperand.selector, 7));
-        checkParseError("_:e<1 ", abi.encodeWithSelector(UnclosedOperand.selector, 6));
-        checkParseError("_:e<1", abi.encodeWithSelector(UnclosedOperand.selector, 5));
-        checkParseError("_:e<1 1", abi.encodeWithSelector(UnclosedOperand.selector, 7));
-        checkParseError("_:e<1 1 1", abi.encodeWithSelector(UnclosedOperand.selector, 9));
+        checkParseError("_:e<1 1();", abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(7)));
+        checkParseError("_:e<1 0()", abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(7)));
+        checkParseError("_:e<1 ", abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(6)));
+        checkParseError("_:e<1", abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(5)));
+        checkParseError("_:e<1 1", abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(7)));
+        checkParseError("_:e<1 1 1", abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(9)));
     }
 
     /// Unopened operand is disallowed.

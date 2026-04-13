@@ -10,6 +10,7 @@ import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {LibConformString} from "rain.string/lib/mut/LibConformString.sol";
 import {OperandValuesOverflow, UnclosedOperand} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
 
 contract LibParseOperandParseOperandTest is Test {
@@ -272,19 +273,19 @@ contract LibParseOperandParseOperandTest is Test {
 
     /// More than 4 values is an error.
     function testParseOperandTooManyValues() external {
-        vm.expectRevert(abi.encodeWithSelector(OperandValuesOverflow.selector, 9));
+        vm.expectRevert(abi.encodeWithSelector(OperandValuesOverflow.selector, LibParseError.tagErrorOffset(9)));
         this.checkParsingOperandFromData("<1 2 3 4 5>", new bytes32[](0), 0);
     }
 
     /// Unclosed operand is an error.
     function testParseOperandUnclosed() external {
-        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, 8));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(8)));
         this.checkParsingOperandFromData("<1 2 3 4", new bytes32[](0), 0);
     }
 
     // Unexpected chars will be treated as unclosed operands.
     function testParseOperandUnexpectedChars() external {
-        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, 6));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(6)));
         this.checkParsingOperandFromData("<1 2 3;> 6", new bytes32[](0), 0);
     }
 
@@ -292,7 +293,7 @@ contract LibParseOperandParseOperandTest is Test {
     // UnclosedOperand revert at line 111. After parsing `2`, yang is set,
     // then `"` is a valid literal head but yang prevents parsing it.
     function testParseOperandYangStateLiteralCollision() external {
-        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, 4));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(4)));
         this.checkParsingOperandFromData("<1 2\"hi\">", new bytes32[](0), 0);
     }
 }

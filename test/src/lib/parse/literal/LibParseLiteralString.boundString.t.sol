@@ -7,6 +7,7 @@ import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
 import {LibParseLiteralString} from "../../../../../src/lib/parse/literal/LibParseLiteralString.sol";
 import {LibConformString} from "rain.string/lib/mut/LibConformString.sol";
 import {StringTooLong, UnclosedStringLiteral} from "../../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseState.sol";
 import {LibAllStandardOps} from "../../../../../src/lib/op/LibAllStandardOps.sol";
 
@@ -71,7 +72,7 @@ contract LibParseLiteralStringBoundTest is Test {
         vm.assume(bytes(str).length >= 0x20);
         LibConformString.conformValidPrintableStringContent(str);
 
-        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, LibParseError.tagErrorOffset(0)));
         checkStringBounds(string.concat("\"", str, "\""), 0, 0, 0);
     }
 
@@ -82,7 +83,9 @@ contract LibParseLiteralStringBoundTest is Test {
         badIndex = bound(badIndex, 0, (bytes(str).length > 0x1F ? 0x1F : bytes(str).length) - 1);
         LibConformString.corruptSingleChar(str, badIndex);
 
-        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, 1 + badIndex));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnclosedStringLiteral.selector, LibParseError.tagErrorOffset(1 + badIndex))
+        );
         checkStringBounds(string.concat("\"", str, "\""), 0, 0, 0);
     }
 
@@ -94,7 +97,7 @@ contract LibParseLiteralStringBoundTest is Test {
         str = string.concat("\"", str, "\"");
         length = bound(length, 1, bytes(str).length - 1);
 
-        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, length));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, LibParseError.tagErrorOffset(length)));
         (uint256 outerStart, uint256 innerStart, uint256 innerEnd, uint256 outerEnd) =
             this.externalBoundLiteralForceLength(bytes(str), length);
         (outerStart, innerStart, innerEnd, outerEnd);
@@ -106,7 +109,7 @@ contract LibParseLiteralStringBoundTest is Test {
         // "hi" — length 4. Force length to 3 so end points at the closing ".
         // innerEnd scans "hi" (2 chars), lands at offset 3 which equals end.
         bytes memory data = bytes("\"hi\"");
-        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, 3));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, LibParseError.tagErrorOffset(3)));
         this.externalBoundLiteralForceLength(data, 3);
     }
 
@@ -118,7 +121,7 @@ contract LibParseLiteralStringBoundTest is Test {
         bytes memory data = bytes(string.concat("\"", str, "\""));
         // Force length to data.length - 1, placing end at the closing ".
         uint256 length = data.length - 1;
-        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, length));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, LibParseError.tagErrorOffset(length)));
         this.externalBoundLiteralForceLength(data, length);
     }
 }

@@ -15,6 +15,7 @@ import {
     MalformedDecimalPoint
 } from "rain.math.float/error/ErrParse.sol";
 import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralDecimalParseDecimalFloatTest
 /// @notice Tests for parsing decimal float literals.
@@ -116,91 +117,123 @@ contract LibParseLiteralDecimalParseDecimalFloatTest is Test {
 
     /// An empty string should revert.
     function testParseLiteralDecimalFloatEmpty() external {
-        checkParseDecimalRevert("", abi.encodeWithSelector(ParseEmptyDecimalString.selector, 0));
+        checkParseDecimalRevert(
+            "", abi.encodeWithSelector(ParseEmptyDecimalString.selector, LibParseError.tagErrorOffset(0))
+        );
     }
 
     /// A non decimal string should revert.
     function testParseLiteralDecimalFloatNonDecimal() external {
-        checkParseDecimalRevert("hello", abi.encodeWithSelector(ParseEmptyDecimalString.selector, 0));
+        checkParseDecimalRevert(
+            "hello", abi.encodeWithSelector(ParseEmptyDecimalString.selector, LibParseError.tagErrorOffset(0))
+        );
     }
 
     /// e without a number should revert.
     function testParseLiteralDecimalFloatExponentRevert() external {
-        checkParseDecimalRevert("e", abi.encodeWithSelector(ParseEmptyDecimalString.selector, 0));
+        checkParseDecimalRevert(
+            "e", abi.encodeWithSelector(ParseEmptyDecimalString.selector, LibParseError.tagErrorOffset(0))
+        );
     }
 
     /// e with a left digit but not right should revert.
     function testParseLiteralDecimalFloatExponentRevert2() external {
-        checkParseDecimalRevert("1e", abi.encodeWithSelector(MalformedExponentDigits.selector, 2));
+        checkParseDecimalRevert(
+            "1e", abi.encodeWithSelector(MalformedExponentDigits.selector, LibParseError.tagErrorOffset(2))
+        );
     }
 
     /// e with a left digit but not right should revert. Add a negative sign.
     function testParseLiteralDecimalFloatExponentRevert3() external {
-        checkParseDecimalRevert("1e-", abi.encodeWithSelector(MalformedExponentDigits.selector, 3));
+        checkParseDecimalRevert(
+            "1e-", abi.encodeWithSelector(MalformedExponentDigits.selector, LibParseError.tagErrorOffset(3))
+        );
     }
 
     /// e with a right digit but not left should revert.
     function testParseLiteralDecimalFloatExponentRevert4() external {
-        checkParseDecimalRevert("e1", abi.encodeWithSelector(ParseEmptyDecimalString.selector, 0));
+        checkParseDecimalRevert(
+            "e1", abi.encodeWithSelector(ParseEmptyDecimalString.selector, LibParseError.tagErrorOffset(0))
+        );
     }
 
     /// e with a right digit but not left should revert.
     /// two digits.
     function testParseLiteralDecimalFloatExponentRevert5() external {
-        checkParseDecimalRevert("e10", abi.encodeWithSelector(ParseEmptyDecimalString.selector, 0));
+        checkParseDecimalRevert(
+            "e10", abi.encodeWithSelector(ParseEmptyDecimalString.selector, LibParseError.tagErrorOffset(0))
+        );
     }
 
     /// e with a right digit but not left should revert.
     /// two digits with negative sign.
     function testParseLiteralDecimalFloatExponentRevert6() external {
-        checkParseDecimalRevert("e-10", abi.encodeWithSelector(ParseEmptyDecimalString.selector, 0));
+        checkParseDecimalRevert(
+            "e-10", abi.encodeWithSelector(ParseEmptyDecimalString.selector, LibParseError.tagErrorOffset(0))
+        );
     }
 
     /// Dot without digits should revert.
     function testParseLiteralDecimalFloatDotRevert() external {
-        checkParseDecimalRevert(".", abi.encodeWithSelector(ParseEmptyDecimalString.selector, 0));
+        checkParseDecimalRevert(
+            ".", abi.encodeWithSelector(ParseEmptyDecimalString.selector, LibParseError.tagErrorOffset(0))
+        );
     }
 
     /// Dot without leading digits should revert.
     function testParseLiteralDecimalFloatDotRevert2() external {
-        checkParseDecimalRevert(".1", abi.encodeWithSelector(ParseEmptyDecimalString.selector, 0));
+        checkParseDecimalRevert(
+            ".1", abi.encodeWithSelector(ParseEmptyDecimalString.selector, LibParseError.tagErrorOffset(0))
+        );
     }
 
     /// Dot without trailing digits should revert.
     function testParseLiteralDecimalFloatDotRevert3() external {
-        checkParseDecimalRevert("1.", abi.encodeWithSelector(MalformedDecimalPoint.selector, 2));
+        checkParseDecimalRevert(
+            "1.", abi.encodeWithSelector(MalformedDecimalPoint.selector, LibParseError.tagErrorOffset(2))
+        );
     }
 
     /// Dot e is an error.
     function testParseLiteralDecimalFloatDotE() external {
-        checkParseDecimalRevert(".e", abi.encodeWithSelector(ParseEmptyDecimalString.selector, 0));
+        checkParseDecimalRevert(
+            ".e", abi.encodeWithSelector(ParseEmptyDecimalString.selector, LibParseError.tagErrorOffset(0))
+        );
     }
 
     /// Dot e0 is an error.
     function testParseLiteralDecimalFloatDotE0() external {
-        checkParseDecimalRevert(".e0", abi.encodeWithSelector(ParseEmptyDecimalString.selector, 0));
+        checkParseDecimalRevert(
+            ".e0", abi.encodeWithSelector(ParseEmptyDecimalString.selector, LibParseError.tagErrorOffset(0))
+        );
     }
 
     /// e dot is an error.
     function testParseLiteralDecimalFloatEDot() external {
-        checkParseDecimalRevert("e.", abi.encodeWithSelector(ParseEmptyDecimalString.selector, 0));
+        checkParseDecimalRevert(
+            "e.", abi.encodeWithSelector(ParseEmptyDecimalString.selector, LibParseError.tagErrorOffset(0))
+        );
     }
 
     /// Negative e with no digits is an error.
     function testParseLiteralDecimalFloatNegativeE() external {
-        checkParseDecimalRevert("0.0e-", abi.encodeWithSelector(MalformedExponentDigits.selector, 5));
+        checkParseDecimalRevert(
+            "0.0e-", abi.encodeWithSelector(MalformedExponentDigits.selector, LibParseError.tagErrorOffset(5))
+        );
     }
 
     /// Negative frac is an error.
     function testParseLiteralDecimalFloatNegativeFrac() external {
-        checkParseDecimalRevert("0.-1", abi.encodeWithSelector(MalformedDecimalPoint.selector, 2));
+        checkParseDecimalRevert(
+            "0.-1", abi.encodeWithSelector(MalformedDecimalPoint.selector, LibParseError.tagErrorOffset(2))
+        );
     }
 
     /// Can't have more than max total precision. Add decimals after the max int.
     function testParseLiteralDecimalFloatPrecisionRevert0() external {
         checkParseDecimalRevert(
             "57896044618658097711785492504343953926634992332820282019728792003956564819967.1",
-            abi.encodeWithSelector(ParseDecimalPrecisionLoss.selector, 79)
+            abi.encodeWithSelector(ParseDecimalPrecisionLoss.selector, LibParseError.tagErrorOffset(79))
         );
     }
 
@@ -209,7 +242,7 @@ contract LibParseLiteralDecimalParseDecimalFloatTest is Test {
     function testParseLiteralDecimalFloatPrecisionRevert1() external {
         checkParseDecimalRevert(
             "1.57896044618658097711785492504343953926634992332820282019728792003956564819967",
-            abi.encodeWithSelector(ParseDecimalPrecisionLoss.selector, 79)
+            abi.encodeWithSelector(ParseDecimalPrecisionLoss.selector, LibParseError.tagErrorOffset(79))
         );
     }
 }

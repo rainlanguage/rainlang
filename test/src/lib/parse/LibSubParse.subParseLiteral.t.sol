@@ -10,6 +10,7 @@ import {LibBytes} from "rain.solmem/lib/LibBytes.sol";
 import {ISubParserV4} from "rain.interpreter.interface/interface/ISubParserV4.sol";
 import {UnsupportedLiteralType} from "../../../../src/error/ErrParse.sol";
 import {SubParseLiteralDispatchLengthOverflow} from "../../../../src/error/ErrSubParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibSubParseSubParseLiteralTest
 /// @notice Direct unit tests for `LibSubParse.subParseLiteral`.
@@ -84,7 +85,7 @@ contract LibSubParseSubParseLiteralTest is Test {
         address[] memory subs = new address[](1);
         subs[0] = subParser;
 
-        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, LibParseError.tagErrorOffset(0)));
         this.externalSubParseLiteral(dispatch, body, subs);
     }
 
@@ -139,7 +140,7 @@ contract LibSubParseSubParseLiteralTest is Test {
         subs[0] = first;
         subs[1] = second;
 
-        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, LibParseError.tagErrorOffset(0)));
         this.externalSubParseLiteral(dispatch, body, subs);
     }
 

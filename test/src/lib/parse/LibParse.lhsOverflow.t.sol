@@ -26,7 +26,7 @@ contract LibParseLHSOverflowTest is Test {
     /// 256 anonymous LHS items on a single line overflows both lineTracker
     /// (per-line counter) and topLevel1 (per-source counter). The parser
     /// must revert with LHSItemCountOverflow, not silently corrupt state.
-    function testLHSItemCountOverflow256() external {
+    function testLHSItemCountOverflow256() external view {
         // Build "_ _ _ ... (256 times) _ :;"
         bytes memory data = new bytes(256 * 2 + 2);
         for (uint256 i = 0; i < 256; i++) {
