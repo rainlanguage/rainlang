@@ -14,6 +14,10 @@ import {MalformedCommentStart, UnclosedComment} from "../../error/ErrParse.sol";
 import {LibParseError} from "./LibParseError.sol";
 import {LibParseChar} from "rain.string/lib/parse/LibParseChar.sol";
 
+/// @dev Shift to extract a packed 2-byte comment delimiter sequence from the
+/// high bits of a 256-bit mload.
+uint256 constant COMMENT_SEQUENCE_SHIFT = 0xf0;
+
 /// @title LibParseInterstitial
 /// @notice Handles whitespace and comment skipping between meaningful tokens
 /// during parsing.
@@ -46,7 +50,7 @@ library LibParseInterstitial {
             // First check the comment opening sequence is not malformed.
             uint256 startSequence;
             assembly ("memory-safe") {
-                startSequence := shr(0xf0, mload(cursor))
+                startSequence := shr(COMMENT_SEQUENCE_SHIFT, mload(cursor))
             }
             if (startSequence != COMMENT_START_SEQUENCE) {
                 revert MalformedCommentStart(state.parseErrorOffset(cursor));
@@ -68,7 +72,7 @@ library LibParseInterstitial {
                     // Check the sequence.
                     uint256 endSequence;
                     assembly ("memory-safe") {
-                        endSequence := shr(0xf0, mload(sub(cursor, 1)))
+                        endSequence := shr(COMMENT_SEQUENCE_SHIFT, mload(sub(cursor, 1)))
                     }
                     if (endSequence == COMMENT_END_SEQUENCE) {
                         // We found the end of the comment.

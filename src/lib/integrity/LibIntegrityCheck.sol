@@ -14,6 +14,7 @@ import {
 import {BadOpInputsLength, BadOpOutputsLength} from "rain.interpreter.interface/error/ErrIntegrity.sol";
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
 import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OPCODE_FUNCTION_POINTER_SHIFT} from "../eval/LibEval.sol";
 
 /// @notice Tracks the state of the integrity check walk over a single source.
 /// @param stackIndex Current logical stack depth. Increases with opcode
@@ -162,7 +163,7 @@ library LibIntegrityCheck {
                         revert OpcodeOutOfRange(state.opIndex, opcodeIndex, fsCount);
                     }
                     assembly ("memory-safe") {
-                        f := shr(0xf0, mload(add(fPointersStart, mul(opcodeIndex, 2))))
+                        f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(opcodeIndex, 2))))
                     }
                     (uint256 calcOpInputs, uint256 calcOpOutputs) = f(state, operand);
                     if (calcOpInputs != bytecodeOpInputs) {
