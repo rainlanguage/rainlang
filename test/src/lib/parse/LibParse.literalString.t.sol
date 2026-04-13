@@ -10,6 +10,7 @@ import {IntOrAString, LibIntOrAString} from "rain.intorastring/lib/LibIntOrAStri
 import {StringTooLong, UnclosedStringLiteral} from "../../../../src/error/ErrParse.sol";
 import {LibConformString} from "rain.string/lib/mut/LibConformString.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralStringTest
 /// @notice Tests for parsing string literals.
@@ -108,7 +109,7 @@ contract LibParseLiteralStringTest is Test {
         vm.assume(bytes(str).length >= 0x20);
         LibConformString.conformValidPrintableStringContent(str);
 
-        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, 3));
+        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, LibParseError.tagErrorOffset(3)));
         (bytes memory bytecode, bytes32[] memory constants) = this.externalParse(string.concat("_: \"", str, "\";"));
         (bytecode, constants);
     }
@@ -124,7 +125,7 @@ contract LibParseLiteralStringTest is Test {
             mstore(strA, 0x20)
         }
 
-        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, 3));
+        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, LibParseError.tagErrorOffset(3)));
         (bytes memory bytecode, bytes32[] memory constants) =
             this.externalParse(string.concat("_: \"", strA, strB, "\";"));
         (bytecode, constants);
@@ -140,7 +141,9 @@ contract LibParseLiteralStringTest is Test {
 
         LibConformString.corruptSingleChar(str, badIndex);
 
-        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, 4 + badIndex));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnclosedStringLiteral.selector, LibParseError.tagErrorOffset(4 + badIndex))
+        );
         (bytes memory bytecode, bytes32[] memory constants) = this.externalParse(string.concat("_: \"", str, "\";"));
         (bytecode, constants);
     }

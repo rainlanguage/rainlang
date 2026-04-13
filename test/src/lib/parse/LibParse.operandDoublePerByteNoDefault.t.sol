@@ -8,6 +8,7 @@ import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {OperandOverflow} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 contract LibParseOperandDoublePerByteNoDefaultTest is OperandTest {
     using LibParse for ParseState;
@@ -178,7 +179,7 @@ contract LibParseOperandDoublePerByteNoDefaultTest is OperandTest {
 
     /// Unclosed operand is disallowed.
     function testOperandDoublePerByteNoDefaultUnclosed() external {
-        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, 7));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(7)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parse("_:c<1 2");
         (bytecode);
         (constants);

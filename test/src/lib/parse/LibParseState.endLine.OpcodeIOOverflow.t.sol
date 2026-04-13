@@ -4,6 +4,7 @@ pragma solidity =0.8.25;
 
 import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 import {OpcodeIOOverflow} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseStateOpcodeIOOverflowTest
 /// @notice Tests for OpcodeIOOverflow in endLine.
@@ -14,7 +15,7 @@ contract LibParseStateOpcodeIOOverflowTest is RainlangExpressionDeployerDeployme
         // int-add with 16 inputs: int-add(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
         bytes memory rainlang = bytes("_: int-add(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1);");
 
-        vm.expectRevert(abi.encodeWithSelector(OpcodeIOOverflow.selector, 43));
+        vm.expectRevert(abi.encodeWithSelector(OpcodeIOOverflow.selector, LibParseError.tagErrorOffset(43)));
         I_PARSER.unsafeParse(rainlang);
     }
 
@@ -25,7 +26,7 @@ contract LibParseStateOpcodeIOOverflowTest is RainlangExpressionDeployerDeployme
         // Use a 0-input word so inputs don't overflow first.
         bytes memory rainlang = bytes("a b c d e f g h i j k l m n o p: block-number();");
 
-        vm.expectRevert(abi.encodeWithSelector(OpcodeIOOverflow.selector, 47));
+        vm.expectRevert(abi.encodeWithSelector(OpcodeIOOverflow.selector, LibParseError.tagErrorOffset(47)));
         I_PARSER.unsafeParse(rainlang);
     }
 }

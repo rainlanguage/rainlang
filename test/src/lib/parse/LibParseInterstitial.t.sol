@@ -8,6 +8,7 @@ import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState
 import {LibParseInterstitial} from "../../../../src/lib/parse/LibParseInterstitial.sol";
 import {FSM_YANG_MASK} from "../../../../src/lib/parse/LibParseState.sol";
 import {MalformedCommentStart, UnclosedComment} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseInterstitialTest
 /// @notice Tests for LibParseInterstitial.
@@ -24,7 +25,7 @@ contract LibParseInterstitialTest is Test {
         //forge-lint: disable-next-line(unsafe-typecast)
         bytes memory data = abi.encodePacked(bytes1("/"), bytes1(secondByte), bytes2("*/"));
 
-        vm.expectRevert(abi.encodeWithSelector(MalformedCommentStart.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(MalformedCommentStart.selector, LibParseError.tagErrorOffset(0)));
         this.externalSkipComment(data);
     }
 
@@ -38,13 +39,13 @@ contract LibParseInterstitialTest is Test {
 
     /// skipComment with fewer than 4 bytes reverts with UnclosedComment.
     function testSkipCommentTooShort() external {
-        vm.expectRevert(abi.encodeWithSelector(UnclosedComment.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedComment.selector, LibParseError.tagErrorOffset(0)));
         this.externalSkipComment(bytes("/*"));
     }
 
     /// skipComment with exactly 3 bytes reverts with UnclosedComment.
     function testSkipCommentThreeBytes() external {
-        vm.expectRevert(abi.encodeWithSelector(UnclosedComment.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedComment.selector, LibParseError.tagErrorOffset(0)));
         this.externalSkipComment(bytes("/* "));
     }
 

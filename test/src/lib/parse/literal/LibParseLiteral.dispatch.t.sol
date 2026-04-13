@@ -7,6 +7,7 @@ import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
 import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseState.sol";
 import {LibParseLiteral, UnsupportedLiteralType} from "../../../../../src/lib/parse/literal/LibParseLiteral.sol";
 import {UppercaseHexPrefix} from "../../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {LibAllStandardOps} from "../../../../../src/lib/op/LibAllStandardOps.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
 import {ISubParserV4} from "rain.interpreter.interface/interface/ISubParserV4.sol";
@@ -112,7 +113,7 @@ contract LibParseLiteralDispatchTest is Test {
     /// Uppercase '0X' must revert with UppercaseHexPrefix rather than
     /// silently parsing as decimal 0.
     function testTryParseLiteralUppercaseXReverts() external {
-        vm.expectRevert(abi.encodeWithSelector(UppercaseHexPrefix.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(UppercaseHexPrefix.selector, LibParseError.tagErrorOffset(0)));
         this.externalParseLiteral(bytes("0X "));
     }
 
@@ -240,7 +241,7 @@ contract LibParseLiteralDispatchTest is Test {
 
     /// parseLiteral reverts with UnsupportedLiteralType for unrecognized head.
     function testParseLiteralUnsupportedType() external {
-        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, LibParseError.tagErrorOffset(0)));
         this.externalParseLiteral(bytes("@ "));
     }
 
@@ -248,7 +249,7 @@ contract LibParseLiteralDispatchTest is Test {
     /// next byte in memory must route to decimal, not hex. Without a bounds
     /// check the parser reads past end and sees "0x", incorrectly dispatching
     /// to the hex parser which reverts with ZeroLengthHexLiteral.
-    function testTryParseLiteralOOBSecondBytePoison() external {
+    function testTryParseLiteralOOBSecondBytePoison() external view {
         // Allocate data "0" then immediately write 0x78 ('x') right after
         // the data in memory. end = cursor+1 (just the "0" byte), but
         // mload(cursor) reads 32 bytes so byte(1, word) picks up the 'x'.

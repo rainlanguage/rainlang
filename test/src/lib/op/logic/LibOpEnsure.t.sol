@@ -4,6 +4,7 @@ pragma solidity =0.8.25;
 
 import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {ExcessRHSItems} from "../../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {LibOpEnsure} from "../../../../../src/lib/op/logic/LibOpEnsure.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
@@ -78,7 +79,7 @@ contract LibOpEnsureTest is OpTest {
     /// be used on the same line as another word as it has non-one outputs.
     /// Tests ensuring with an addition on the same line.
     function testOpEnsureEvalBadOutputs() external {
-        vm.expectRevert(abi.encodeWithSelector(ExcessRHSItems.selector, 34));
+        vm.expectRevert(abi.encodeWithSelector(ExcessRHSItems.selector, LibParseError.tagErrorOffset(34)));
         (bytes memory bytecode, bytes32[] memory constants) =
             I_PARSER.unsafeParse("_:ensure(1 \"always true\") add(1 1);");
         (bytecode);
@@ -89,7 +90,7 @@ contract LibOpEnsureTest is OpTest {
     /// be used on the same line as another word as it has non-one outputs.
     /// Tests ensuring with another ensure on the same line.
     function testOpEnsureEvalBadOutputs2() external {
-        vm.expectRevert(abi.encodeWithSelector(ExcessRHSItems.selector, 48));
+        vm.expectRevert(abi.encodeWithSelector(ExcessRHSItems.selector, LibParseError.tagErrorOffset(48)));
         (bytes memory bytecode, bytes32[] memory constants) =
             I_PARSER.unsafeParse(":ensure(1 \"always true\") ensure(1 \"always true\");");
         (bytecode);

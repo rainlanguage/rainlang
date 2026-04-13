@@ -10,6 +10,7 @@ import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseSt
 import {CMASK_STRING_LITERAL_TAIL} from "rain.string/lib/parse/LibParseCMask.sol";
 import {LibConformString} from "rain.string/lib/mut/LibConformString.sol";
 import {UnclosedStringLiteral} from "../../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralStringTest
 /// @notice Tests parsing strings with the LibParseLiteral library.
@@ -77,7 +78,9 @@ contract LibParseLiteralStringTest is Test {
 
         ParseState memory state = LibParseState.newState(bytes(string.concat("\"", string(data), "\"")), "", "", "");
 
-        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, 1 + corruptIndex));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnclosedStringLiteral.selector, LibParseError.tagErrorOffset(1 + corruptIndex))
+        );
         (uint256 cursorAfter, bytes32 value) = this.parseStringExternal(state);
         (cursorAfter, value);
     }

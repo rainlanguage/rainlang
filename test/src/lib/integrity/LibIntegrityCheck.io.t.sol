@@ -19,7 +19,7 @@ contract LibIntegrityCheckIoTest is RainlangExpressionDeployerDeploymentTest {
     }
 
     /// Single source with 0 inputs and 1 output.
-    function testIntegrityCheck2IoSingleSource() external {
+    function testIntegrityCheck2IoSingleSource() external view {
         (bytes memory bytecode, bytes32[] memory constants) = I_PARSER.unsafeParse(bytes("_: 1;"));
         bytes memory io = this.externalIntegrityCheck(bytecode, constants);
         assertEq(io.length, 2, "io length for 1 source");
@@ -28,7 +28,7 @@ contract LibIntegrityCheckIoTest is RainlangExpressionDeployerDeploymentTest {
     }
 
     /// Two sources with different output counts.
-    function testIntegrityCheck2IoTwoSources() external {
+    function testIntegrityCheck2IoTwoSources() external view {
         (bytes memory bytecode, bytes32[] memory constants) = I_PARSER.unsafeParse(bytes("_: 1;_: 2, _: 3;"));
         bytes memory io = this.externalIntegrityCheck(bytecode, constants);
         assertEq(io.length, 4, "io length for 2 sources");

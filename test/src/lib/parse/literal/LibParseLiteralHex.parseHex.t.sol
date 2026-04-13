@@ -8,6 +8,7 @@ import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseState.sol";
 import {LibParseLiteralHex} from "../../../../../src/lib/parse/literal/LibParseLiteralHex.sol";
 import {HexLiteralOverflow, ZeroLengthHexLiteral, OddLengthHexLiteral} from "../../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralHexParseHexTest
 /// @notice Tests parsing hex literals with LibParseLiteralHex.
@@ -37,7 +38,7 @@ contract LibParseLiteralHexParseHexTest is Test {
         bytes memory data = bytes("0x00000000000000000000000000000000000000000000000000000000000000000a");
 
         // Offset 2: the hex digits start after the "0x" prefix.
-        vm.expectRevert(abi.encodeWithSelector(HexLiteralOverflow.selector, 2));
+        vm.expectRevert(abi.encodeWithSelector(HexLiteralOverflow.selector, LibParseError.tagErrorOffset(2)));
         this.externalParseHex(data);
     }
 
@@ -55,7 +56,7 @@ contract LibParseLiteralHexParseHexTest is Test {
         //forge-lint: disable-next-line(unsafe-typecast)
         bytes memory data = abi.encodePacked(bytes2("0x"), bytes1(trailingByte));
 
-        vm.expectRevert(abi.encodeWithSelector(ZeroLengthHexLiteral.selector, 2));
+        vm.expectRevert(abi.encodeWithSelector(ZeroLengthHexLiteral.selector, LibParseError.tagErrorOffset(2)));
         this.externalParseHex(data);
     }
 
@@ -74,7 +75,7 @@ contract LibParseLiteralHexParseHexTest is Test {
             data[i + 2] = "a";
         }
 
-        vm.expectRevert(abi.encodeWithSelector(OddLengthHexLiteral.selector, 2));
+        vm.expectRevert(abi.encodeWithSelector(OddLengthHexLiteral.selector, LibParseError.tagErrorOffset(2)));
         this.externalParseHex(data);
     }
 

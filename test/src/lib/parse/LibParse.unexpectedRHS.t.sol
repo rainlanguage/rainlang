@@ -5,6 +5,7 @@ pragma solidity =0.8.25;
 import {ParseTest} from "test/abstract/ParseTest.sol";
 import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {UnexpectedRHSChar} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 import {
     CMASK_RHS_WORD_HEAD,
     CMASK_LITERAL_HEAD,
@@ -49,7 +50,7 @@ contract LibParseUnexpectedRHSTest is ParseTest {
         );
         string memory s = string(bytes.concat(":", bytes1(unexpected), ";"));
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, LibParseError.tagErrorOffset(1)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal(s);
         (bytecode, constants);
     }
@@ -59,7 +60,7 @@ contract LibParseUnexpectedRHSTest is ParseTest {
     function testParseUnexpectedRHSLeftParen() external {
         string memory s = ":();";
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, LibParseError.tagErrorOffset(1)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal(s);
         (bytecode, constants);
     }
@@ -67,7 +68,7 @@ contract LibParseUnexpectedRHSTest is ParseTest {
     /// Check the parser reverts when two words appear consecutively without
     /// whitespace (yang-state word-word path).
     function testParseUnexpectedRHSYangWordWord() external {
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, 10));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, LibParseError.tagErrorOffset(10)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal("_:add(1 2)add(3 4);");
         (bytecode, constants);
     }

@@ -8,6 +8,7 @@ import {OperandTest} from "test/abstract/OperandTest.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {OperandOverflow} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 contract LibParseOperandM1M1Test is OperandTest {
     using LibParse for ParseState;
@@ -173,15 +174,17 @@ contract LibParseOperandM1M1Test is OperandTest {
 
     /// Unclosed operand is disallowed.
     function testOperandM1M1Unclosed() external {
-        checkParseError("_:d<1 1();", abi.encodeWithSelector(UnclosedOperand.selector, 7));
-        checkParseError("_:d<1 0()", abi.encodeWithSelector(UnclosedOperand.selector, 7));
-        checkParseError("_:d<1 ", abi.encodeWithSelector(UnclosedOperand.selector, 6));
-        checkParseError("_:d<1", abi.encodeWithSelector(UnclosedOperand.selector, 5));
-        checkParseError("_:d<1 1", abi.encodeWithSelector(UnclosedOperand.selector, 7));
+        checkParseError("_:d<1 1();", abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(7)));
+        checkParseError("_:d<1 0()", abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(7)));
+        checkParseError("_:d<1 ", abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(6)));
+        checkParseError("_:d<1", abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(5)));
+        checkParseError("_:d<1 1", abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(7)));
     }
 
     /// Unopened operand is disallowed.
     function testOperandM1M1Unopened() external {
-        checkParseError("_:d>1 1>();", abi.encodeWithSelector(ExpectedLeftParen.selector, 3));
+        checkParseError(
+            "_:d>1 1>();", abi.encodeWithSelector(ExpectedLeftParen.selector, LibParseError.tagErrorOffset(3))
+        );
     }
 }

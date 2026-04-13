@@ -5,6 +5,7 @@ pragma solidity =0.8.25;
 import {OpTest} from "test/abstract/OpTest.sol";
 import {MissingFinalSemi} from "../../../src/error/ErrParse.sol";
 import {BadOpInputsLength} from "rain.interpreter.interface/error/ErrIntegrity.sol";
+import {LibParseError} from "../../../src/lib/parse/LibParseError.sol";
 
 contract RainlangExpressionDeployerParse2Test is OpTest {
     /// parse2 with empty input must return valid serialized bytecode
@@ -16,7 +17,7 @@ contract RainlangExpressionDeployerParse2Test is OpTest {
 
     /// parse2 with malformed Rainlang must propagate the parse error.
     function testParse2MissingFinalSemi() external {
-        vm.expectRevert(abi.encodeWithSelector(MissingFinalSemi.selector, 4));
+        vm.expectRevert(abi.encodeWithSelector(MissingFinalSemi.selector, LibParseError.tagErrorOffset(4)));
         I_DEPLOYER.parse2("_: 1");
     }
 

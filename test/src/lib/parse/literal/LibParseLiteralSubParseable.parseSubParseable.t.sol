@@ -11,6 +11,7 @@ import {
     SubParseableMissingDispatch,
     UnsupportedLiteralType
 } from "../../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {ISubParserV4} from "rain.interpreter.interface/interface/ISubParserV4.sol";
 import {LibConformString} from "rain.string/lib/mut/LibConformString.sol";
 import {CMASK_WHITESPACE, CMASK_SUB_PARSEABLE_LITERAL_END} from "rain.string/lib/parse/LibParseCMask.sol";
@@ -65,48 +66,66 @@ contract LibParseLiteralSubParseableTest is Test {
 
     /// An unclosed sub parseable literal is an error.
     function testParseLiteralSubParseableUnclosedDispatch0() external {
-        checkParseSubParseableError("[a", abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, 2));
+        checkParseSubParseableError(
+            "[a", abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, LibParseError.tagErrorOffset(2))
+        );
     }
 
     /// Leading whitespace is not allowed.
     function testParseLiteralSubParseableUnclosedDispatchWhitespace1() external {
-        checkParseSubParseableError("[ a", abi.encodeWithSelector(SubParseableMissingDispatch.selector, 1));
+        checkParseSubParseableError(
+            "[ a", abi.encodeWithSelector(SubParseableMissingDispatch.selector, LibParseError.tagErrorOffset(1))
+        );
     }
 
     /// An unclosed sub parseable literal is an error.
     function testParseLiteralSubParseableUnclosedDispatchWhitespace0() external {
-        checkParseSubParseableError("[a ", abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, 3));
+        checkParseSubParseableError(
+            "[a ", abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, LibParseError.tagErrorOffset(3))
+        );
     }
 
     /// An unclosed sub parseable literal is an error.
     /// Tests with a body.
     function testParseLiteralSubParseableUnclosedDispatchBody() external {
-        checkParseSubParseableError("[a b", abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, 4));
+        checkParseSubParseableError(
+            "[a b", abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, LibParseError.tagErrorOffset(4))
+        );
     }
 
     /// An unclosed sub parseable literal is an error.
     function testParseLiteralSubParseableUnclosedDoubleOpen() external {
-        checkParseSubParseableError("[[", abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, 2));
+        checkParseSubParseableError(
+            "[[", abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, LibParseError.tagErrorOffset(2))
+        );
     }
 
     /// An empty sub parseable literal is an error.
     function testParseLiteralSubParseableMissingDispatchEmpty() external {
-        checkParseSubParseableError("[]", abi.encodeWithSelector(SubParseableMissingDispatch.selector, 1));
+        checkParseSubParseableError(
+            "[]", abi.encodeWithSelector(SubParseableMissingDispatch.selector, LibParseError.tagErrorOffset(1))
+        );
     }
 
     /// An unclosed sub parseable literal with no dispatch is an error.
     function testParseLiteralSubParseableMissingDispatchUnclosed() external {
-        checkParseSubParseableError("[", abi.encodeWithSelector(SubParseableMissingDispatch.selector, 1));
+        checkParseSubParseableError(
+            "[", abi.encodeWithSelector(SubParseableMissingDispatch.selector, LibParseError.tagErrorOffset(1))
+        );
     }
 
     /// An unclosed sub parseable literal with no dispatch is an error.
     function testParseLiteralSubParseableMissingDispatchUnclosedWhitespace0() external {
-        checkParseSubParseableError("[ ", abi.encodeWithSelector(SubParseableMissingDispatch.selector, 1));
+        checkParseSubParseableError(
+            "[ ", abi.encodeWithSelector(SubParseableMissingDispatch.selector, LibParseError.tagErrorOffset(1))
+        );
     }
 
     /// An unclosed sub parseable literal with no dispatch is an error.
     function testParseLiteralSubParseableMissingDispatchUnclosedWhitespace1() external {
-        checkParseSubParseableError("[  ", abi.encodeWithSelector(SubParseableMissingDispatch.selector, 1));
+        checkParseSubParseableError(
+            "[  ", abi.encodeWithSelector(SubParseableMissingDispatch.selector, LibParseError.tagErrorOffset(1))
+        );
     }
 
     /// A dispatch with an empty body is allowed. Trailing whitespace is ignored.
@@ -186,7 +205,7 @@ contract LibParseLiteralSubParseableTest is Test {
     /// then shrink its length by 1 so `]` is still in memory but logically
     /// past the end of the data.
     function testParseLiteralSubParseableUnclosedBracketPastEnd() external {
-        vm.expectRevert(abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, 4));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, LibParseError.tagErrorOffset(4)));
         this.parseSubParseableBracketPastEnd(bytes("[a b]"));
     }
 
@@ -242,7 +261,7 @@ contract LibParseLiteralSubParseableTest is Test {
         mockSubParseLiteral(first, false, bytes32(0));
         mockSubParseLiteral(second, false, bytes32(0));
 
-        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, LibParseError.tagErrorOffset(1)));
         this.externalParseWithTwoSubParsers(bytes("[foo]"), first, second);
     }
 }

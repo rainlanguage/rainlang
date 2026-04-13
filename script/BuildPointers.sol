@@ -30,7 +30,7 @@ contract BuildPointers is Script {
     /// @notice Generates a Solidity address constant declaration string.
     /// @param addr The address value.
     /// @return A string containing the Solidity code for the address constant.
-    function addressConstantString(address addr) internal view returns (string memory) {
+    function addressConstantString(address addr) internal pure returns (string memory) {
         return string.concat(
             "\n",
             "/// @dev The deterministic deploy address of the contract when deployed via\n",

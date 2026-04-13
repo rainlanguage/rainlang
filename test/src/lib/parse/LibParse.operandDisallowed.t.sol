@@ -7,13 +7,14 @@ import {ParseTest} from "test/abstract/ParseTest.sol";
 import {UnexpectedOperand, UnsupportedLiteralType} from "../../../../src/error/ErrParse.sol";
 import {LibParse, ExpectedLeftParen} from "../../../../src/lib/parse/LibParse.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 contract LibParseOperandDisallowedTest is ParseTest {
     using LibParse for ParseState;
 
     /// Opening an operand is disallowed for words that don't support it.
     function testOperandDisallowed() external {
-        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, 4));
+        vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, LibParseError.tagErrorOffset(4)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal("_:a<;");
         (bytecode);
         (constants);
@@ -21,7 +22,7 @@ contract LibParseOperandDisallowedTest is ParseTest {
 
     /// Closing an operand is disallowed for words that don't support it.
     function testOperandDisallowed1() external {
-        vm.expectRevert(abi.encodeWithSelector(ExpectedLeftParen.selector, 3));
+        vm.expectRevert(abi.encodeWithSelector(ExpectedLeftParen.selector, LibParseError.tagErrorOffset(3)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal("_:a>;");
         (bytecode);
         (constants);

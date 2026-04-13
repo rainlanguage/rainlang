@@ -12,6 +12,7 @@ import {
 } from "rain.string/lib/parse/LibParseCMask.sol";
 import {LibParse, UnexpectedLHSChar} from "../../../../src/lib/parse/LibParse.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseUnexpectedLHSTest
 /// @notice The parser should revert if it encounters an unexpected character on the LHS.
@@ -20,38 +21,38 @@ contract LibParseUnexpectedLHSTest is ParseTest {
 
     /// Check the parser reverts if it encounters an unexpected EOL on the LHS.
     function testParseUnexpectedLHSEOL() external {
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(0)));
         this.parseExternal(",");
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(1)));
         this.parseExternal(" ,");
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(1)));
         this.parseExternal("_,");
     }
 
     /// Check the parser reverts if it encounters an unexpected EOF on the LHS.
     function testParseUnexpectedLHSEOF() external {
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(0)));
         this.parseExternal(";");
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(1)));
         this.parseExternal(" ;");
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(1)));
         this.parseExternal("_;");
     }
 
     /// Check the parser reverts if it encounters underscores in the tail of an
     /// LHS item.
     function testParseUnexpectedLHSUnderscoreTail() external {
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(1)));
         this.parseExternal("a_:;");
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 3));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(3)));
         this.parseExternal("a __:;");
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 2));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(2)));
         this.parseExternal("_a_:;");
     }
 
@@ -65,7 +66,7 @@ contract LibParseUnexpectedLHSTest is ParseTest {
                 == 0
         );
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(0)));
         this.parseExternal(string(bytes.concat(bytes1(a), ":;")));
     }
 
@@ -79,7 +80,7 @@ contract LibParseUnexpectedLHSTest is ParseTest {
                 == 0
         );
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(1)));
         this.parseExternal(string(bytes.concat("_", bytes1(a), ":;")));
     }
 
@@ -107,7 +108,7 @@ contract LibParseUnexpectedLHSTest is ParseTest {
         vm.assume(identifier.length > 0);
         vm.assume(identifier.length < 32);
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, i + 1));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, LibParseError.tagErrorOffset(i + 1)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal(string(bytes.concat(identifier, ":;")));
         (bytecode, constants);
     }
