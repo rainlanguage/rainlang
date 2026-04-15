@@ -128,35 +128,50 @@ library LibEval {
 
             // Bytes [16, 19].
             assembly ("memory-safe") {
-                f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(mod(byte(12, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(12, word), fsCount), 2)))
+                )
                 operand := and(shr(0x80, word), 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
 
             // Bytes [12, 15].
             assembly ("memory-safe") {
-                f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(mod(byte(16, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(16, word), fsCount), 2)))
+                )
                 operand := and(shr(0x60, word), 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
 
             // Bytes [8, 11].
             assembly ("memory-safe") {
-                f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(mod(byte(20, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(20, word), fsCount), 2)))
+                )
                 operand := and(shr(0x40, word), 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
 
             // Bytes [4, 7].
             assembly ("memory-safe") {
-                f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(mod(byte(24, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(24, word), fsCount), 2)))
+                )
                 operand := and(shr(0x20, word), 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
 
             // Bytes [0, 3].
             assembly ("memory-safe") {
-                f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(mod(byte(28, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(28, word), fsCount), 2)))
+                )
                 operand := and(word, 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
@@ -173,7 +188,10 @@ library LibEval {
         while (cursor < end) {
             assembly ("memory-safe") {
                 word := mload(cursor)
-                f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(mod(byte(28, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(28, word), fsCount), 2)))
+                )
                 // 3 bytes mask.
                 operand := and(word, 0xFFFFFF)
             }
