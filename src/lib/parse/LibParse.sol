@@ -44,7 +44,8 @@ import {
     FSM_DEFAULT,
     FSM_ACTIVE_SOURCE_MASK,
     FSM_WORD_END_MASK,
-    PARSE_STATE_PAREN_TRACKER0_OFFSET
+    PARSE_STATE_PAREN_TRACKER0_OFFSET,
+    PAREN_POINTER_SHIFT
 } from "./LibParseState.sol";
 import {LibParsePragma} from "./LibParsePragma.sol";
 import {LibParseInterstitial} from "./LibParseInterstitial.sol";
@@ -380,7 +381,7 @@ library LibParse {
                             // Add 1 to sandwich the inputs byte between
                             // the opcode index byte and the operand low
                             // bytes.
-                            add(1, shr(0xf0, mload(add(add(stateOffset, 2), parenOffset)))),
+                            add(1, shr(PAREN_POINTER_SHIFT, mload(add(add(stateOffset, 2), parenOffset)))),
                             // Store the input counter, which is 2 bytes
                             // after the operand write pointer.
                             byte(0, mload(add(add(stateOffset, 4), parenOffset)))

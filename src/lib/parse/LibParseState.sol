@@ -37,6 +37,14 @@ uint256 constant SUB_PARSER_POINTER_SHIFT = 0xA0;
 /// 0x20.
 uint256 constant EMPTY_ACTIVE_SOURCE = 0x20;
 
+/// @dev Shift to extract a packed 2-byte active source pointer from the high
+/// bits of a 256-bit mload during parse-time source traversal.
+uint256 constant ACTIVE_SOURCE_POINTER_SHIFT = 0xf0;
+
+/// @dev Shift to extract a packed 2-byte paren tracking pointer from the high
+/// bits of a 256-bit mload during operand processing.
+uint256 constant PAREN_POINTER_SHIFT = 0xf0;
+
 /// @dev Bit 0 of the FSM. When set, the parser is in "yang" state (building
 /// an RHS word). When clear, the parser is in "yin" state (between words).
 uint256 constant FSM_YANG_MASK = 1;
@@ -496,7 +504,7 @@ library LibParseState {
                         // is handled on allocation in `newActiveSourcePointer`.
                         if (itemSourceHead % 0x20 == 0x1c) {
                             assembly ("memory-safe") {
-                                itemSourceHead := shr(0xf0, mload(itemSourceHead))
+                                itemSourceHead := shr(ACTIVE_SOURCE_POINTER_SHIFT, mload(itemSourceHead))
                             }
                         }
                         uint256 opInputs;
@@ -1002,7 +1010,7 @@ library LibParseState {
                     let relativePointer := and(mload(add(bytecode, add(3, mul(i, 2)))), 0xFFFF)
                     targetPointer := add(sourcesStart, relativePointer)
                     let tmpPrefix := mload(targetPointer)
-                    sourcePointer := add(0x20, shr(0xf0, tmpPrefix))
+                    sourcePointer := add(0x20, shr(ACTIVE_SOURCE_POINTER_SHIFT, tmpPrefix))
                     length := and(shr(0xe0, tmpPrefix), 0xFFFF)
                 }
                 LibMemCpy.unsafeCopyBytesTo(sourcePointer, targetPointer, length);

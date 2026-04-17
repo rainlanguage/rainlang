@@ -10,6 +10,7 @@ import {FullyQualifiedNamespace} from "rain.interpreter.interface/interface/IInt
 import {IInterpreterStoreV3} from "rain.interpreter.interface/interface/IInterpreterStoreV3.sol";
 
 import {InterpreterState} from "./LibInterpreterState.sol";
+import {SOURCE_OFFSET_SHIFT} from "../eval/LibEval.sol";
 
 library LibInterpreterStateDataContract {
     using LibBytes for bytes;
@@ -118,7 +119,7 @@ library LibInterpreterStateDataContract {
                 } {
                     // The stack size is in the prefix of the source data, which
                     // is behind a relative pointer in the bytecode prefix.
-                    let sourcePointer := add(sourcesStart, shr(0xf0, mload(cursor)))
+                    let sourcePointer := add(sourcesStart, shr(SOURCE_OFFSET_SHIFT, mload(cursor)))
                     // Stack size is the second byte of the source prefix.
                     let stackSize := byte(1, mload(sourcePointer))
 

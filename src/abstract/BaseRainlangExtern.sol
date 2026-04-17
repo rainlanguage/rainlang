@@ -13,6 +13,7 @@ import {
 import {IIntegrityToolingV1} from "rain.sol.codegen/interface/IIntegrityToolingV1.sol";
 import {IOpcodeToolingV1} from "rain.sol.codegen/interface/IOpcodeToolingV1.sol";
 import {ExternOpcodeOutOfRange, ExternPointersMismatch, ExternOpcodePointersEmpty} from "../error/ErrExtern.sol";
+import {OPCODE_FUNCTION_POINTER_SHIFT} from "../lib/eval/LibEval.sol";
 
 /// @dev Empty opcode function pointers constant. Inheriting contracts should
 /// create their own constant and override `opcodeFunctionPointers` to use
@@ -73,7 +74,7 @@ abstract contract BaseRainlangExtern is IInterpreterExternV4, IIntegrityToolingV
 
             function(OperandV2, StackItem[] memory) internal view returns (StackItem[] memory) f;
             assembly ("memory-safe") {
-                f := shr(0xf0, mload(add(fPointersStart, mul(mod(opcode, fsCount), 2))))
+                f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(mod(opcode, fsCount), 2))))
             }
             outputs = f(operand, inputs);
         }
@@ -102,7 +103,7 @@ abstract contract BaseRainlangExtern is IInterpreterExternV4, IIntegrityToolingV
 
             function(OperandV2, uint256, uint256) internal pure returns (uint256, uint256) f;
             assembly ("memory-safe") {
-                f := shr(0xf0, mload(add(fPointersStart, mul(opcode, 2))))
+                f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(opcode, 2))))
             }
             (actualInputs, actualOutputs) = f(operand, expectedInputs, expectedOutputs);
         }
