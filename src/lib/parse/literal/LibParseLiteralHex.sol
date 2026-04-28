@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
 import {ParseState} from "../LibParseState.sol";
 import {
@@ -16,10 +17,22 @@ import {
 } from "rain.string/lib/parse/LibParseCMask.sol";
 import {LibParseError} from "../LibParseError.sol";
 
+/// @title LibParseLiteralHex
+/// @notice Parses hexadecimal literals from Rainlang source text into
+/// bytes32 values.
 library LibParseLiteralHex {
     using LibParseLiteralHex for ParseState;
     using LibParseError for ParseState;
 
+    /// @notice Finds the bounds of a hex literal by scanning forward from past the
+    /// "0x" prefix until a non-hex character is encountered. The `ParseState`
+    /// parameter is unused here but kept for a consistent `bound*` signature
+    /// across literal types (e.g. `boundString` uses it for error reporting).
+    /// @param cursor The cursor position at the start of the hex literal.
+    /// @param end The end of the source string.
+    /// @return The start of the hex digits (past "0x").
+    /// @return The end of the hex digits.
+    /// @return The new cursor position after the hex literal.
     function boundHex(ParseState memory, uint256 cursor, uint256 end)
         internal
         pure
@@ -40,13 +53,18 @@ library LibParseLiteralHex {
         return (innerStart, innerEnd, innerEnd);
     }
 
-    /// Algorithm for parsing hexadecimal literals:
+    /// @notice Algorithm for parsing hexadecimal literals:
     /// - start at the end of the literal
     /// - for each character:
     ///   - convert the character to a nybble
     ///   - shift the nybble into the total at the correct position
     ///     (4 bits per nybble)
     /// - return the total
+    /// @param state The current parse state.
+    /// @param cursor The cursor position at the start of the hex literal.
+    /// @param end The end of the source string.
+    /// @return The updated cursor position after parsing.
+    /// @return The parsed hex value.
     function parseHex(ParseState memory state, uint256 cursor, uint256 end) internal pure returns (uint256, bytes32) {
         unchecked {
             bytes32 value;
@@ -94,6 +112,10 @@ library LibParseLiteralHex {
                         // forge-lint: disable-next-line(unsafe-typecast)
                         nybble = bytes32(hexCharByte - uint256(uint8(bytes1("A"))) + 10);
                     } else {
+                        // Unreachable: boundHex already restricts the
+                        // cursor range to CMASK_HEX characters. Retained
+                        // as a defensive fallback in case the upstream
+                        // mask is ever modified.
                         revert MalformedHexLiteral(state.parseErrorOffset(cursor));
                     }
 

@@ -1,17 +1,15 @@
 [package]
-name = "rain_interpreter_parser"
+name = "rainlang_parser"
 version = "0.1.0"
-edition = "2021"
-license = "CAL-1.0"
-description = "Rain Interpreter Parser Rust Crate."
-homepage = "https://github.com/rainlanguage/rain.interpreter"
+edition.workspace = true
+license.workspace = true
+description = "Rainlang Parser Rust Crate."
+homepage.workspace = true
 
 [dependencies]
 alloy-ethers-typecast = { workspace = true }
-rain_interpreter_dispair = { workspace = true }
-rain_interpreter_bindings = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
+rainlang_dispair = { workspace = true }
+rainlang_bindings = { workspace = true }
 alloy = { workspace = true }
 thiserror = { workspace = true }
 

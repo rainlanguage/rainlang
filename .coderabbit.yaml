@@ -1,0 +1,7 @@
+reviews:
+  path_filters:
+    - "!audit/**"
+    - "!CLAUDE.md"
+    - "!AUDIT.md"
+    - "!TESTING.md"
+    - "!.claude/**"

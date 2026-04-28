@@ -2,42 +2,24 @@ name: Manual sol artifacts
 on:
   workflow_dispatch:
     inputs:
-      network:
-        description: 'Network to deploy to'
+      suite:
+        description: "The suite to deploy"
         required: true
         type: choice
         options:
-          - arbitrum
-          - arbitrum_sepolia
-          - avalanche
-          - base
-          - bsc
-          - ethereum
-          - flare
-          - mumbai
-          - oasis_sapphire
-          - polygon
-          - sepolia
-          - songbird
-
+          - parser
+          - store
+          - interpreter
+          - expression-deployer
+          - rainlang
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          network=${{ inputs.network }}
-          echo "etherscan_api_key_secret_name=CI_DEPLOY_${network^^}_ETHERSCAN_API_KEY" >> $GITHUB_ENV
-          echo "rpc_secret_name=CI_DEPLOY_${network^^}_RPC_URL" >> $GITHUB_ENV
-          echo "verify_secret_name=CI_DEPLOY_${network^^}_VERIFY" >> $GITHUB_ENV
-          echo "verifier_secret_name=CI_DEPLOY_${network^^}_VERIFIER" >> $GITHUB_ENV
-          echo "verifier_url_secret_name=CI_DEPLOY_${network^^}_VERIFIER_URL" >> $GITHUB_ENV
-          echo "metaboard_address_secret_name=CI_DEPLOY_${network^^}_METABOARD_ADDRESS" >> $GITHUB_ENV
-
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
-
       - uses: nixbuild/nix-quick-install-action@v30
         with:
           nix_conf: |
@@ -54,18 +36,21 @@ jobs:
           # before trying to save a new cache
           # 1G = 1073741824
           gc-max-store-size-linux: 1G
-
       - run: nix develop --command rainix-sol-prelude
       - run: nix develop --command rainix-rs-prelude
-      - run: nix develop --command i9r-prelude
-      - name: deploy to ${{ inputs.network }}
-        run: nix develop --command rainix-sol-artifacts
+      - run: nix develop --command rainlang-prelude
+      - run: nix develop -c forge selectors up --all
+      - run: nix develop -c forge script script/Deploy.sol:Deploy -vvvvv --slow --broadcast --verify
         env:
-          DEPLOY_BROADCAST: '1'
-          DEPLOYMENT_KEY: ${{ github.ref == 'refs/heads/main' && secrets.PRIVATE_KEY || secrets.PRIVATE_KEY_DEV }}
-          ETH_RPC_URL: ${{ secrets[env.rpc_secret_name] || vars[env.rpc_secret_name] || '' }}
-          ETHERSCAN_API_KEY: ${{ secrets[env.etherscan_api_key_secret_name] || vars[env.etherscan_api_key_secret_name] || ''}}
-          DEPLOY_VERIFY: ${{ secrets[env.verify_secret_name] || vars[env.verify_secret_name] || '' }}
-          DEPLOY_VERIFIER: ${{ secrets[env.verifier_secret_name] || vars[env.verifier_secret_name] || '' }}
-          DEPLOY_VERIFIER_URL: ${{ secrets[env.verifier_url_secret_name] || vars[env.verifier_url_secret_name] || '' }}
-          DEPLOY_METABOARD_ADDRESS: ${{ secrets[env.metaboard_address_secret_name] || vars[env.metaboard_address_secret_name] || '' }}
+          DEPLOYMENT_KEY: ${{ secrets.PRIVATE_KEY }}
+          DEPLOYMENT_SUITE: ${{ inputs.suite }}
+          CI_DEPLOY_ARBITRUM_RPC_URL: ${{ secrets.CI_DEPLOY_ARBITRUM_RPC_URL || vars.CI_DEPLOY_ARBITRUM_RPC_URL || '' }}
+          CI_DEPLOY_BASE_RPC_URL: ${{ secrets.CI_DEPLOY_BASE_RPC_URL || vars.CI_DEPLOY_BASE_RPC_URL || '' }}
+          CI_DEPLOY_BASE_SEPOLIA_RPC_URL: ${{ secrets.CI_DEPLOY_BASE_SEPOLIA_RPC_URL || vars.CI_DEPLOY_BASE_SEPOLIA_RPC_URL || '' }}
+          CI_DEPLOY_FLARE_RPC_URL: ${{ secrets.CI_DEPLOY_FLARE_RPC_URL || vars.CI_DEPLOY_FLARE_RPC_URL || '' }}
+          CI_DEPLOY_POLYGON_RPC_URL: ${{ secrets.CI_DEPLOY_POLYGON_RPC_URL || vars.CI_DEPLOY_POLYGON_RPC_URL || '' }}
+          CI_DEPLOY_ARBITRUM_ETHERSCAN_API_KEY: ${{ secrets.CI_DEPLOY_ARBITRUM_ETHERSCAN_API_KEY || vars.CI_DEPLOY_ARBITRUM_ETHERSCAN_API_KEY || '' }}
+          CI_DEPLOY_BASE_ETHERSCAN_API_KEY: ${{ secrets.CI_DEPLOY_BASE_ETHERSCAN_API_KEY || vars.CI_DEPLOY_BASE_ETHERSCAN_API_KEY || '' }}
+          CI_DEPLOY_BASE_SEPOLIA_ETHERSCAN_API_KEY: ${{ secrets.CI_DEPLOY_BASE_SEPOLIA_ETHERSCAN_API_KEY || vars.CI_DEPLOY_BASE_SEPOLIA_ETHERSCAN_API_KEY || '' }}
+          CI_DEPLOY_FLARE_ETHERSCAN_API_KEY: ${{ secrets.CI_DEPLOY_FLARE_ETHERSCAN_API_KEY || vars.CI_DEPLOY_FLARE_ETHERSCAN_API_KEY || '' }}
+          CI_DEPLOY_POLYGON_ETHERSCAN_API_KEY: ${{ secrets.CI_DEPLOY_POLYGON_ETHERSCAN_API_KEY || vars.CI_DEPLOY_POLYGON_ETHERSCAN_API_KEY || '' }}

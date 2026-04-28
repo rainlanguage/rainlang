@@ -1,18 +1,14 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
-import {OperandV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {Pointer, LibPointer} from "rain.solmem/lib/LibPointer.sol";
+import {Pointer} from "rain.solmem/lib/LibPointer.sol";
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
 import {LibEval} from "../../eval/LibEval.sol";
-
-/// Thrown when the outputs requested by the operand exceed the outputs
-/// available from the source.
-/// @param sourceOutputs The number of outputs available from the source.
-/// @param outputs The number of outputs requested by the operand.
-error CallOutputsExceedSource(uint256 sourceOutputs, uint256 outputs);
+import {CallOutputsExceedSource, CallInputsMismatchSource} from "../../../error/ErrIntegrity.sol";
 
 /// @title LibOpCall
 /// @notice Contains the call operation. This allows sources to be treated in a
@@ -71,15 +67,33 @@ error CallOutputsExceedSource(uint256 sourceOutputs, uint256 outputs);
 /// a b: call<1 2>(10 5); ten five:, a b: int-div(ten five) 9;
 /// ```
 library LibOpCall {
-    using LibPointer for Pointer;
-
+    /// @notice Validates a `call` operand against the bytecode at integrity-check
+    /// time. Extracts `sourceIndex` (low 16 bits) and `outputs` (bits 20+)
+    /// from the operand.
+    ///
+    /// `sourceInputsOutputsLength` reverts with `SourceIndexOutOfBounds` if
+    /// `sourceIndex` exceeds the bytecode's source count. This is the only
+    /// bounds check protecting the assembly access in `run`, which indexes
+    /// into `stackBottoms` via raw pointer arithmetic.
+    ///
+    /// Reverts with `CallOutputsExceedSource` if the caller requests more
+    /// outputs than the callee source provides.
+    /// @param state The current integrity check state containing the bytecode.
+    /// @param operand Encodes sourceIndex (low 16 bits), inputs (bits 16–19),
+    /// and outputs (bits 20+).
+    /// @return The number of inputs and outputs for stack tracking.
     function integrity(IntegrityCheckState memory state, OperandV2 operand) internal pure returns (uint256, uint256) {
         uint256 sourceIndex = uint256(OperandV2.unwrap(operand) & bytes32(uint256(0xFFFF)));
-        uint256 outputs = uint256(OperandV2.unwrap(operand) >> 0x14);
+        uint256 outputs = uint256(OperandV2.unwrap(operand) >> 0x14) & 0x0F;
+
+        uint256 operandInputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
 
         (uint256 sourceInputs, uint256 sourceOutputs) =
             LibBytecode.sourceInputsOutputsLength(state.bytecode, sourceIndex);
 
+        if (operandInputs != sourceInputs) {
+            revert CallInputsMismatchSource(operandInputs, sourceInputs);
+        }
         if (sourceOutputs < outputs) {
             revert CallOutputsExceedSource(sourceOutputs, outputs);
         }
@@ -87,15 +101,34 @@ library LibOpCall {
         return (sourceInputs, outputs);
     }
 
-    /// The `call` word is conceptually very simple. It takes a source index, a
-    /// number of outputs, and a number of inputs. It then runs the standard
-    /// eval loop for the source, with a starting stack pointer above the inputs,
-    /// and then copies the outputs to the calling stack.
+    /// @notice Executes a call to another source within the same expression.
+    ///
+    /// 1. Extracts `sourceIndex`, `inputs`, and `outputs` from the operand.
+    /// 2. Looks up the callee's stack bottom from `state.stackBottoms` and
+    ///    copies `inputs` values from the caller's stack to the callee's
+    ///    stack in reverse order (so the first input to `call` becomes the
+    ///    bottom of the callee's stack).
+    /// 3. Saves and swaps `state.sourceIndex`, then runs `evalLoop` for the
+    ///    callee source.
+    /// 4. Copies `outputs` values from the callee's stack back to the
+    ///    caller's stack, then restores `state.sourceIndex`.
+    ///
+    /// `stackBottoms[sourceIndex]` is accessed via assembly pointer arithmetic
+    /// (no Solidity bounds check). This is safe because `integrity` validates
+    /// `sourceIndex` against the bytecode via
+    /// `LibBytecode.sourceInputsOutputsLength`, which reverts with
+    /// `SourceIndexOutOfBounds` for invalid indices. Bytecode is immutable
+    /// once serialized so the index cannot become stale.
+    /// @param state The interpreter state containing the stack bottoms and bytecode.
+    /// @param operand Encodes sourceIndex (low 16 bits), inputs (bits 16–19),
+    /// and outputs (bits 20+).
+    /// @param stackTop Pointer to the top of the stack.
+    /// @return The new stack top pointer after execution.
     function run(InterpreterState memory state, OperandV2 operand, Pointer stackTop) internal view returns (Pointer) {
         // Extract config from the operand.
         uint256 sourceIndex = uint256(OperandV2.unwrap(operand) & bytes32(uint256(0xFFFF)));
-        uint256 inputs = uint256((OperandV2.unwrap(operand) >> 0x10) & bytes32(uint256(0x0F)));
-        uint256 outputs = uint256(OperandV2.unwrap(operand) >> 0x14);
+        uint256 inputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
+        uint256 outputs = uint256(OperandV2.unwrap(operand) >> 0x14) & 0x0F;
 
         // Copy inputs in. The inputs have to be copied in reverse order so that
         // the top of the stack from the perspective of `call`, i.e. the first

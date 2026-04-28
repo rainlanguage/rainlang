@@ -1,8 +1,9 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
-import {EMPTY_ACTIVE_SOURCE, LibParseState} from "src/lib/parse/LibParseState.sol";
+import {EMPTY_ACTIVE_SOURCE, LibParseState} from "../../../../src/lib/parse/LibParseState.sol";
 
 contract LibParseStateNewActiveSourcePointerTest is Test {
     function checkPointer(uint256 pointer, uint256 expectedSource) internal pure {

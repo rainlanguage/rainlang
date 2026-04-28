@@ -1,14 +1,16 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
-import {LibParseOperand} from "src/lib/parse/LibParseOperand.sol";
-import {ParseState} from "src/lib/parse/LibParseState.sol";
+import {LibParseOperand} from "../../../../src/lib/parse/LibParseOperand.sol";
+import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {LibConformString} from "rain.string/lib/mut/LibConformString.sol";
-import {OperandValuesOverflow, UnclosedOperand} from "src/error/ErrParse.sol";
+import {OperandValuesOverflow, UnclosedOperand} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
 
 contract LibParseOperandParseOperandTest is Test {
@@ -19,7 +21,7 @@ contract LibParseOperandParseOperandTest is Test {
 
     function checkParsingOperandFromData(string memory s, bytes32[] memory expectedValues, uint256 expectedEnd)
         public
-        pure
+        view
     {
         ParseState memory state = LibMetaFixture.newState(s);
         // Before parsing any operand values the state gets initialized at the
@@ -42,7 +44,7 @@ contract LibParseOperandParseOperandTest is Test {
     // Test that parsing a string that doesn't start with the operand opening
     // character always results in a zero length operand values array.
     /// forge-config: default.fuzz.runs = 100
-    function testParseOperandNoOpeningCharacter(string memory s) external pure {
+    function testParseOperandNoOpeningCharacter(string memory s) external view {
         vm.assume(bytes(s).length > 0);
         vm.assume(bytes(s)[0] != "<");
 
@@ -53,7 +55,7 @@ contract LibParseOperandParseOperandTest is Test {
     // values array. The cursor moves past both the opening and closing
     // characters.
     /// forge-config: default.fuzz.runs = 100
-    function testParseOperandEmptyOperand(string memory s) external pure {
+    function testParseOperandEmptyOperand(string memory s) external view {
         vm.assume(bytes(s).length > 2);
         bytes(s)[0] = "<";
         bytes(s)[1] = ">";
@@ -69,7 +71,7 @@ contract LibParseOperandParseOperandTest is Test {
         string memory maybeWhitespaceA,
         string memory maybeWhitespaceB,
         string memory suffix
-    ) external pure {
+    ) external view {
         LibConformString.conformStringToWhitespace(maybeWhitespaceA);
         LibConformString.conformStringToWhitespace(maybeWhitespaceB);
 
@@ -104,7 +106,7 @@ contract LibParseOperandParseOperandTest is Test {
         string memory maybeWhitespaceB,
         string memory maybeWhitespaceC,
         string memory suffix
-    ) external pure {
+    ) external view {
         vm.assume(bytes(maybeWhitespaceB).length > 0);
 
         valueA = bound(valueA, 0, type(int224).max);
@@ -155,7 +157,7 @@ contract LibParseOperandParseOperandTest is Test {
         string memory maybeWhitespaceC,
         string memory maybeWhitespaceD,
         string memory suffix
-    ) external pure {
+    ) external view {
         vm.assume(bytes(maybeWhitespaceB).length > 0);
         vm.assume(bytes(maybeWhitespaceC).length > 0);
 
@@ -214,7 +216,7 @@ contract LibParseOperandParseOperandTest is Test {
         int256[4] memory values,
         string[5] memory maybeWhitespace,
         string memory suffix
-    ) external pure {
+    ) external view {
         {
             vm.assume(bytes(maybeWhitespace[1]).length > 0);
             vm.assume(bytes(maybeWhitespace[2]).length > 0);
@@ -243,7 +245,7 @@ contract LibParseOperandParseOperandTest is Test {
 
         {
             expectedLength += bytes(valueAString).length + bytes(valueBString).length + bytes(valueCString).length
-                + bytes(valueDString).length;
+            + bytes(valueDString).length;
         }
 
         string memory s;
@@ -271,19 +273,27 @@ contract LibParseOperandParseOperandTest is Test {
 
     /// More than 4 values is an error.
     function testParseOperandTooManyValues() external {
-        vm.expectRevert(abi.encodeWithSelector(OperandValuesOverflow.selector, 9));
+        vm.expectRevert(abi.encodeWithSelector(OperandValuesOverflow.selector, LibParseError.tagErrorOffset(9)));
         this.checkParsingOperandFromData("<1 2 3 4 5>", new bytes32[](0), 0);
     }
 
     /// Unclosed operand is an error.
     function testParseOperandUnclosed() external {
-        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, 8));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(8)));
         this.checkParsingOperandFromData("<1 2 3 4", new bytes32[](0), 0);
     }
 
     // Unexpected chars will be treated as unclosed operands.
     function testParseOperandUnexpectedChars() external {
-        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, 6));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(6)));
         this.checkParsingOperandFromData("<1 2 3;> 6", new bytes32[](0), 0);
+    }
+
+    // Two literals back-to-back without whitespace hit the yang-state
+    // UnclosedOperand revert at line 111. After parsing `2`, yang is set,
+    // then `"` is a valid literal head but yang prevents parsing it.
+    function testParseOperandYangStateLiteralCollision() external {
+        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(4)));
+        this.checkParsingOperandFromData("<1 2\"hi\">", new bytes32[](0), 0);
     }
 }

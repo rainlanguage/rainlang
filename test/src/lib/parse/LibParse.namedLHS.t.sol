@@ -1,20 +1,23 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {ParseTest} from "test/abstract/ParseTest.sol";
 
 import {AuthoringMetaV2} from "rain.interpreter.interface/interface/IParserV2.sol";
-import {LibParse, DuplicateLHSItem, WordSize} from "src/lib/parse/LibParse.sol";
+import {LibParse, DuplicateLHSItem, WordSize} from "../../../../src/lib/parse/LibParse.sol";
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
-import {LibParseState, ParseState} from "src/lib/parse/LibParseState.sol";
-import {OperandV2, LibParseOperand} from "src/lib/parse/LibParseOperand.sol";
+import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {OperandV2, LibParseOperand} from "../../../../src/lib/parse/LibParseOperand.sol";
 import {LibConvert} from "rain.lib.typecast/LibConvert.sol";
-import {LibAllStandardOps} from "src/lib/op/LibAllStandardOps.sol";
+import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 import {LibGenParseMeta} from "rain.interpreter.interface/lib/codegen/LibGenParseMeta.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
 
 /// @title LibParseNamedLHSTest
+/// @notice Tests for parsing named LHS items.
 contract LibParseNamedLHSTest is ParseTest {
     using LibParse for ParseState;
 
@@ -112,8 +115,8 @@ contract LibParseNamedLHSTest is ParseTest {
         meta[2] = AuthoringMetaV2("c", "c");
         bytes memory parseMeta = LibGenParseMeta.buildParseMetaV2(meta, 1);
 
-        function (bytes32[] memory) internal pure returns (OperandV2)[] memory operandHandlers =
-            new function (bytes32[] memory) internal pure returns (OperandV2)[](3);
+        function(bytes32[] memory) internal pure returns (OperandV2)[] memory operandHandlers =
+            new function(bytes32[] memory) internal pure returns (OperandV2)[](3);
         operandHandlers[0] = LibParseOperand.handleOperandDisallowed;
         operandHandlers[1] = LibParseOperand.handleOperandDisallowed;
         operandHandlers[2] = LibParseOperand.handleOperandSingleFull;
@@ -124,11 +127,11 @@ contract LibParseNamedLHSTest is ParseTest {
         bytes memory operandHandlerPointers = LibConvert.unsafeTo16BitBytes(pointers);
 
         (bytes memory bytecode, bytes32[] memory constants) = LibParseState.newState(
-            bytes("a _:1 2,b:a,:c(),d:3,e:d;"),
-            parseMeta,
-            operandHandlerPointers,
-            LibAllStandardOps.literalParserFunctionPointers()
-        ).parse();
+                bytes("a _:1 2,b:a,:c(),d:3,e:d;"),
+                parseMeta,
+                operandHandlerPointers,
+                LibAllStandardOps.literalParserFunctionPointers()
+            ).parse();
         assertEq(
             bytecode,
             // 2 sources.
@@ -162,17 +165,78 @@ contract LibParseNamedLHSTest is ParseTest {
         assertEq(constants[2], Float.unwrap(LibDecimalFloat.packLossless(3, 0)));
     }
 
+    /// Stack name as the sole item on RHS of a line.
+    function testParseNamedLHSStackNameOnly() external view {
+        (bytes memory bytecode, bytes32[] memory constants) =
+            LibParseState.newState("a:1,b:a;", "", "", LibAllStandardOps.literalParserFunctionPointers()).parse();
+        assertEq(
+            bytecode,
+            // 1 source
+            hex"01"
+            // offset 0
+            hex"0000"
+            // 2 ops
+            hex"02"
+            // 2 stack allocation
+            hex"02"
+            // 0 input
+            hex"00"
+            // 2 output
+            hex"02"
+            // constant 0
+            hex"01100000"
+            // stack 0
+            hex"00100000"
+        );
+        assertEq(constants.length, 1);
+        assertEq(constants[0], Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
+    }
+
+    /// Stack name at the last position on RHS after other items.
+    function testParseNamedLHSStackNameLastPosition() external view {
+        (bytes memory bytecode, bytes32[] memory constants) = LibParseState.newState(
+                "a _:1 2,b c:3 a;", "", "", LibAllStandardOps.literalParserFunctionPointers()
+            ).parse();
+        assertEq(
+            bytecode,
+            // 1 source
+            hex"01"
+            // offset 0
+            hex"0000"
+            // 4 ops
+            hex"04"
+            // 4 stack allocation
+            hex"04"
+            // 0 input
+            hex"00"
+            // 4 output
+            hex"04"
+            // constant 0
+            hex"01100000"
+            // constant 1
+            hex"01100001"
+            // constant 2
+            hex"01100002"
+            // stack 0
+            hex"00100000"
+        );
+        assertEq(constants.length, 3);
+        assertEq(constants[0], Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
+        assertEq(constants[1], Float.unwrap(LibDecimalFloat.packLossless(2, 0)));
+        assertEq(constants[2], Float.unwrap(LibDecimalFloat.packLossless(3, 0)));
+    }
+
     /// Duplicate names are disallowed in the same source.
     function testParseNamedErrorDuplicateSameSource() external {
-        vm.expectRevert(abi.encodeWithSelector(DuplicateLHSItem.selector, 4));
+        vm.expectRevert(abi.encodeWithSelector(DuplicateLHSItem.selector, LibParseError.tagErrorOffset(4)));
         this.parseExternal("a:,a:;");
     }
 
     /// Duplicate names are allowed across different sources.
     function testParseNamedDuplicateDifferentSource() external view {
         (bytes memory bytecode, bytes32[] memory constants) = LibParseState.newState(
-            "a b:1 2, e:a;c d:3 4,e:d;", "", "", LibAllStandardOps.literalParserFunctionPointers()
-        ).parse();
+                "a b:1 2, e:a;c d:3 4,e:d;", "", "", LibAllStandardOps.literalParserFunctionPointers()
+            ).parse();
         assertEq(
             bytecode,
             // 2 sources.

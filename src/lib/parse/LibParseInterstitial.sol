@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
 import {FSM_YANG_MASK, ParseState} from "./LibParseState.sol";
 import {
@@ -11,20 +12,26 @@ import {
 } from "rain.string/lib/parse/LibParseCMask.sol";
 import {MalformedCommentStart, UnclosedComment} from "../../error/ErrParse.sol";
 import {LibParseError} from "./LibParseError.sol";
-import {LibParse} from "./LibParse.sol";
 import {LibParseChar} from "rain.string/lib/parse/LibParseChar.sol";
 
+/// @dev Shift to extract a packed 2-byte comment delimiter sequence from the
+/// high bits of a 256-bit mload.
+uint256 constant COMMENT_SEQUENCE_SHIFT = 0xf0;
+
+/// @title LibParseInterstitial
+/// @notice Handles whitespace and comment skipping between meaningful tokens
+/// during parsing.
 library LibParseInterstitial {
-    using LibParse for ParseState;
     using LibParseError for ParseState;
     using LibParseInterstitial for ParseState;
 
-    /// The cursor currently points at the head of a comment. We need to skip
+    /// @notice The cursor currently points at the head of a comment. We need to skip
     /// over all data until we find the end of the comment. This MAY REVERT if
     /// the comment is malformed, e.g. if the comment doesn't start with `/*`.
     /// @param state The parser state.
     /// @param cursor The current cursor position.
-    /// @return The new cursor position.
+    /// @param end The end of the data to parse.
+    /// @return The new cursor position after the comment.
     function skipComment(ParseState memory state, uint256 cursor, uint256 end) internal pure returns (uint256) {
         // Set yang for comments to force a little breathing room between
         // comments and the next item.
@@ -43,7 +50,7 @@ library LibParseInterstitial {
             // First check the comment opening sequence is not malformed.
             uint256 startSequence;
             assembly ("memory-safe") {
-                startSequence := shr(0xf0, mload(cursor))
+                startSequence := shr(COMMENT_SEQUENCE_SHIFT, mload(cursor))
             }
             if (startSequence != COMMENT_START_SEQUENCE) {
                 revert MalformedCommentStart(state.parseErrorOffset(cursor));
@@ -65,7 +72,7 @@ library LibParseInterstitial {
                     // Check the sequence.
                     uint256 endSequence;
                     assembly ("memory-safe") {
-                        endSequence := shr(0xf0, mload(sub(cursor, 1)))
+                        endSequence := shr(COMMENT_SEQUENCE_SHIFT, mload(sub(cursor, 1)))
                     }
                     if (endSequence == COMMENT_END_SEQUENCE) {
                         // We found the end of the comment.
@@ -87,6 +94,12 @@ library LibParseInterstitial {
         }
     }
 
+    /// @notice Advances the cursor past any contiguous whitespace characters and
+    /// resets the FSM to yin state.
+    /// @param state The parser state.
+    /// @param cursor The current cursor position.
+    /// @param end The end of the data to parse.
+    /// @return The new cursor position after the whitespace.
     function skipWhitespace(ParseState memory state, uint256 cursor, uint256 end) internal pure returns (uint256) {
         unchecked {
             // Set ying as we now open to possibilities.
@@ -95,6 +108,13 @@ library LibParseInterstitial {
         }
     }
 
+    /// @notice Skips over all interstitial content (whitespace and comments) between
+    /// meaningful parse tokens, returning the cursor at the next non-interstitial
+    /// character.
+    /// @param state The parser state.
+    /// @param cursor The current cursor position.
+    /// @param end The end of the data to parse.
+    /// @return The new cursor position after all interstitial content.
     function parseInterstitial(ParseState memory state, uint256 cursor, uint256 end) internal pure returns (uint256) {
         while (cursor < end) {
             uint256 char;

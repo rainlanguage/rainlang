@@ -1,10 +1,11 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
-import {LibParse} from "src/lib/parse/LibParse.sol";
+import {LibParse} from "../../src/lib/parse/LibParse.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
-import {ParseState} from "src/lib/parse/LibParseState.sol";
+import {ParseState} from "../../src/lib/parse/LibParseState.sol";
 
 abstract contract OperandTest is Test {
     using LibParse for ParseState;

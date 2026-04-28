@@ -1,15 +1,16 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 
-import {LibParse} from "src/lib/parse/LibParse.sol";
+import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
-import {ParseState} from "src/lib/parse/LibParseState.sol";
+import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 
 /// @title LibParseIgnoredLHSTest
-/// Tests parsing ignored LHS items. An ignored LHS item is one that starts with
+/// @notice Tests parsing ignored LHS items. An ignored LHS item is one that starts with
 /// an underscore and is cheaper than named LHS items as they don't need to be
 /// tracked for potential use in the RHS.
 contract LibParseIgnoredLHSTest is Test {

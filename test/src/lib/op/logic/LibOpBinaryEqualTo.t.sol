@@ -1,11 +1,12 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {OpTest} from "test/abstract/OpTest.sol";
-import {LibOpBinaryEqualTo} from "src/lib/op/logic/LibOpBinaryEqualTo.sol";
-import {IntegrityCheckState, BadOpInputsLength} from "src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {InterpreterState} from "src/lib/state/LibInterpreterState.sol";
+import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
+import {LibOpBinaryEqualTo} from "../../../../../src/lib/op/logic/LibOpBinaryEqualTo.sol";
+import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 
 contract LibOpBinaryEqualToTest is OpTest {
@@ -99,5 +100,10 @@ contract LibOpBinaryEqualToTest is OpTest {
 
     function testOpBinaryEqualToTwoOutputs() external {
         checkBadOutputs("_ _: binary-equal-to(0 0);", 2, 1, 2);
+    }
+
+    /// Test that operand is disallowed.
+    function testOpBinaryEqualToEvalOperandDisallowed() external {
+        checkUnhappyParse("_: binary-equal-to<0>(1 2);", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }

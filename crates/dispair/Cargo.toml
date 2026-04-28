@@ -1,35 +1,13 @@
 [package]
-name = "rain_interpreter_dispair"
+name = "rainlang_dispair"
 version = "0.1.0"
-edition = "2021"
-license = "CAL-1.0"
-description = "Rain Interpreter Rust Crate."
-homepage = "https://github.com/rainlanguage/rain.interpreter"
+edition.workspace = true
+license.workspace = true
+description = "Rainlang DISPaiR Rust Crate."
+homepage.workspace = true
 
 [dependencies]
-alloy-ethers-typecast = { workspace = true }
-rain_interpreter_bindings = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
 alloy = { workspace = true }
-thiserror = { workspace = true }
-
-[target.'cfg(not(target_family = "wasm"))'.dependencies]
-tokio = { version = "1.28.0", features = ["full"] }
-
-[target.'cfg(target_family = "wasm")'.dependencies]
-tokio = { version = "1.28.0", features = [
-  "sync",
-  "macros",
-  "io-util",
-  "rt",
-  "time",
-] }
-
-[dev-dependencies]
-rain_interpreter_test_fixtures = { workspace = true }
 
 [package.metadata.docs.rs]
 all-features = true

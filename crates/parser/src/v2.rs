@@ -1,10 +1,11 @@
 use crate::error::ParserError;
-use alloy::primitives::*;
+use alloy::primitives::Address;
 use alloy_ethers_typecast::{ReadContractParametersBuilder, ReadableClient};
-use rain_interpreter_bindings::IParserPragmaV1::*;
-use rain_interpreter_bindings::IParserV2::*;
-use rain_interpreter_dispair::DISPair;
+use rainlang_bindings::IParserPragmaV1::*;
+use rainlang_bindings::IParserV2::*;
+use rainlang_dispair::DISPaiR;
 
+/// Trait for interacting with the on-chain Rainlang parser contract.
 #[cfg(not(target_family = "wasm"))]
 pub trait Parser2 {
     /// Call Parser contract to parse the provided rainlang text.
@@ -34,8 +35,24 @@ pub trait Parser2 {
         data: Vec<u8>,
         client: ReadableClient,
     ) -> impl std::future::Future<Output = Result<parsePragma1Return, ParserError>> + Send;
+
+    /// Call Parser contract to parse the provided rainlang text and return the pragma addresses.
+    fn parse_pragma_text(
+        &self,
+        text: &str,
+        client: ReadableClient,
+    ) -> impl std::future::Future<Output = Result<Vec<Address>, ParserError>> + Send
+    where
+        Self: Sync,
+    {
+        async {
+            let res = self.parse_pragma(text.as_bytes().to_vec(), client).await?;
+            Ok(res._0.usingWordsFrom)
+        }
+    }
 }
 
+/// Trait for interacting with the on-chain Rainlang parser contract.
 #[cfg(target_family = "wasm")]
 pub trait Parser2 {
     /// Call Parser contract to parse the provided rainlang text.
@@ -65,17 +82,36 @@ pub trait Parser2 {
         data: Vec<u8>,
         client: ReadableClient,
     ) -> impl std::future::Future<Output = Result<parsePragma1Return, ParserError>>;
+
+    /// Call Parser contract to parse the provided rainlang text and return the pragma addresses.
+    fn parse_pragma_text(
+        &self,
+        text: &str,
+        client: ReadableClient,
+    ) -> impl std::future::Future<Output = Result<Vec<Address>, ParserError>>
+    where
+        Self: Sync,
+    {
+        async {
+            let res = self.parse_pragma(text.as_bytes().to_vec(), client).await?;
+            Ok(res._0.usingWordsFrom)
+        }
+    }
 }
 
-/// ParserV2
-/// Struct representing ParserV2 instances.
+/// Client-side wrapper around a deployer address that implements [`Parser2`]
+/// by making read calls to the on-chain deployer contract (which implements
+/// `IParserV2`).
+///
+/// The deployer address is typically discovered from Rainlang.
 #[derive(Clone, Default)]
 pub struct ParserV2 {
+    /// The address of the expression deployer (implements `IParserV2`).
     pub deployer_address: Address,
 }
 
-impl From<DISPair> for ParserV2 {
-    fn from(val: DISPair) -> Self {
+impl From<DISPaiR> for ParserV2 {
+    fn from(val: DISPaiR) -> Self {
         Self {
             deployer_address: val.deployer,
         }
@@ -91,6 +127,7 @@ impl From<Address> for ParserV2 {
 }
 
 impl ParserV2 {
+    /// Creates a new `ParserV2` for the given deployer address.
     pub fn new(deployer_address: Address) -> Self {
         Self { deployer_address }
     }
@@ -136,31 +173,16 @@ impl Parser2 for ParserV2 {
     }
 }
 
-impl ParserV2 {
-    /// Call Parser contract to parse the provided rainlang text and provide the pragma.
-    pub async fn parse_pragma_text(
-        &self,
-        text: &str,
-        client: ReadableClient,
-    ) -> Result<Vec<Address>, ParserError>
-    where
-        Self: Sync,
-    {
-        let res = self.parse_pragma(text.as_bytes().to_vec(), client).await?;
-        Ok(res._0.usingWordsFrom)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloy::{primitives::Address, providers::mock::Asserter};
+    use alloy::{hex, primitives::Address, providers::mock::Asserter};
 
     #[tokio::test]
     async fn test_from_dispair() {
         let deployer_address = Address::repeat_byte(0x4);
 
-        let dispair = DISPair {
+        let dispair = DISPaiR {
             deployer: deployer_address,
             interpreter: Address::repeat_byte(0x2),
             store: Address::repeat_byte(0x3),

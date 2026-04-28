@@ -1,10 +1,12 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.18;
 
 import {Test} from "forge-std/Test.sol";
-import {LibParseState, ParseState} from "src/lib/parse/LibParseState.sol";
+import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 
 /// @title LibParseStatePushConstantValueTest
+/// @notice Tests for pushing constant values onto the parse state.
 contract LibParseStatePushConstantValueTest is Test {
     using LibParseState for ParseState;
 

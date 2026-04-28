@@ -1,12 +1,13 @@
 use alloy::primitives::BlockNumber;
 use clap::Args;
-use rain_interpreter_eval::fork::NewForkedEvm;
+use rainlang_eval::fork::NewForkedEvm;
 
+/// CLI arguments for connecting to a forked EVM via RPC.
 #[derive(Args, Clone, Debug)]
 pub struct NewForkedEvmCliArgs {
     #[arg(short = 'i', long, help = "RPC url for the fork")]
     pub fork_url: String,
-    #[arg(short = 'i', long, help = "Optional block number to fork from")]
+    #[arg(short = 'b', long, help = "Optional block number to fork from")]
     pub fork_block_number: Option<BlockNumber>,
 }
 

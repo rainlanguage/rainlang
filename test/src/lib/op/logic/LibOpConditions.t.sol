@@ -1,17 +1,17 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {LibUint256Array} from "rain.solmem/lib/LibUint256Array.sol";
 
 import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
-import {LibOpConditions} from "src/lib/op/logic/LibOpConditions.sol";
-import {IntegrityCheckState, BadOpInputsLength} from "src/lib/integrity/LibIntegrityCheck.sol";
-import {InterpreterState} from "src/lib/state/LibInterpreterState.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {LibOpConditions} from "../../../../../src/lib/op/logic/LibOpConditions.sol";
+import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
+import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {LibIntOrAString, IntOrAString} from "rain.intorastring/lib/LibIntOrAString.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
 
 contract LibOpConditionsTest is OpTest {
     using LibUint256Array for uint256[];
@@ -94,7 +94,7 @@ contract LibOpConditionsTest is OpTest {
 
         if (inputs.length % 2 != 0) {
             inputs[inputs.length - 1] =
-                StackItem.wrap(bytes32(IntOrAString.unwrap(LibIntOrAString.fromString2(reason))));
+                StackItem.wrap(bytes32(IntOrAString.unwrap(LibIntOrAString.fromStringV3(reason))));
         } else {
             reason = "";
         }

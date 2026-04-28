@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
 import {LibPointer, Pointer} from "rain.solmem/lib/LibPointer.sol";
 import {LibMemCpy} from "rain.solmem/lib/LibMemCpy.sol";
@@ -21,9 +22,7 @@ import {
 import {LibParseChar} from "rain.string/lib/parse/LibParseChar.sol";
 import {LibParseMeta} from "rain.interpreter.interface/lib/parse/LibParseMeta.sol";
 import {LibParseOperand} from "./LibParseOperand.sol";
-import {
-    OperandV2, OPCODE_STACK, OPCODE_UNKNOWN
-} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {OperandV2, OPCODE_STACK, OPCODE_UNKNOWN} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {LibParseStackName} from "./LibParseStackName.sol";
 import {
     UnexpectedRHSChar,
@@ -35,7 +34,8 @@ import {
     UnexpectedLHSChar,
     MissingFinalSemi,
     UnexpectedComment,
-    ParenOverflow
+    ParenOverflow,
+    LHSItemCountOverflow
 } from "../../error/ErrParse.sol";
 import {
     LibParseState,
@@ -43,20 +43,36 @@ import {
     FSM_YANG_MASK,
     FSM_DEFAULT,
     FSM_ACTIVE_SOURCE_MASK,
-    FSM_WORD_END_MASK
+    FSM_WORD_END_MASK,
+    PARSE_STATE_PAREN_TRACKER0_OFFSET,
+    PAREN_POINTER_SHIFT
 } from "./LibParseState.sol";
 import {LibParsePragma} from "./LibParsePragma.sol";
 import {LibParseInterstitial} from "./LibParseInterstitial.sol";
 import {LibParseError} from "./LibParseError.sol";
 import {LibSubParse} from "./LibSubParse.sol";
 import {LibBytes} from "rain.solmem/lib/LibBytes.sol";
-import {LibUint256Array} from "rain.solmem/lib/LibUint256Array.sol";
 import {LibBytes32Array} from "rain.solmem/lib/LibBytes32Array.sol";
 
-uint256 constant NOT_LOW_16_BIT_MASK = ~uint256(0xFFFF);
-uint256 constant ACTIVE_SOURCE_MASK = NOT_LOW_16_BIT_MASK;
+/// @dev Size in bytes of the fixed header prepended to sub-parser bytecode.
+/// Comprises the operand values tail pointer (2 bytes), the literal parsers
+/// tail pointer (2 bytes), and the word length (1 byte).
 uint256 constant SUB_PARSER_BYTECODE_HEADER_SIZE = 5;
 
+/// @dev Maximum paren offset before the paren tracker overflows. The tracker
+/// has 62 bytes of group data (3 bytes each, fitting 20 groups), but
+/// `pushOpToSource` writes a phantom counter at `parenOffset + 4`, so the
+/// effective limit is 19 groups (offset 57). The check rejects offset 60
+/// because `newParenOffset` is already incremented by 3.
+uint256 constant MAX_PAREN_OFFSET = 59;
+
+/// @title LibParse
+/// @notice Core parsing library for Rainlang source text.
+///
+/// The parser only supports single-byte ASCII input. All character masks are
+/// 128-bit bitmaps indexed by byte value, so bytes above 0x7F (non-ASCII /
+/// multibyte UTF-8 sequences) will never match any mask and will be rejected
+/// as unexpected characters. Callers MUST NOT pass non-ASCII input.
 library LibParse {
     using LibPointer for Pointer;
     using LibParseStackName for ParseState;
@@ -69,10 +85,9 @@ library LibParse {
     using LibParseOperand for ParseState;
     using LibSubParse for ParseState;
     using LibBytes for bytes;
-    using LibUint256Array for uint256[];
     using LibBytes32Array for bytes32[];
 
-    /// Parses a word that matches a tail mask between cursor and end. The caller
+    /// @notice Parses a word that matches a tail mask between cursor and end. The caller
     /// has several responsibilities while safely using this word.
     /// - The caller MUST ensure that the word is not zero length.
     ///   I.e. `end - cursor > 0`.
@@ -84,6 +99,11 @@ library LibParse {
     /// tail mask. If any invalid characters are found, the parsing will stop
     /// looping as it is assumed the remaining data is valid as something else,
     /// just not a word.
+    /// @param cursor The current cursor position pointing at the word start.
+    /// @param end The end of the data to parse.
+    /// @param mask The character mask for valid tail characters.
+    /// @return The new cursor position after the word.
+    /// @return The parsed word as a bytes32.
     function parseWord(uint256 cursor, uint256 end, uint256 mask) internal pure returns (uint256, bytes32) {
         unchecked {
             bytes32 word;
@@ -112,6 +132,13 @@ library LibParse {
         }
     }
 
+    /// @notice Parses the left-hand side (LHS) of a source line. Handles named and
+    /// anonymous stack items, whitespace, and the LHS/RHS delimiter. Reverts
+    /// on unexpected characters, comments, or duplicate named stack items.
+    /// @param state The parser state.
+    /// @param cursor The current cursor position.
+    /// @param end The end of the data to parse.
+    /// @return The new cursor position after the LHS.
     //forge-lint: disable-next-line(mixed-case-function)
     function parseLHS(ParseState memory state, uint256 cursor, uint256 end) internal pure returns (uint256) {
         unchecked {
@@ -132,8 +159,8 @@ library LibParse {
                     // Named stack item.
                     if (char & CMASK_IDENTIFIER_HEAD > 0) {
                         (cursor, word) = parseWord(cursor, end, CMASK_LHS_STACK_TAIL);
-                        (bool exists, uint256 index) = state.pushStackName(word);
-                        (index);
+                        // slither-disable-next-line unused-return
+                        (bool exists,) = state.pushStackName(word);
                         // If the stack name already exists, then we
                         // revert as shadowing is not allowed.
                         if (exists) {
@@ -145,7 +172,17 @@ library LibParse {
                         cursor = LibParseChar.skipMask(cursor + 1, end, CMASK_LHS_STACK_TAIL);
                     }
                     // Bump the index regardless of whether the stack
-                    // item is named or not.
+                    // item is named or not. Both counters are packed into
+                    // the low byte of their respective uint256 fields.
+                    // Exceeding 0xFF would carry into the adjacent byte,
+                    // silently corrupting parser state.
+                    // The low byte of each field is only ever mutated by
+                    // single increments (here) and resets to 0 (newSource
+                    // / endLine), so reading via `& 0xFF` reliably gives
+                    // the true count at this point.
+                    if ((state.topLevel1 & 0xFF) == 0xFF || (state.lineTracker & 0xFF) == 0xFF) {
+                        revert LHSItemCountOverflow(state.parseErrorOffset(cursor));
+                    }
                     state.topLevel1++;
                     state.lineTracker++;
 
@@ -172,9 +209,16 @@ library LibParse {
         }
     }
 
-    //slither-disable-start cyclomatic-complexity
+    /// @notice Parses the right-hand side (RHS) of a source line. Resolves words
+    /// against known opcodes, LHS stack names, and sub parsers. Handles
+    /// parenthesised operand groups, literals, and line/source terminators.
+    /// @param state The parser state.
+    /// @param cursor The current cursor position.
+    /// @param end The end of the data to parse.
+    /// @return The new cursor position after the RHS.
     //forge-lint: disable-next-line(mixed-case-function)
-    function parseRHS(ParseState memory state, uint256 cursor, uint256 end) internal pure returns (uint256) {
+    //slither-disable-next-line cyclomatic-complexity
+    function parseRHS(ParseState memory state, uint256 cursor, uint256 end) internal view returns (uint256) {
         unchecked {
             while (cursor < end) {
                 bytes32 word;
@@ -300,14 +344,12 @@ library LibParse {
                     // the expectation that it will be overwritten by
                     // the next paren group.
                     uint256 newParenOffset;
+                    uint256 parenTracker0Offset = PARSE_STATE_PAREN_TRACKER0_OFFSET;
                     assembly ("memory-safe") {
-                        newParenOffset := add(byte(0, mload(add(state, 0x60))), 3)
-                        mstore8(add(state, 0x60), newParenOffset)
+                        newParenOffset := add(byte(0, mload(add(state, parenTracker0Offset))), 3)
+                        mstore8(add(state, parenTracker0Offset), newParenOffset)
                     }
-                    // first 2 bytes are reserved, then remaining 62
-                    // bytes are for paren groups, so the offset MUST NOT
-                    // imply writing to the 63rd byte.
-                    if (newParenOffset > 59) {
+                    if (newParenOffset > MAX_PAREN_OFFSET) {
                         revert ParenOverflow();
                     }
                     cursor++;
@@ -317,8 +359,9 @@ library LibParse {
                     state.fsm &= ~(FSM_WORD_END_MASK | FSM_YANG_MASK);
                 } else if (char & CMASK_RIGHT_PAREN > 0) {
                     uint256 parenOffset;
+                    uint256 parenTracker0Offset = PARSE_STATE_PAREN_TRACKER0_OFFSET;
                     assembly ("memory-safe") {
-                        parenOffset := byte(0, mload(add(state, 0x60)))
+                        parenOffset := byte(0, mload(add(state, parenTracker0Offset)))
                     }
                     if (parenOffset == 0) {
                         revert UnexpectedRightParen(state.parseErrorOffset(cursor));
@@ -329,17 +372,16 @@ library LibParse {
                     // write the input counter out to the operand pointed
                     // to by the pointer we deallocated.
                     assembly ("memory-safe") {
-                        // State field offset.
-                        let stateOffset := add(state, 0x60)
+                        let stateOffset := add(state, parenTracker0Offset)
                         parenOffset := sub(parenOffset, 3)
                         mstore8(stateOffset, parenOffset)
                         mstore8(
                             // Add 2 for the reserved bytes to the offset
                             // then read top 16 bits from the pointer.
-                            // Add 1 to sandwitch the inputs byte between
+                            // Add 1 to sandwich the inputs byte between
                             // the opcode index byte and the operand low
                             // bytes.
-                            add(1, shr(0xf0, mload(add(add(stateOffset, 2), parenOffset)))),
+                            add(1, shr(PAREN_POINTER_SHIFT, mload(add(add(stateOffset, 2), parenOffset)))),
                             // Store the input counter, which is 2 bytes
                             // after the operand write pointer.
                             byte(0, mload(add(add(stateOffset, 4), parenOffset)))
@@ -384,8 +426,13 @@ library LibParse {
             return cursor;
         }
     }
-    //slither-disable-end
 
+    /// @notice Top-level entry point for parsing. Processes pragmas, then iterates
+    /// over interstitial, LHS, and RHS sections to build the final bytecode
+    /// and constants array. Sub-parses any unknown words after initial parsing.
+    /// @param state The parser state.
+    /// @return bytecode The compiled bytecode.
+    /// @return The constants array.
     function parse(ParseState memory state) internal view returns (bytes memory bytecode, bytes32[] memory) {
         unchecked {
             if (state.data.length > 0) {
@@ -406,7 +453,9 @@ library LibParse {
                 }
             }
             //slither-disable-next-line unused-return
-            return state.subParseWords(state.buildBytecode());
+            (bytes memory built, bytes32[] memory constants) = state.subParseWords(state.buildBytecode());
+            LibParseState.checkParseMemoryOverflow();
+            return (built, constants);
         }
     }
 }

@@ -1,10 +1,11 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {OpTest, IntegrityCheckState, InterpreterState, OperandV2} from "test/abstract/OpTest.sol";
-import {LibOpDiv} from "src/lib/op/math/LibOpDiv.sol";
+import {LibOpDiv} from "../../../../../src/lib/op/math/LibOpDiv.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
 import {
     LibDecimalFloatImplementation,
@@ -16,10 +17,7 @@ contract LibOpDivTest is OpTest {
 
     /// Directly test the integrity logic of LibOpDiv. This tests the
     /// happy path where the inputs input and calc match.
-    function testOpDivIntegrityHappy(IntegrityCheckState memory state, uint8 inputs, uint16 operandData)
-        external
-        pure
-    {
+    function testOpDivIntegrityHappy(IntegrityCheckState memory state, uint8 inputs, uint16 operandData) external pure {
         inputs = uint8(bound(inputs, 2, 0x0F));
         (uint256 calcInputs, uint256 calcOutputs) = LibOpDiv.integrity(state, LibOperand.build(inputs, 1, operandData));
 

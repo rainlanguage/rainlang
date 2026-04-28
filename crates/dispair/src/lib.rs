@@ -1,88 +1,47 @@
-use alloy::primitives::*;
-use alloy_ethers_typecast::{
-    ReadContractParametersBuilder, ReadContractParametersBuilderError, ReadableClient,
-    ReadableClientError,
-};
-use rain_interpreter_bindings::DeployerISP;
-use thiserror::Error;
+//! DISPaiR (Deployer/Interpreter/Store/Parser) address tuple.
 
-#[derive(Error, Debug)]
-pub enum DISPairError {
-    #[error(transparent)]
-    ReadableClientError(#[from] ReadableClientError),
-    #[error(transparent)]
-    ReadContractParametersBuilderError(#[from] ReadContractParametersBuilderError),
-}
+use alloy::primitives::Address;
 
-/// DISPair
-/// Struct representing DISP instances.
-#[derive(Clone, Default)]
-pub struct DISPair {
+/// Deployer/Interpreter/Store/Parser address tuple.
+///
+/// Groups the four contract addresses that together form a complete
+/// Rain interpreter deployment.
+#[derive(Debug, Clone, Default)]
+pub struct DISPaiR {
     pub deployer: Address,
     pub interpreter: Address,
     pub store: Address,
     pub parser: Address,
 }
 
-/// Implementation to build DISPair from Deployer address.
-impl DISPair {
-    pub async fn from_deployer(
-        deployer: Address,
-        client: ReadableClient,
-    ) -> Result<Self, DISPairError> {
-        Ok(DISPair {
+impl DISPaiR {
+    /// Creates a new `DISPaiR` from the four component addresses.
+    pub fn new(deployer: Address, interpreter: Address, store: Address, parser: Address) -> Self {
+        DISPaiR {
             deployer,
-            interpreter: client
-                .read(
-                    ReadContractParametersBuilder::default()
-                        .address(deployer)
-                        .call(DeployerISP::I_INTERPRETERCall {})
-                        .build()
-                        .map_err(DISPairError::ReadContractParametersBuilderError)?,
-                )
-                .await
-                .map_err(DISPairError::ReadableClientError)?,
-            store: client
-                .read(
-                    ReadContractParametersBuilder::default()
-                        .address(deployer)
-                        .call(DeployerISP::I_STORECall {})
-                        .build()
-                        .map_err(DISPairError::ReadContractParametersBuilderError)?,
-                )
-                .await
-                .map_err(DISPairError::ReadableClientError)?,
-            parser: client
-                .read(
-                    ReadContractParametersBuilder::default()
-                        .address(deployer)
-                        .call(DeployerISP::I_PARSERCall {})
-                        .build()
-                        .map_err(DISPairError::ReadContractParametersBuilderError)?,
-                )
-                .await
-                .map_err(DISPairError::ReadableClientError)?,
-        })
+            interpreter,
+            store,
+            parser,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rain_interpreter_test_fixtures::LocalEvm;
 
-    #[tokio::test]
-    async fn test_from_deployer() {
-        let local_evm = LocalEvm::new().await;
-        let deployer = *local_evm.deployer.address();
-        let client = ReadableClient::new_from_url(local_evm.url())
-            .await
-            .expect("Failed to create ReadableClient");
-        let dispair = DISPair::from_deployer(deployer, client).await.unwrap();
+    #[test]
+    fn test_new() {
+        let deployer = Address::repeat_byte(0x1);
+        let interpreter = Address::repeat_byte(0x2);
+        let store = Address::repeat_byte(0x3);
+        let parser = Address::repeat_byte(0x4);
+
+        let dispair = DISPaiR::new(deployer, interpreter, store, parser);
 
         assert_eq!(dispair.deployer, deployer);
-        assert_eq!(dispair.interpreter, *local_evm.interpreter.address());
-        assert_eq!(dispair.store, *local_evm.store.address());
-        assert_eq!(dispair.parser, *local_evm.parser.address());
+        assert_eq!(dispair.interpreter, interpreter);
+        assert_eq!(dispair.store, store);
+        assert_eq!(dispair.parser, parser);
     }
 }

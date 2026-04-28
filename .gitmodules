@@ -13,3 +13,12 @@
 [submodule "lib/rain.string"]
 	path = lib/rain.string
 	url = https://github.com/rainlanguage/rain.string
+[submodule "lib/rain.deploy"]
+	path = lib/rain.deploy
+	url = https://github.com/rainlanguage/rain.deploy
+[submodule "lib/rain.tofu.erc20-decimals"]
+	path = lib/rain.tofu.erc20-decimals
+	url = https://github.com/rainlanguage/rain.tofu.erc20-decimals
+[submodule "lib/rain.extrospection"]
+	path = lib/rain.extrospection
+	url = https://github.com/rainlanguage/rain.extrospection

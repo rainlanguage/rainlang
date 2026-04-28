@@ -1,16 +1,19 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
-import {LibParse} from "src/lib/parse/LibParse.sol";
+import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {IntOrAString, LibIntOrAString} from "rain.intorastring/lib/LibIntOrAString.sol";
-import {StringTooLong, UnclosedStringLiteral} from "src/error/ErrParse.sol";
+import {StringTooLong, UnclosedStringLiteral} from "../../../../src/error/ErrParse.sol";
 import {LibConformString} from "rain.string/lib/mut/LibConformString.sol";
-import {ParseState} from "src/lib/parse/LibParseState.sol";
+import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralStringTest
+/// @notice Tests for parsing string literals.
 contract LibParseLiteralStringTest is Test {
     using LibParse for ParseState;
 
@@ -33,7 +36,7 @@ contract LibParseLiteralStringTest is Test {
         assertEq(outputs, 1);
 
         assertEq(constants.length, 1);
-        assertEq(constants[0], bytes32(IntOrAString.unwrap(LibIntOrAString.fromString2(""))));
+        assertEq(constants[0], bytes32(IntOrAString.unwrap(LibIntOrAString.fromStringV3(""))));
     }
 
     /// Check a simple string `"a"` literal. Should not revert and return
@@ -50,7 +53,7 @@ contract LibParseLiteralStringTest is Test {
         assertEq(outputs, 1);
 
         assertEq(constants.length, 1);
-        assertEq(constants[0], bytes32(IntOrAString.unwrap(LibIntOrAString.fromString2("a"))));
+        assertEq(constants[0], bytes32(IntOrAString.unwrap(LibIntOrAString.fromStringV3("a"))));
     }
 
     /// Any ASCII printable string shorter than 32 bytes should be parsed
@@ -72,7 +75,7 @@ contract LibParseLiteralStringTest is Test {
         assertEq(outputs, 1);
 
         assertEq(constants.length, 1);
-        assertEq(constants[0], bytes32(IntOrAString.unwrap(LibIntOrAString.fromString2(str))));
+        assertEq(constants[0], bytes32(IntOrAString.unwrap(LibIntOrAString.fromStringV3(str))));
     }
 
     /// Can parse 2 valid strings.
@@ -96,8 +99,8 @@ contract LibParseLiteralStringTest is Test {
         assertEq(outputs, 2);
 
         assertEq(constants.length, 2);
-        assertEq(constants[0], bytes32(IntOrAString.unwrap(LibIntOrAString.fromString2(strA))));
-        assertEq(constants[1], bytes32(IntOrAString.unwrap(LibIntOrAString.fromString2(strB))));
+        assertEq(constants[0], bytes32(IntOrAString.unwrap(LibIntOrAString.fromStringV3(strA))));
+        assertEq(constants[1], bytes32(IntOrAString.unwrap(LibIntOrAString.fromStringV3(strB))));
     }
 
     /// Valid ASCII printable strings 32 bytes or longer should error.
@@ -106,7 +109,7 @@ contract LibParseLiteralStringTest is Test {
         vm.assume(bytes(str).length >= 0x20);
         LibConformString.conformValidPrintableStringContent(str);
 
-        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, 3));
+        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, LibParseError.tagErrorOffset(3)));
         (bytes memory bytecode, bytes32[] memory constants) = this.externalParse(string.concat("_: \"", str, "\";"));
         (bytecode, constants);
     }
@@ -122,7 +125,7 @@ contract LibParseLiteralStringTest is Test {
             mstore(strA, 0x20)
         }
 
-        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, 3));
+        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, LibParseError.tagErrorOffset(3)));
         (bytes memory bytecode, bytes32[] memory constants) =
             this.externalParse(string.concat("_: \"", strA, strB, "\";"));
         (bytecode, constants);
@@ -138,7 +141,9 @@ contract LibParseLiteralStringTest is Test {
 
         LibConformString.corruptSingleChar(str, badIndex);
 
-        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, 4 + badIndex));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnclosedStringLiteral.selector, LibParseError.tagErrorOffset(4 + badIndex))
+        );
         (bytes memory bytecode, bytes32[] memory constants) = this.externalParse(string.concat("_: \"", str, "\";"));
         (bytecode, constants);
     }

@@ -1,12 +1,14 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {ParseTest} from "test/abstract/ParseTest.sol";
-import {UnclosedOperand, UnexpectedOperandValue} from "src/error/ErrParse.sol";
-import {LibParse, ExpectedLeftParen} from "src/lib/parse/LibParse.sol";
+import {UnclosedOperand, UnexpectedOperandValue} from "../../../../src/error/ErrParse.sol";
+import {LibParse, ExpectedLeftParen} from "../../../../src/lib/parse/LibParse.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
-import {ParseState} from "src/lib/parse/LibParseState.sol";
-import {OperandOverflow} from "src/error/ErrParse.sol";
+import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {OperandOverflow} from "../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 contract LibParseOperandSingleFullTest is ParseTest {
     using LibParse for ParseState;
@@ -221,7 +223,7 @@ contract LibParseOperandSingleFullTest is ParseTest {
 
     /// Opening angle bracket without closing angle bracket reverts.
     function testOperandSingleFullUnclosed() external {
-        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, 5));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedOperand.selector, LibParseError.tagErrorOffset(5)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal("_:b<0;");
         (bytecode);
         (constants);
@@ -229,7 +231,7 @@ contract LibParseOperandSingleFullTest is ParseTest {
 
     /// Closing angle bracket without opening angle bracket reverts.
     function testOperandSingleFullUnopened() external {
-        vm.expectRevert(abi.encodeWithSelector(ExpectedLeftParen.selector, 3));
+        vm.expectRevert(abi.encodeWithSelector(ExpectedLeftParen.selector, LibParseError.tagErrorOffset(3)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal("_:b>0>;");
         (bytecode);
         (constants);

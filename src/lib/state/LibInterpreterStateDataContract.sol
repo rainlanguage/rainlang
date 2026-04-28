@@ -1,18 +1,29 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
 import {MemoryKV} from "rain.lib.memkv/lib/LibMemoryKV.sol";
 import {Pointer} from "rain.solmem/lib/LibPointer.sol";
 import {LibMemCpy} from "rain.solmem/lib/LibMemCpy.sol";
 import {LibBytes} from "rain.solmem/lib/LibBytes.sol";
-import {FullyQualifiedNamespace} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {IInterpreterStoreV3} from "rain.interpreter.interface/interface/unstable/IInterpreterStoreV3.sol";
+import {FullyQualifiedNamespace} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {IInterpreterStoreV3} from "rain.interpreter.interface/interface/IInterpreterStoreV3.sol";
 
 import {InterpreterState} from "./LibInterpreterState.sol";
+import {SOURCE_OFFSET_SHIFT} from "../eval/LibEval.sol";
 
 library LibInterpreterStateDataContract {
     using LibBytes for bytes;
 
+    /// @notice Returns the total byte size needed to serialize `bytecode` and
+    /// `constants` into a single contiguous memory region. The layout is:
+    /// `[constants length][constants data...][bytecode length][bytecode data...]`.
+    /// Uses unchecked arithmetic — the caller MUST ensure the in-memory length
+    /// fields of `bytecode` and `constants` are not corrupt, otherwise the
+    /// multiplication or addition can silently overflow.
+    /// @param bytecode The bytecode to serialize.
+    /// @param constants The constants array to serialize.
+    /// @return size The total byte size of the serialized representation.
     function serializeSize(bytes memory bytecode, bytes32[] memory constants) internal pure returns (uint256 size) {
         unchecked {
             // bytecode length + constants length * 0x20 + 0x40 for both the bytecode and constants length words.
@@ -20,6 +31,12 @@ library LibInterpreterStateDataContract {
         }
     }
 
+    /// @notice Writes `constants` (with length prefix) then `bytecode` (with length
+    /// prefix) into the memory region starting at `cursor`. The caller must
+    /// ensure `cursor` points to a region of at least `serializeSize` bytes.
+    /// @param cursor Pointer to the start of the destination memory region.
+    /// @param bytecode The bytecode to serialize.
+    /// @param constants The constants array to serialize.
     function unsafeSerialize(Pointer cursor, bytes memory bytecode, bytes32[] memory constants) internal pure {
         unchecked {
             // Copy constants into place with length.
@@ -37,6 +54,19 @@ library LibInterpreterStateDataContract {
         }
     }
 
+    /// @notice Reconstructs an `InterpreterState` from a previously serialized byte
+    /// array. References the constants and bytecode arrays in-place (no copy).
+    /// Allocates a fresh stack for each source according to the bytecode's
+    /// declared stack allocation, and returns a fully populated state ready
+    /// for evaluation.
+    /// @param serialized The serialized byte array produced by
+    /// `unsafeSerialize`.
+    /// @param sourceIndex The index of the source to evaluate.
+    /// @param namespace The fully qualified namespace for store reads/writes.
+    /// @param store The interpreter store contract for persistent state.
+    /// @param context The 2D context array passed by the caller.
+    /// @param fs The packed function pointer table for opcode dispatch.
+    /// @return The fully populated interpreter state ready for evaluation.
     function unsafeDeserialize(
         bytes memory serialized,
         uint256 sourceIndex,
@@ -89,7 +119,7 @@ library LibInterpreterStateDataContract {
                 } {
                     // The stack size is in the prefix of the source data, which
                     // is behind a relative pointer in the bytecode prefix.
-                    let sourcePointer := add(sourcesStart, shr(0xf0, mload(cursor)))
+                    let sourcePointer := add(sourcesStart, shr(SOURCE_OFFSET_SHIFT, mload(cursor)))
                     // Stack size is the second byte of the source prefix.
                     let stackSize := byte(1, mload(sourcePointer))
 

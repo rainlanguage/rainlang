@@ -1,16 +1,17 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {OperandTest} from "test/abstract/OperandTest.sol";
 
-import {LibParse} from "src/lib/parse/LibParse.sol";
+import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
-import {ParseState} from "src/lib/parse/LibParseState.sol";
-import {MaxSources} from "src/error/ErrParse.sol";
+import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {MaxSources} from "../../../../src/error/ErrParse.sol";
 
 /// @title LibParseEmptyTest
-/// Tests parsing empty sources and constants. All we want to check is that the
+/// @notice Tests parsing empty sources and constants. All we want to check is that the
 /// parser doesn't revert and the correct number of sources and constants are
 /// returned.
 contract LibParseEmptyTest is OperandTest {

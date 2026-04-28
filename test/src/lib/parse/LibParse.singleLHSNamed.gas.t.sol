@@ -1,12 +1,13 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
-import {LibParseState, ParseState} from "src/lib/parse/LibParseState.sol";
-import {LibParse} from "src/lib/parse/LibParse.sol";
+import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 
 /// @title LibParseSingleLHSNamedGasTest
-/// Parse a single named LHS for many different sized LHS names just to include
+/// @notice Parse a single named LHS for many different sized LHS names just to include
 /// the gas cost of the parsing in the gas snapshot.
 contract LibParseSingleLHSNamedGasTest is Test {
     using LibParse for ParseState;

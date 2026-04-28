@@ -1,13 +1,14 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {LibMemoryKV, MemoryKV, MemoryKVVal, MemoryKVKey} from "rain.lib.memkv/lib/LibMemoryKV.sol";
 
 import {OpTest} from "test/abstract/OpTest.sol";
-import {LibOpSet} from "src/lib/op/store/LibOpSet.sol";
-import {IntegrityCheckState} from "src/lib/integrity/LibIntegrityCheck.sol";
-import {InterpreterState} from "src/lib/state/LibInterpreterState.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {LibOpSet} from "../../../../../src/lib/op/store/LibOpSet.sol";
+import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
+import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 
 contract LibOpSetTest is OpTest {

@@ -1,23 +1,30 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {Pointer} from "rain.solmem/lib/LibPointer.sol";
 import {IERC721} from "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
+import {NotAnAddress} from "../../../error/ErrRainType.sol";
 
 /// @title LibOpERC721BalanceOf
 /// @notice Opcode for getting the current ERC721 balance of an account.
 library LibOpERC721BalanceOf {
+    /// @notice `erc721-balance-of` integrity check. Requires 2 inputs and produces 1 output.
+    /// @return The number of inputs.
+    /// @return The number of outputs.
     function integrity(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256) {
         // Always 2 inputs, the token and the account.
         // Always 1 output, the balance.
         return (2, 1);
     }
 
+    /// @notice `erc721-balance-of` opcode. Calls `balanceOf` on the token and converts the result to a decimal float.
+    /// @param stackTop Pointer to the top of the stack.
+    /// @return The new stack top pointer after execution.
     function run(InterpreterState memory, OperandV2, Pointer stackTop) internal view returns (Pointer) {
         uint256 token;
         uint256 account;
@@ -26,8 +33,16 @@ library LibOpERC721BalanceOf {
             stackTop := add(stackTop, 0x20)
             account := mload(stackTop)
         }
-        // It is the rainlang author's responsibility to ensure token and account
-        // are valid addresses.
+        // It is the rainlang author's responsibility to ensure the correctness
+        // of token and account as addresses.
+        // Casting to `uint160` is intentional to detect non-address values.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        if (token != uint256(uint160(token))) revert NotAnAddress(token);
+        // Casting to `uint160` is intentional to detect non-address values.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        if (account != uint256(uint160(account))) revert NotAnAddress(account);
+        // Casting to `uint160` is safe because `NotAnAddress` above
+        // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
         uint256 tokenBalance = IERC721(address(uint160(token))).balanceOf(address(uint160(account)));
 
@@ -39,13 +54,30 @@ library LibOpERC721BalanceOf {
         return stackTop;
     }
 
+    /// @notice Reference implementation of `erc721-balance-of` for testing.
+    /// @param inputs The input values from the stack.
+    /// @return The output values to push onto the stack.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
         internal
         view
         returns (StackItem[] memory)
     {
-        address token = address(uint160(uint256(StackItem.unwrap(inputs[0]))));
-        address account = address(uint160(uint256(StackItem.unwrap(inputs[1]))));
+        uint256 tokenValue = uint256(StackItem.unwrap(inputs[0]));
+        // Casting to `uint160` is intentional to detect non-address values.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        if (tokenValue != uint256(uint160(tokenValue))) revert NotAnAddress(tokenValue);
+        uint256 accountValue = uint256(StackItem.unwrap(inputs[1]));
+        // Casting to `uint160` is intentional to detect non-address values.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        if (accountValue != uint256(uint160(accountValue))) revert NotAnAddress(accountValue);
+        // Casting to `uint160` is safe because `NotAnAddress` above
+        // ensures the value fits in 160 bits.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        address token = address(uint160(tokenValue));
+        // Casting to `uint160` is safe because `NotAnAddress` above
+        // ensures the value fits in 160 bits.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        address account = address(uint160(accountValue));
         uint256 tokenBalance = IERC721(token).balanceOf(account);
 
         Float tokenBalanceFloat = LibDecimalFloat.fromFixedDecimalLosslessPacked(tokenBalance, 0);

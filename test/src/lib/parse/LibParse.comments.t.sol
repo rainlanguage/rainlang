@@ -1,17 +1,19 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {OperandTest} from "test/abstract/OperandTest.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 
-import {LibParse} from "src/lib/parse/LibParse.sol";
+import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
 
-import {UnclosedComment, UnexpectedComment, UnexpectedLHSChar} from "src/error/ErrParse.sol";
-import {ParseState} from "src/lib/parse/LibParseState.sol";
+import {UnclosedComment, UnexpectedComment, UnexpectedLHSChar} from "../../../../src/error/ErrParse.sol";
+import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {LibParseError, MAGIC_NUMBER_RAIN_PARSE_ERROR_V1} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseCommentsTest
-/// Test that the parser correctly parses comments.
+/// @notice Test that the parser correctly parses comments.
 contract LibParseCommentsTest is OperandTest {
     using LibParse for ParseState;
 
@@ -394,56 +396,70 @@ contract LibParseCommentsTest is OperandTest {
     /// Comments cause yang so cannot be without trailing whitespace.
     function testParseCommentNoTrailingWhitespace() external {
         string memory s = "/* comment */_:a();";
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedLHSChar.selector, 13));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnexpectedLHSChar.selector, uint256(MAGIC_NUMBER_RAIN_PARSE_ERROR_V1) | 13)
+        );
         this.parse(bytes(s));
     }
 
     /// Comments cannot be in an ignored LHS item.
     function testParseCommentInIgnoredLHS() external {
         string memory s = "_/* comment */:a();";
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedComment.selector, 1));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnexpectedComment.selector, uint256(MAGIC_NUMBER_RAIN_PARSE_ERROR_V1) | 1)
+        );
         this.parse(bytes(s));
     }
 
     /// Comments cannot be in a named LHS item.
     function testParseCommentInNamedLHS() external {
         string memory s = "_a/* comment */:a();";
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedComment.selector, 2));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnexpectedComment.selector, uint256(MAGIC_NUMBER_RAIN_PARSE_ERROR_V1) | 2)
+        );
         this.parse(bytes(s));
     }
 
     /// Comments cannot be in the whitespace between LHS items.
     function testParseCommentInLHSWhitespace() external {
         string memory s = "_ /* comment */ _:a();";
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedComment.selector, 2));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnexpectedComment.selector, uint256(MAGIC_NUMBER_RAIN_PARSE_ERROR_V1) | 2)
+        );
         this.parse(bytes(s));
     }
 
     /// Comments cannot be in the RHS. Tests the start of the RHS.
     function testParseCommentInRHS() external {
         string memory s = "_:/* comment */a();";
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedComment.selector, 2));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnexpectedComment.selector, uint256(MAGIC_NUMBER_RAIN_PARSE_ERROR_V1) | 2)
+        );
         this.parse(bytes(s));
     }
 
     /// Comments cannot be in the RHS. Tests the middle of the RHS.
     function testParseCommentInRHS2() external {
         string memory s = "_:a()/* comment */ b();";
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedComment.selector, 5));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnexpectedComment.selector, uint256(MAGIC_NUMBER_RAIN_PARSE_ERROR_V1) | 5)
+        );
         this.parse(bytes(s));
     }
 
     /// Comments cannot be in the RHS. Tests the end of the RHS.
     function testParseCommentInRHS3() external {
         string memory s = "_:a()/* comment */;";
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedComment.selector, 5));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnexpectedComment.selector, uint256(MAGIC_NUMBER_RAIN_PARSE_ERROR_V1) | 5)
+        );
         this.parse(bytes(s));
     }
 
     /// Unclosed comments don't escape the data bounds.
     function testParseCommentUnclosed() external {
         string memory s = "/* unclosed comment";
-        vm.expectRevert(abi.encodeWithSelector(UnclosedComment.selector, 19));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedComment.selector, LibParseError.tagErrorOffset(19)));
         this.parse(bytes(s));
     }
 
@@ -451,7 +467,7 @@ contract LibParseCommentsTest is OperandTest {
     /// so must revert and not escape the data bounds.
     function testParseCommentUnclosed2() external {
         string memory s = "/* unclosed comment *";
-        vm.expectRevert(abi.encodeWithSelector(UnclosedComment.selector, 21));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedComment.selector, LibParseError.tagErrorOffset(21)));
         this.parse(bytes(s));
     }
 }

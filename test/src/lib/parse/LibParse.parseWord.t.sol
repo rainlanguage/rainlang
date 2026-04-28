@@ -1,12 +1,13 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
-import {LibParse} from "src/lib/parse/LibParse.sol";
+import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {Pointer, LibBytes} from "rain.solmem/lib/LibBytes.sol";
 import {LibParseSlow} from "./LibParseSlow.sol";
 import {CMASK_NUMERIC_0_9} from "rain.string/lib/parse/LibParseCMask.sol";
-import {WordSize} from "src/error/ErrParse.sol";
+import {WordSize} from "../../../../src/error/ErrParse.sol";
 
 /// @title LibParseParseWordTest
 /// @notice Tests LibParse's parseWord function.

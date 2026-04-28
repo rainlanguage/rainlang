@@ -1,14 +1,15 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {OpTest} from "test/abstract/OpTest.sol";
+import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 
 import {LibPointer, Pointer} from "rain.solmem/lib/LibPointer.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {LibStackPointer} from "rain.solmem/lib/LibStackPointer.sol";
-import {LibInterpreterState, InterpreterState} from "src/lib/state/LibInterpreterState.sol";
-import {IntegrityCheckState} from "src/lib/integrity/LibIntegrityCheck.sol";
-import {LibOpBlockNumber} from "src/lib/op/evm/LibOpBlockNumber.sol";
+import {LibInterpreterState, InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
+import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
+import {LibOpBlockNumber} from "../../../../../src/lib/op/evm/LibOpBlockNumber.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 
 /// @title LibOpBlockNumberTest
@@ -64,5 +65,10 @@ contract LibOpBlockNumberTest is OpTest {
 
     function testOpBlockNumberEvalTwoOutputs() external {
         checkBadOutputs("_ _: block-number();", 0, 1, 2);
+    }
+
+    /// Test that operand is disallowed.
+    function testOpBlockNumberEvalOperandDisallowed() external {
+        checkUnhappyParse("_: block-number<0>();", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }

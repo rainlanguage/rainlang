@@ -1,14 +1,14 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {OpTest} from "test/abstract/OpTest.sol";
-import {LibOpIf} from "src/lib/op/logic/LibOpIf.sol";
-import {IntegrityCheckState, BadOpInputsLength} from "src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {InterpreterState} from "src/lib/state/LibInterpreterState.sol";
+import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
+import {LibOpIf} from "../../../../../src/lib/op/logic/LibOpIf.sol";
+import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
 
 contract LibOpIfTest is OpTest {
     /// Directly test the integrity logic of LibOpIf. No matter the
@@ -96,14 +96,11 @@ contract LibOpIfTest is OpTest {
     /// conditionals assume numeric inputs. We can demonstrate some of the
     /// weirdness in testing.
     function testOpIfEvalEmptyStringTruthy() external view {
-        /// Empty string is false, because even though there's a binary high
-        /// bit set, it looks like an exponent on zero as a float.
-        checkHappy("_: if(\"\" 5 50);", Float.unwrap(LibDecimalFloat.packLossless(50, 0)), "");
-        /// "foo" is also false, because even with a length of 3 it still
-        /// looks like an exponent on zero as a float.
-        checkHappy("_: if(\"foo\" 5 50);", Float.unwrap(LibDecimalFloat.packLossless(50, 0)), "");
-        /// "foos" is true because it has enough chars to look like a non
-        /// zero float.
+        /// Empty string is true, because all strings are true.
+        checkHappy("_: if(\"\" 5 50);", Float.unwrap(LibDecimalFloat.packLossless(5, 0)), "");
+        /// "foo" is also true, because all strings are true.
+        checkHappy("_: if(\"foo\" 5 50);", Float.unwrap(LibDecimalFloat.packLossless(5, 0)), "");
+        /// "foos" is true, because all strings are true.
         checkHappy("_: if(\"foos\" 5 50);", Float.unwrap(LibDecimalFloat.packLossless(5, 0)), "");
     }
 
@@ -141,5 +138,10 @@ contract LibOpIfTest is OpTest {
 
     function testOpIfEvalTwoOutputs() external {
         checkBadOutputs("_ _: if(5 0 0);", 3, 1, 2);
+    }
+
+    /// Test that operand is disallowed.
+    function testOpIfEvalOperandDisallowed() external {
+        checkUnhappyParse("_: if<0>(1 2 3);", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }

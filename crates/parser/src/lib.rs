@@ -1,3 +1,5 @@
+//! Rust client for the on-chain Rainlang parser contract.
+
 pub mod error;
 pub mod v2;
 

@@ -1,11 +1,12 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {OpTest} from "test/abstract/OpTest.sol";
-import {LibOpMaxPositiveValue} from "src/lib/op/math/LibOpMaxPositiveValue.sol";
-import {IntegrityCheckState, BadOpInputsLength} from "src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {InterpreterState, LibInterpreterState} from "src/lib/state/LibInterpreterState.sol";
+import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
+import {LibOpMaxPositiveValue} from "../../../../../src/lib/op/math/LibOpMaxPositiveValue.sol";
+import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {InterpreterState, LibInterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
 
@@ -65,5 +66,10 @@ contract LibOpMaxPositiveValueTest is OpTest {
 
     function testOpMaxPositiveValueTwoOutputs() external {
         checkBadOutputs("_ _: max-positive-value();", 0, 1, 2);
+    }
+
+    /// Test that operand is disallowed.
+    function testOpMaxPositiveValueEvalOperandDisallowed() external {
+        checkUnhappyParse("_: max-positive-value<0>();", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }

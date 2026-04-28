@@ -1,13 +1,13 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {OpTest} from "test/abstract/OpTest.sol";
-import {LibOpLessThan} from "src/lib/op/logic/LibOpLessThan.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {InterpreterState} from "src/lib/state/LibInterpreterState.sol";
-import {IntegrityCheckState, BadOpInputsLength} from "src/lib/integrity/LibIntegrityCheck.sol";
+import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
+import {LibOpLessThan} from "../../../../../src/lib/op/logic/LibOpLessThan.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
+import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
 
 contract LibOpLessThanTest is OpTest {
     /// Directly test the integrity logic of LibOpLessThan. No matter the
@@ -53,62 +53,67 @@ contract LibOpLessThanTest is OpTest {
 
     /// Test the eval of less than opcode parsed from a string. Tests 2 inputs.
     /// The first input is 1, the second input is 0.
-    function testOpLessThanNPEval2InputsFirstOneSecondZero() external view {
+    function testOpLessThanEval2InputsFirstOneSecondZero() external view {
         checkHappy("_: less-than(1 0);", bytes32(uint256(0)), "");
     }
 
     /// Test the eval of less than opcode parsed from a string. Tests 2 inputs.
     /// Both inputs are 1.
-    function testOpLessThanNPEval2InputsBothOne() external view {
+    function testOpLessThanEval2InputsBothOne() external view {
         checkHappy("_: less-than(1 1);", bytes32(uint256(0)), "");
     }
 
     // Test 1.1 lt 1.2, which should return 1.
-    function testOpLessThanNP1_1Lt1_2() external view {
+    function testOpLessThan1_1Lt1_2() external view {
         checkHappy("_: less-than(1.1 1.2);", bytes32(uint256(1)), "");
     }
 
     /// Test 1.0 lt 1 which should return 0.
-    function testOpLessThanNP1_0Lt1() external view {
+    function testOpLessThan1_0Lt1() external view {
         checkHappy("_: less-than(1.0 1);", bytes32(uint256(0)), "");
     }
 
     // Test -1.1 lt -1.2, which should return 0.
-    function testOpLessThanNPMinus1_1LtMinus1_2() external view {
+    function testOpLessThanMinus1_1LtMinus1_2() external view {
         checkHappy("_: less-than(-1.1 -1.2);", bytes32(uint256(0)), "");
     }
 
     /// Test -1 lt 0, which should return 1.
-    function testOpLessThanNPMinus1Lt0() external view {
+    function testOpLessThanMinus1Lt0() external view {
         checkHappy("_: less-than(-1 0);", bytes32(uint256(1)), "");
     }
 
     /// Test that a less than to without inputs fails integrity check.
-    function testOpLessThanToNPEvalFail0Inputs() public {
+    function testOpLessThanToEvalFail0Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 2, 0));
         bytes memory bytecode = I_DEPLOYER.parse2("_: less-than();");
         (bytecode);
     }
 
     /// Test that a less than to with 1 input fails integrity check.
-    function testOpLessThanToNPEvalFail1Input() public {
+    function testOpLessThanToEvalFail1Input() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 2, 1));
         bytes memory bytecode = I_DEPLOYER.parse2("_: less-than(0x00);");
         (bytecode);
     }
 
     /// Test that a less than to with 3 inputs fails integrity check.
-    function testOpLessThanToNPEvalFail3Inputs() public {
+    function testOpLessThanToEvalFail3Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 3, 2, 3));
         bytes memory bytecode = I_DEPLOYER.parse2("_: less-than(0x00 0x00 0x00);");
         (bytecode);
     }
 
-    function testOpLessThanNPZeroOutputs() external {
+    function testOpLessThanZeroOutputs() external {
         checkBadOutputs(": less-than(0 0);", 2, 1, 0);
     }
 
-    function testOpLessThanNPTwoOutputs() external {
+    function testOpLessThanTwoOutputs() external {
         checkBadOutputs("_ _: less-than(30 0);", 2, 1, 2);
+    }
+
+    /// Test that operand is disallowed.
+    function testOpLessThanEvalOperandDisallowed() external {
+        checkUnhappyParse("_: less-than<0>(1 2);", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }

@@ -2,15 +2,16 @@ use crate::execute::Execute;
 use crate::fork::NewForkedEvmCliArgs;
 use crate::output::SupportedOutputEncoding;
 use alloy::primitives::{Address, U256};
-use anyhow::anyhow;
 use anyhow::Context;
 use anyhow::Result;
+use anyhow::anyhow;
 use clap::Args;
-use rain_interpreter_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
-use rain_interpreter_eval::trace::RainEvalResult;
-use rain_interpreter_eval::{eval::ForkEvalArgs, fork::Forker};
+use rainlang_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
+use rainlang_eval::trace::RainEvalResult;
+use rainlang_eval::{eval::ForkEvalArgs, fork::Forker};
 use std::path::PathBuf;
 
+/// CLI arguments for evaluating a Rainlang expression.
 #[derive(Args, Clone, Debug)]
 pub struct ForkEvalCliArgs {
     #[arg(short, long, help = "The Rainlang string to parse")]
@@ -19,9 +20,8 @@ pub struct ForkEvalCliArgs {
     #[arg(short, long, help = "The source index")]
     pub source_index: u16,
 
-    // Assuming `Address` can be parsed directly from a string argument
-    #[arg(short, long, help = "The address of the deployer")]
-    pub deployer: Address,
+    #[arg(long, help = "The address of the Rainlang contract")]
+    pub rainlang: Address,
 
     #[arg(short, long, help = "The namespace")]
     pub namespace: String,
@@ -74,7 +74,7 @@ impl TryFrom<ForkEvalCliArgs> for ForkEvalArgs {
         Ok(ForkEvalArgs {
             rainlang_string: args.rainlang_string,
             source_index: args.source_index,
-            deployer: args.deployer,
+            rainlang: args.rainlang,
             namespace: FullyQualifiedNamespace::from(namespace),
             context,
             decode_errors: args.decode_errors,
@@ -93,6 +93,7 @@ fn parse_int_or_hex(value: &str) -> Result<U256> {
     }
 }
 
+/// CLI subcommand that evaluates a Rainlang expression against a forked EVM.
 #[derive(Args, Clone)]
 pub struct Eval {
     /// Output path. If not specified, the output is written to stdout.
@@ -115,14 +116,16 @@ impl Execute for Eval {
 
         match result {
             Ok(res) => {
-                let rain_eval_result: RainEvalResult = res.into();
+                let rain_eval_result: RainEvalResult = res.try_into().map_err(
+                    |e: rainlang_eval::trace::RainEvalResultFromRawCallResultError| anyhow!(e),
+                )?;
                 crate::output::output(
                     &self.output_path,
                     SupportedOutputEncoding::Binary,
                     format!("{:#?}", rain_eval_result).as_bytes(),
                 )
             }
-            Err(e) => Err(anyhow!("Error: {:?}", e)),
+            Err(e) => Err(anyhow!(e)),
         }
     }
 }
@@ -130,7 +133,7 @@ impl Execute for Eval {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rain_interpreter_test_fixtures::LocalEvm;
+    use rainlang_test_fixtures::LocalEvm;
 
     #[test]
     fn test_parse_int_or_hex() {
@@ -140,10 +143,64 @@ mod tests {
         assert!(parse_int_or_hex("invalid").is_err());
     }
 
+    fn simple_cli_args() -> ForkEvalCliArgs {
+        ForkEvalCliArgs {
+            rainlang_string: "_: 1;".into(),
+            source_index: 0,
+            rainlang: Address::ZERO,
+            namespace: "0x0".into(),
+            context: vec![],
+            decode_errors: false,
+            inputs: None,
+            state_overlay: None,
+        }
+    }
+
+    #[test]
+    fn test_try_from_invalid_namespace() {
+        let mut args = simple_cli_args();
+        args.namespace = "not_a_number".into();
+        let result = ForkEvalArgs::try_from(args);
+        assert!(result.is_err());
+        let err = result.unwrap_err().to_string();
+        assert!(
+            err.contains("Invalid namespace format"),
+            "expected 'Invalid namespace format', got: {err}"
+        );
+    }
+
+    #[test]
+    fn test_try_from_invalid_context_value() {
+        let mut args = simple_cli_args();
+        args.context = vec!["123,bad_value,456".into()];
+        let result = ForkEvalArgs::try_from(args);
+        assert!(result.is_err());
+        let err = result.unwrap_err().to_string();
+        assert!(
+            err.contains("Invalid context value"),
+            "expected 'Invalid context value', got: {err}"
+        );
+    }
+
+    #[test]
+    fn test_try_from_valid() {
+        let mut args = simple_cli_args();
+        args.namespace = "0xff".into();
+        args.context = vec!["1,2,3".into(), "0xa,0xb".into()];
+        let result = ForkEvalArgs::try_from(args);
+        assert!(result.is_ok());
+        let eval_args = result.unwrap();
+        assert_eq!(eval_args.context.len(), 2);
+        assert_eq!(
+            eval_args.context[0],
+            vec![U256::from(1), U256::from(2), U256::from(3)]
+        );
+        assert_eq!(eval_args.context[1], vec![U256::from(0xa), U256::from(0xb)]);
+    }
+
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn test_execute() {
         let local_evm = LocalEvm::new().await;
-        let deployer = *local_evm.deployer.address();
 
         let eval = Eval {
             output_path: None,
@@ -154,7 +211,7 @@ mod tests {
             fork_eval_args: ForkEvalCliArgs {
                 rainlang_string: r"_: 12, _: context<0 0>(), _:context<0 1>();".into(),
                 source_index: 0,
-                deployer,
+                rainlang: local_evm.rainlang,
                 namespace: "0x123".into(),
                 context: vec!["0x06,99".into()],
                 decode_errors: true,

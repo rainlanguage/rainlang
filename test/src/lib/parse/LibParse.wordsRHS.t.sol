@@ -1,17 +1,18 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
 
-import {LibParse} from "src/lib/parse/LibParse.sol";
-import {LibParseState, ParseState} from "src/lib/parse/LibParseState.sol";
+import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
+import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
-import {LibAllStandardOps} from "src/lib/op/LibAllStandardOps.sol";
+import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 
 /// @title LibParseNamedRHSTest
-/// Test that the parser can handle named RHS values.
+/// @notice Test that the parser can handle named RHS values.
 contract LibParseNamedRHSTest is Test {
     using LibParse for ParseState;
 

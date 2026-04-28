@@ -1,3 +1,5 @@
+//! Alloy Solidity contract bindings for rainlang.
+
 use alloy::sol;
 
 sol!(
@@ -28,12 +30,8 @@ sol!(
     "../../out/IExpressionDeployerV3.sol/IExpressionDeployerV3.json"
 );
 
-// dispair binding
-sol! {
+sol!(
     #![sol(all_derives = true)]
-    interface  DeployerISP {
-        function I_INTERPRETER() public view returns(address);
-        function I_STORE() public view returns(address);
-        function I_PARSER() public view returns(address);
-    }
-}
+    Rainlang,
+    "../../out/Rainlang.sol/Rainlang.json"
+);

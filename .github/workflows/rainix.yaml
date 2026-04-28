@@ -1,10 +1,8 @@
 name: Rainix CI
 on: [push]
-
 concurrency:
   group: ${{ github.ref }}-rainix
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-
 jobs:
   rainix:
     strategy:
@@ -17,8 +15,6 @@ jobs:
             task: rainix-sol-test
           - os: ubuntu-latest
             task: rainix-sol-static
-          - os: ubuntu-latest
-            task: rainix-sol-artifacts
           # We don't need to do rust static analysis on multiple platforms
           - os: ubuntu-latest
             task: rainix-rs-static
@@ -34,7 +30,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
       - uses: nixbuild/nix-quick-install-action@v30
         with:
           nix_conf: |
@@ -51,15 +46,20 @@ jobs:
           # before trying to save a new cache
           # 1G = 1073741824
           gc-max-store-size-linux: 1G
-
       - run: nix develop -c rainix-sol-prelude
       - run: nix develop -c rainix-rs-prelude
-      - run: nix develop -c i9r-prelude
+      - run: nix develop -c rainlang-prelude
       - name: Run ${{ matrix.task }}
         env:
           ETH_RPC_URL: ${{ secrets.CI_DEPLOY_SEPOLIA_RPC_URL || vars.CI_DEPLOY_SEPOLIA_RPC_URL }}
+          CI_FORK_ETH_RPC_URL: ${{ secrets.RPC_URL_ETHEREUM_FORK || vars.RPC_URL_ETHEREUM_FORK || '' }}
           ETHERSCAN_API_KEY: ${{ secrets.EXPLORER_VERIFICATION_KEY }}
           DEPLOY_BROADCAST: ""
           DEPLOY_VERIFIER: ""
           DEPLOY_METABOARD_ADDRESS: ${{ vars.CI_DEPLOY_SEPOLIA_METABOARD_ADDRESS }}
+          CI_DEPLOY_ARBITRUM_RPC_URL: ${{ secrets.CI_DEPLOY_ARBITRUM_RPC_URL || vars.CI_DEPLOY_ARBITRUM_RPC_URL || '' }}
+          CI_DEPLOY_BASE_RPC_URL: ${{ secrets.CI_DEPLOY_BASE_RPC_URL || vars.CI_DEPLOY_BASE_RPC_URL || '' }}
+          CI_DEPLOY_BASE_SEPOLIA_RPC_URL: ${{ secrets.CI_DEPLOY_BASE_SEPOLIA_RPC_URL || vars.CI_DEPLOY_BASE_SEPOLIA_RPC_URL || '' }}
+          CI_DEPLOY_FLARE_RPC_URL: ${{ secrets.CI_DEPLOY_FLARE_RPC_URL || vars.CI_DEPLOY_FLARE_RPC_URL || '' }}
+          CI_DEPLOY_POLYGON_RPC_URL: ${{ secrets.CI_DEPLOY_POLYGON_RPC_URL || vars.CI_DEPLOY_POLYGON_RPC_URL || '' }}
         run: nix develop -c ${{ matrix.task }}

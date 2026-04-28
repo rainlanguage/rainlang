@@ -1,11 +1,13 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.18;
 
 import {Test} from "forge-std/Test.sol";
-import {LibParseState} from "src/lib/parse/LibParseState.sol";
+import {LibParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibCtPop} from "rain.math.binary/lib/LibCtPop.sol";
 
 /// @title LibParseStateConstantValueBloomTest
+/// @notice Tests for the constant value bloom filter in LibParseState.
 contract LibParseStateConstantValueBloomTest is Test {
     /// This is a kinda pointless test, it just duplicates the internal logic...
     function testConstantValueBloom(bytes32 value) external pure {

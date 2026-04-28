@@ -1,11 +1,13 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.18;
 
 import {Test} from "forge-std/Test.sol";
-import {LibParseState, ParseState} from "src/lib/parse/LibParseState.sol";
+import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
 
 /// @title LibParseStateExportSubParsersTest
+/// @notice Tests for exporting sub parsers from LibParseState.
 contract LibParseStateExportSubParsersTest is Test {
     using LibParseState for ParseState;
     using LibBytes for bytes;

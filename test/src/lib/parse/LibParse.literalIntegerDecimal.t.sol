@@ -1,17 +1,19 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {ParseTest} from "test/abstract/ParseTest.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 
-import {LibParse, UnexpectedRHSChar, UnexpectedRightParen} from "src/lib/parse/LibParse.sol";
+import {LibParse, UnexpectedRHSChar, UnexpectedRightParen} from "../../../../src/lib/parse/LibParse.sol";
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
-import {ParseState} from "src/lib/parse/LibParseState.sol";
+import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
 import {ParseDecimalOverflow} from "rain.string/error/ErrParse.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralIntegerDecimalTest
-/// Tests parsing integer literal decimal values.
+/// @notice Tests parsing integer literal decimal values.
 contract LibParseLiteralIntegerDecimalTest is ParseTest {
     using LibParse for ParseState;
 
@@ -200,7 +202,7 @@ contract LibParseLiteralIntegerDecimalTest is ParseTest {
 
     /// Check that decimal literals will revert if they overflow uint256.
     function testParseIntegerLiteralDecimalUint256OverflowSimple() external {
-        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, 81));
+        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, LibParseError.tagErrorOffset(81)));
         (bytes memory bytecode, bytes32[] memory constants) =
             this.parseExternal("_: 115792089237316195423570985008687907853269984665640564039457584007913129639936e-18;");
         (bytecode);
@@ -210,7 +212,7 @@ contract LibParseLiteralIntegerDecimalTest is ParseTest {
     /// Check that decimal literals will revert if they overflow uint256 with
     /// leading zeros.
     function testParseIntegerLiteralDecimalUint256OverflowLeadingZeros() external {
-        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, 83));
+        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, LibParseError.tagErrorOffset(83)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal(
             "_: 00115792089237316195423570985008687907853269984665640564039457584007913129639936e-18;"
         );
@@ -221,7 +223,7 @@ contract LibParseLiteralIntegerDecimalTest is ParseTest {
     // Check that decimal literals will revert if they overflow uint256 with
     // a non-one leading digit.
     function testParseIntegerLiteralDecimalUint256OverflowLeadingDigitBasic() external {
-        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, 81));
+        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, LibParseError.tagErrorOffset(81)));
         (bytes memory bytecode, bytes32[] memory constants) =
             this.parseExternal("_: 215792089237316195423570985008687907853269984665640564039457584007913129639935e-18;");
         (bytecode);
@@ -231,7 +233,7 @@ contract LibParseLiteralIntegerDecimalTest is ParseTest {
     /// Check that decimal literals will revert if they overflow uint256 with
     /// a non-one leading digit and leading zeros.
     function testParseIntegerLiteralDecimalUint256OverflowLeadingDigitLeadingZeros() external {
-        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, 83));
+        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, LibParseError.tagErrorOffset(83)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal(
             "_: 00215792089237316195423570985008687907853269984665640564039457584007913129639935e-18;"
         );
@@ -291,7 +293,7 @@ contract LibParseLiteralIntegerDecimalTest is ParseTest {
         // The second e will happily be parsed up to by the internal bounds logic
         // but the parser will be in a state of yang, unable to receive the next
         // non-yin char.
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, 5));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, LibParseError.tagErrorOffset(5)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal("_:1e0e;");
         (bytecode);
         (constants);
@@ -300,7 +302,7 @@ contract LibParseLiteralIntegerDecimalTest is ParseTest {
     /// Check that decimals cannot be used with parens as they are literals not
     /// words. This tests left paren.
     function testParseIntegerLiteralDecimalParensLeft() external {
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, 3));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, LibParseError.tagErrorOffset(3)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal("_:1(;");
         (bytecode);
         (constants);
@@ -309,7 +311,7 @@ contract LibParseLiteralIntegerDecimalTest is ParseTest {
     /// Check that decimals cannot be used with parens as they are literals not
     /// words. This tests right paren.
     function testParseIntegerLiteralDecimalParensRight() external {
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedRightParen.selector, 3));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedRightParen.selector, LibParseError.tagErrorOffset(3)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal("_:1);");
         (bytecode);
         (constants);
@@ -318,7 +320,7 @@ contract LibParseLiteralIntegerDecimalTest is ParseTest {
     /// Check that decimals cannot be used with parens as they are literals not
     /// words. This tests both parens.
     function testParseIntegerLiteralDecimalParensBoth() external {
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, 3));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedRHSChar.selector, LibParseError.tagErrorOffset(3)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal("_:1();");
         (bytecode);
         (constants);

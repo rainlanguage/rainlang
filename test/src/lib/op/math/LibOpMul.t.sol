@@ -1,21 +1,19 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {console2} from "forge-std/Test.sol";
-import {LibOpMul} from "src/lib/op/math/LibOpMul.sol";
+import {LibOpMul} from "../../../../../src/lib/op/math/LibOpMul.sol";
 import {OpTest, IntegrityCheckState, OperandV2} from "test/abstract/OpTest.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
 import {ExponentOverflow, CoefficientOverflow} from "rain.math.float/error/ErrDecimalFloat.sol";
 
 contract LibOpMulTest is OpTest {
     /// Directly test the integrity logic of LibOpMul. This tests the
     /// happy path where the inputs input and calc match.
-    function testOpMulIntegrityHappy(IntegrityCheckState memory state, uint8 inputs, uint16 operandData)
-        external
-        pure
-    {
+    function testOpMulIntegrityHappy(IntegrityCheckState memory state, uint8 inputs, uint16 operandData) external pure {
         inputs = uint8(bound(inputs, 2, 0x0F));
         (uint256 calcInputs, uint256 calcOutputs) = LibOpMul.integrity(state, LibOperand.build(inputs, 1, operandData));
 
@@ -34,7 +32,7 @@ contract LibOpMulTest is OpTest {
 
     /// Directly test the integrity logic of LibOpMul. This tests the
     /// unhappy path where the operand is invalid due to 1 inputs.
-    function testOpDecimal18MulNPIntegrityUnhappyOneInput(IntegrityCheckState memory state) external pure {
+    function testOpDecimal18MulIntegrityUnhappyOneInput(IntegrityCheckState memory state) external pure {
         (uint256 calcInputs, uint256 calcOutputs) =
             LibOpMul.integrity(state, OperandV2.wrap(bytes32(uint256(0x010000))));
         // Calc inputs will be minimum 2.

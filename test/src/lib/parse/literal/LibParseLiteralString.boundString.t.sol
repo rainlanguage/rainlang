@@ -1,15 +1,18 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
 import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
-import {LibParseLiteralString} from "src/lib/parse/literal/LibParseLiteralString.sol";
+import {LibParseLiteralString} from "../../../../../src/lib/parse/literal/LibParseLiteralString.sol";
 import {LibConformString} from "rain.string/lib/mut/LibConformString.sol";
-import {StringTooLong, UnclosedStringLiteral} from "src/error/ErrParse.sol";
-import {LibParseState, ParseState} from "src/lib/parse/LibParseState.sol";
-import {LibAllStandardOps} from "src/lib/op/LibAllStandardOps.sol";
+import {StringTooLong, UnclosedStringLiteral} from "../../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
+import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseState.sol";
+import {LibAllStandardOps} from "../../../../../src/lib/op/LibAllStandardOps.sol";
 
 /// @title LibParseLiteralStringBoundTest
+/// @notice Tests for string literal boundary detection.
 contract LibParseLiteralStringBoundTest is Test {
     using LibBytes for bytes;
     using LibParseLiteralString for ParseState;
@@ -69,7 +72,7 @@ contract LibParseLiteralStringBoundTest is Test {
         vm.assume(bytes(str).length >= 0x20);
         LibConformString.conformValidPrintableStringContent(str);
 
-        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(StringTooLong.selector, LibParseError.tagErrorOffset(0)));
         checkStringBounds(string.concat("\"", str, "\""), 0, 0, 0);
     }
 
@@ -80,7 +83,9 @@ contract LibParseLiteralStringBoundTest is Test {
         badIndex = bound(badIndex, 0, (bytes(str).length > 0x1F ? 0x1F : bytes(str).length) - 1);
         LibConformString.corruptSingleChar(str, badIndex);
 
-        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, 1 + badIndex));
+        vm.expectRevert(
+            abi.encodeWithSelector(UnclosedStringLiteral.selector, LibParseError.tagErrorOffset(1 + badIndex))
+        );
         checkStringBounds(string.concat("\"", str, "\""), 0, 0, 0);
     }
 
@@ -92,9 +97,31 @@ contract LibParseLiteralStringBoundTest is Test {
         str = string.concat("\"", str, "\"");
         length = bound(length, 1, bytes(str).length - 1);
 
-        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, length));
+        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, LibParseError.tagErrorOffset(length)));
         (uint256 outerStart, uint256 innerStart, uint256 innerEnd, uint256 outerEnd) =
             this.externalBoundLiteralForceLength(bytes(str), length);
         (outerStart, innerStart, innerEnd, outerEnd);
+    }
+
+    /// UnclosedStringLiteral when end == innerEnd: the closing quote character
+    /// is at exactly the end boundary, so there is no room for it.
+    function testBoundStringUnclosedAtEndBoundary() external {
+        // "hi" — length 4. Force length to 3 so end points at the closing ".
+        // innerEnd scans "hi" (2 chars), lands at offset 3 which equals end.
+        bytes memory data = bytes("\"hi\"");
+        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, LibParseError.tagErrorOffset(3)));
+        this.externalBoundLiteralForceLength(data, 3);
+    }
+
+    /// Fuzz variant: any valid string with end set to exclude the closing
+    /// quote hits the end == innerEnd branch.
+    function testBoundStringUnclosedAtEndBoundaryFuzz(string memory str) external {
+        vm.assume(bytes(str).length > 0 && bytes(str).length < 0x20);
+        LibConformString.conformValidPrintableStringContent(str);
+        bytes memory data = bytes(string.concat("\"", str, "\""));
+        // Force length to data.length - 1, placing end at the closing ".
+        uint256 length = data.length - 1;
+        vm.expectRevert(abi.encodeWithSelector(UnclosedStringLiteral.selector, LibParseError.tagErrorOffset(length)));
+        this.externalBoundLiteralForceLength(data, length);
     }
 }

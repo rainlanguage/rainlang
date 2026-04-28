@@ -1,10 +1,11 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
-import {LibParseOperand, OperandV2} from "src/lib/parse/LibParseOperand.sol";
-import {ExpectedOperand, UnexpectedOperandValue} from "src/error/ErrParse.sol";
-import {OperandOverflow} from "src/error/ErrParse.sol";
+import {LibParseOperand, OperandV2} from "../../../../src/lib/parse/LibParseOperand.sol";
+import {ExpectedOperand, UnexpectedOperandValue} from "../../../../src/error/ErrParse.sol";
+import {OperandOverflow} from "../../../../src/error/ErrParse.sol";
 
 contract LibParseOperandHandleOperand8M1M1Test is Test {
     //forge-lint: disable-next-line(mixed-case-function)
@@ -73,6 +74,22 @@ contract LibParseOperandHandleOperand8M1M1Test is Test {
         values[1] = bytes32(b);
         values[2] = bytes32(c);
         assertEq(OperandV2.unwrap(LibParseOperand.handleOperand8M1M1(values)), bytes32((c << 9) | (b << 8) | a));
+    }
+
+    // If all the values are provided but the first is greater than 1 byte, it
+    // is an error.
+    function testHandleOperand8M1M1AllValuesFirstValueTooLarge(int256 a, uint256 b, uint256 c) external {
+        a = bound(a, int256(uint256(type(uint8).max)) + 1, type(int128).max);
+        b = bound(b, 0, 1);
+        c = bound(c, 0, 1);
+
+        bytes32[] memory values = new bytes32[](3);
+        //forge-lint: disable-next-line(unsafe-typecast)
+        values[0] = bytes32(uint256(a));
+        values[1] = bytes32(b);
+        values[2] = bytes32(c);
+        vm.expectRevert(abi.encodeWithSelector(OperandOverflow.selector));
+        this.handleOperand8M1M1External(values);
     }
 
     // If all the values are provided, the first is 1 byte, the second is 1 bit

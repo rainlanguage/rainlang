@@ -1,17 +1,26 @@
 {
+  "lib/rain.deploy": {
+    "rev": "ccfdb378d2ab1ed95461ecf1355682250e487e4c"
+  },
+  "lib/rain.extrospection": {
+    "rev": "f9a46744a66daf4004a3edc1d4387ae14a9dc8e4"
+  },
   "lib/rain.interpreter.interface": {
-    "rev": "2d06b797698d3ed2555e93162176479127a02b1a"
+    "rev": "0908a84b9eceb796f9bb7deb261aac75502f9dce"
   },
   "lib/rain.lib.memkv": {
-    "rev": "90efd9409786b50d691209c172ce3f4b74a54996"
+    "rev": "83e607990be8b3e06549338043c6b18f430f6bd2"
   },
   "lib/rain.metadata": {
     "rev": "0cfba664c5a381662ed4436979ad47e12e76c2a8"
   },
   "lib/rain.string": {
-    "rev": "0b1ca08aed6d9c06b83fe127a7d20ee7002ead28"
+    "rev": "488f237cd59874e4eb91b5a4f747bd57578fec7f"
+  },
+  "lib/rain.tofu.erc20-decimals": {
+    "rev": "bcf1f45248a2e45a3e28dda06e21b3617610f86b"
   },
   "lib/sol.lib.binmaskflag": {
-    "rev": "3b0bbf05e38ee4a31ca65070e41b299fa6bcdf9e"
+    "rev": "3ea4a8b4e5cc2ecf80ee408ecd0a213de44841c0"
   }
 }

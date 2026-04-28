@@ -1,11 +1,13 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
-import {LibOpSqrt} from "src/lib/op/math/LibOpSqrt.sol";
+import {PowNegativeBase} from "rain.math.float/error/ErrDecimalFloat.sol";
+import {LibOpSqrt} from "../../../../../src/lib/op/math/LibOpSqrt.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 
 contract LibOpSqrtTest is OpTest {
     using LibDecimalFloat for Float;
@@ -62,6 +64,11 @@ contract LibOpSqrtTest is OpTest {
 
     function testOpSqrtEvalTwoOutputs() external {
         checkBadOutputs("_ _: sqrt(1);", 1, 1, 2);
+    }
+
+    /// Test that sqrt of a negative number reverts.
+    function testOpSqrtEvalNegativeInput() external {
+        checkUnhappy("_: sqrt(-1);", abi.encodeWithSelector(PowNegativeBase.selector, -1, 0));
     }
 
     /// Test that operand is disallowed.

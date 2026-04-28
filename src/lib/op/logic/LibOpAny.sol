@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
-import {OperandV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {Pointer} from "rain.solmem/lib/LibPointer.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
 
 /// @title LibOpAny
@@ -14,18 +14,25 @@ import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
 library LibOpAny {
     using LibDecimalFloat for Float;
 
+    /// @notice `any` integrity check. Requires at least 1 input and produces 1 output.
+    /// @param operand The operand encoding the number of inputs.
+    /// @return The number of inputs.
+    /// @return The number of outputs.
     function integrity(IntegrityCheckState memory, OperandV2 operand) internal pure returns (uint256, uint256) {
         // There must be at least one input.
-        uint256 inputs = uint256((OperandV2.unwrap(operand) >> 0x10) & bytes32(uint256(0x0F)));
+        uint256 inputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
         inputs = inputs > 0 ? inputs : 1;
         return (inputs, 1);
     }
 
-    /// ANY
+    /// @notice ANY
     /// ANY is the first nonzero item, else 0.
+    /// @param operand The operand encoding the number of inputs.
+    /// @param stackTop Pointer to the top of the stack.
+    /// @return The new stack top pointer after execution.
     function run(InterpreterState memory, OperandV2 operand, Pointer stackTop) internal pure returns (Pointer) {
         unchecked {
-            uint256 length = 0x20 * uint256((OperandV2.unwrap(operand) >> 0x10) & bytes32(uint256(0x0F)));
+            uint256 length = 0x20 * (uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F);
             Float item;
             Pointer cursor = stackTop;
             Pointer end = Pointer.wrap(Pointer.unwrap(stackTop) + length);
@@ -47,7 +54,9 @@ library LibOpAny {
         return stackTop;
     }
 
-    /// Gas intensive reference implementation of ANY for testing.
+    /// @notice Gas intensive reference implementation of ANY for testing.
+    /// @param inputs The input values from the stack.
+    /// @return outputs The output values to push onto the stack.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
         internal
         pure

@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
 import {LibInterpreterState, InterpreterState} from "../state/LibInterpreterState.sol";
 
@@ -7,16 +8,46 @@ import {LibMemCpy} from "rain.solmem/lib/LibMemCpy.sol";
 import {LibMemoryKV, MemoryKV} from "rain.lib.memkv/lib/LibMemoryKV.sol";
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
 import {Pointer} from "rain.solmem/lib/LibPointer.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 
-/// Thrown when the inputs length does not match the expected inputs length.
-/// @param expected The expected number of inputs.
-/// @param actual The actual number of inputs.
-error InputsLengthMismatch(uint256 expected, uint256 actual);
+import {InputsLengthMismatch} from "../../error/ErrEval.sol";
+
+/// @dev Shift to extract a packed 2-byte function pointer from the high bits
+/// of a 256-bit mload. `shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(...))` yields
+/// the 16-bit pointer value.
+uint256 constant OPCODE_FUNCTION_POINTER_SHIFT = 0xf0;
+
+/// @dev Shift to extract a packed 2-byte source offset from the bytecode
+/// header. Same width as function pointers but semantically distinct — these
+/// are relative offsets into the bytecode, not function pointers.
+uint256 constant SOURCE_OFFSET_SHIFT = 0xf0;
 
 library LibEval {
     using LibMemoryKV for MemoryKV;
 
+    /// @notice Evaluates opcodes from a single source in the bytecode. Reads 32-byte
+    /// words from the source, each containing up to 8 packed 4-byte opcodes
+    /// (1 byte opcode index + 3 bytes operand). Each opcode index is looked up
+    /// in the function pointer table (bounded by modulo) and dispatched.
+    /// A remainder loop handles sources whose opcode count is not a multiple
+    /// of 8. Emits a stack trace via `STACK_TRACER` after execution.
+    ///
+    /// TRUST: `state.sourceIndex` is NOT bounds-checked against the bytecode's
+    /// source count. All callers MUST validate it before calling. `eval4` does
+    /// this via `LibBytecode.sourceInputsOutputsLength` (which reverts with
+    /// `SourceIndexOutOfBounds`). `LibOpCall.run` relies on integrity checks
+    /// at deploy time to reject invalid source indices in operands. The
+    /// function pointer table is read-only during evaluation so a corrupt
+    /// source index cannot modify the dispatch table, but it would cause the
+    /// cursor to land at an arbitrary bytecode position and execute whatever
+    /// bytes happen to be there as opcodes.
+    /// @param state The interpreter state containing bytecode, constants,
+    /// stacks, and function pointers.
+    /// @param parentSourceIndex The source index of the caller (used for stack
+    /// tracing).
+    /// @param stackTop Pointer to the current top of the stack.
+    /// @param stackBottom Pointer to the bottom of the stack (highest address).
+    /// @return The updated stack top pointer after evaluation.
     function evalLoop(InterpreterState memory state, uint256 parentSourceIndex, Pointer stackTop, Pointer stackBottom)
         internal
         view
@@ -43,7 +74,7 @@ library LibEval {
                 // Find start of sources.
                 let sourcesStart := add(cursor, mul(sourcesLength, 2))
                 // Find relative pointer to source.
-                let sourcesPointer := shr(0xf0, mload(add(cursor, mul(sourceIndex, 2))))
+                let sourcesPointer := shr(SOURCE_OFFSET_SHIFT, mload(add(cursor, mul(sourceIndex, 2))))
                 // Move cursor to start of source.
                 cursor := add(sourcesStart, sourcesPointer)
                 // Calculate the end.
@@ -64,10 +95,7 @@ library LibEval {
             }
         }
 
-        function(InterpreterState memory, OperandV2, Pointer)
-                    internal
-                    view
-                    returns (Pointer) f;
+        function(InterpreterState memory, OperandV2, Pointer) internal view returns (Pointer) f;
         OperandV2 operand;
         uint256 word;
         while (cursor < end) {
@@ -79,56 +107,71 @@ library LibEval {
             // f needs to be looked up from the fn pointers table.
             // operand is 3 bytes.
             assembly ("memory-safe") {
-                f := shr(0xf0, mload(add(fPointersStart, mul(mod(byte(0, word), fsCount), 2))))
+                f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(mod(byte(0, word), fsCount), 2))))
                 operand := and(shr(0xe0, word), 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
 
             // Bytes [24, 27].
             assembly ("memory-safe") {
-                f := shr(0xf0, mload(add(fPointersStart, mul(mod(byte(4, word), fsCount), 2))))
+                f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(mod(byte(4, word), fsCount), 2))))
                 operand := and(shr(0xc0, word), 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
 
             // Bytes [20, 23].
             assembly ("memory-safe") {
-                f := shr(0xf0, mload(add(fPointersStart, mul(mod(byte(8, word), fsCount), 2))))
+                f := shr(OPCODE_FUNCTION_POINTER_SHIFT, mload(add(fPointersStart, mul(mod(byte(8, word), fsCount), 2))))
                 operand := and(shr(0xa0, word), 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
 
             // Bytes [16, 19].
             assembly ("memory-safe") {
-                f := shr(0xf0, mload(add(fPointersStart, mul(mod(byte(12, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(12, word), fsCount), 2)))
+                )
                 operand := and(shr(0x80, word), 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
 
             // Bytes [12, 15].
             assembly ("memory-safe") {
-                f := shr(0xf0, mload(add(fPointersStart, mul(mod(byte(16, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(16, word), fsCount), 2)))
+                )
                 operand := and(shr(0x60, word), 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
 
             // Bytes [8, 11].
             assembly ("memory-safe") {
-                f := shr(0xf0, mload(add(fPointersStart, mul(mod(byte(20, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(20, word), fsCount), 2)))
+                )
                 operand := and(shr(0x40, word), 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
 
             // Bytes [4, 7].
             assembly ("memory-safe") {
-                f := shr(0xf0, mload(add(fPointersStart, mul(mod(byte(24, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(24, word), fsCount), 2)))
+                )
                 operand := and(shr(0x20, word), 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
 
             // Bytes [0, 3].
             assembly ("memory-safe") {
-                f := shr(0xf0, mload(add(fPointersStart, mul(mod(byte(28, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(28, word), fsCount), 2)))
+                )
                 operand := and(word, 0xFFFFFF)
             }
             stackTop = f(state, operand, stackTop);
@@ -145,7 +188,10 @@ library LibEval {
         while (cursor < end) {
             assembly ("memory-safe") {
                 word := mload(cursor)
-                f := shr(0xf0, mload(add(fPointersStart, mul(mod(byte(28, word), fsCount), 2))))
+                f := shr(
+                    OPCODE_FUNCTION_POINTER_SHIFT,
+                    mload(add(fPointersStart, mul(mod(byte(28, word), fsCount), 2)))
+                )
                 // 3 bytes mask.
                 operand := and(word, 0xFFFFFF)
             }
@@ -158,7 +204,19 @@ library LibEval {
         return stackTop;
     }
 
-    function eval2(InterpreterState memory state, StackItem[] memory inputs, uint256 maxOutputs)
+    /// @notice Top-level evaluation entry point. Validates that `inputs` length matches
+    /// the source's declared input count, copies inputs onto the stack, runs
+    /// `evalLoop`, then constructs the output array from the final stack
+    /// position.
+    /// @param state The interpreter state containing bytecode, constants,
+    /// stacks, store, and function pointers.
+    /// @param inputs The stack items to pass as inputs to the source.
+    /// @param maxOutputs The maximum number of outputs to return from the
+    /// final stack.
+    /// @return The output stack items, truncated to `maxOutputs`.
+    /// @return The state KV writes as a flat array of interleaved keys and
+    /// values from the in-memory KV store.
+    function eval4(InterpreterState memory state, StackItem[] memory inputs, uint256 maxOutputs)
         internal
         view
         returns (StackItem[] memory, bytes32[] memory)
@@ -175,6 +233,13 @@ library LibEval {
             {
                 stackBottom = state.stackBottoms[state.sourceIndex];
                 stackTop = stackBottom;
+                // Inputs length must always match what the bytecode
+                // expects. Without this check a caller could pass more
+                // inputs than the stack allocation, moving stackTop
+                // below allocated memory.
+                if (inputs.length != sourceInputs) {
+                    revert InputsLengthMismatch(sourceInputs, inputs.length);
+                }
                 // Copy inputs into place if needed.
                 if (inputs.length > 0) {
                     // Inline some logic to avoid jumping due to function calls
@@ -186,8 +251,6 @@ library LibEval {
                         inputsDataPointer := add(inputs, 0x20)
                     }
                     LibMemCpy.unsafeCopyWordsTo(inputsDataPointer, stackTop, inputs.length);
-                } else if (inputs.length != sourceInputs) {
-                    revert InputsLengthMismatch(sourceInputs, inputs.length);
                 }
             }
 
@@ -199,9 +262,9 @@ library LibEval {
             // If the stack top is pointing to the base of Solidity's understanding
             // of the stack array, then this will simply write the same length over
             // the length the stack was initialized with, otherwise a shorter array
-            // will be built within the bounds of the stack. After this point `tail`
-            // and the original stack MUST be immutable as they're both pointing to
-            // the same memory region.
+            // will be built within the bounds of the stack. After this point `stack`
+            // and the original stack array MUST be immutable as they're both
+            // pointing to the same memory region.
             uint256 outputs = maxOutputs < sourceOutputs ? maxOutputs : sourceOutputs;
             StackItem[] memory stack;
             assembly ("memory-safe") {

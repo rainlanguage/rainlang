@@ -1,19 +1,23 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
-import {OperandV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {Pointer} from "rain.solmem/lib/LibPointer.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
 import {LibDecimalFloatImplementation} from "rain.math.float/lib/implementation/LibDecimalFloatImplementation.sol";
 
 /// @title LibOpSub
-/// @notice Opcode to subtract N integers.
+/// @notice Opcode to subtract N decimal floating point values.
 library LibOpSub {
     using LibDecimalFloat for Float;
 
+    /// @notice `sub` integrity check. Requires at least 2 inputs and produces 1 output.
+    /// @param operand Low 4 bits of the high byte encode the input count.
+    /// @return inputs The number of stack items consumed (minimum 2).
+    /// @return outputs Always 1.
     function integrity(IntegrityCheckState memory, OperandV2 operand) internal pure returns (uint256, uint256) {
         // There must be at least two inputs.
         uint256 inputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
@@ -21,7 +25,11 @@ library LibOpSub {
         return (inputs, 1);
     }
 
-    /// sub
+    /// @notice Subtracts N decimal floating point values from the first value on the
+    /// stack. Pops all inputs and pushes the result.
+    /// @param operand Low 4 bits of the high byte encode the input count.
+    /// @param stackTop Pointer to the top of the stack.
+    /// @return The updated stack top with the difference written.
     function run(InterpreterState memory, OperandV2 operand, Pointer stackTop) internal pure returns (Pointer) {
         Float a;
         Float b;
@@ -61,7 +69,9 @@ library LibOpSub {
         return stackTop;
     }
 
-    /// Gas intensive reference implementation of subtraction for testing.
+    /// @notice Gas intensive reference implementation of subtraction for testing.
+    /// @param inputs The stack items to subtract (first minus rest).
+    /// @return outputs Single-element array containing the difference.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
         internal
         pure

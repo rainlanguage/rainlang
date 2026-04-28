@@ -1,20 +1,18 @@
 use alloy::primitives::{Address, B256, U256, keccak256};
-use rain_interpreter_bindings::IInterpreterV4::FullyQualifiedNamespace;
+use rainlang_bindings::IInterpreterV4::FullyQualifiedNamespace;
 
-pub struct CreateNamespace {}
+/// Qualifies a state namespace by hashing it with the sender address,
+/// matching the on-chain `qualifyNamespace` logic in RainlangStore.
+pub fn qualify_namespace(state_namespace: B256, sender: Address) -> FullyQualifiedNamespace {
+    // Combine state namespace and sender into a single 64-byte array
+    let mut combined = [0u8; 64];
+    combined[..32].copy_from_slice(state_namespace.as_slice());
+    combined[44..].copy_from_slice(sender.as_slice());
 
-impl CreateNamespace {
-    pub fn qualify_namespace(state_namespace: B256, sender: Address) -> FullyQualifiedNamespace {
-        // Combine state namespace and sender into a single 64-byte array
-        let mut combined = [0u8; 64];
-        combined[..32].copy_from_slice(state_namespace.as_slice());
-        combined[44..].copy_from_slice(sender.as_slice());
+    // Hash the combined array with Keccak256
+    let qualified_namespace = keccak256(combined);
 
-        // Hash the combined array with Keccak256
-        let qualified_namespace = keccak256(combined);
-
-        FullyQualifiedNamespace::from(U256::from_be_bytes(qualified_namespace.0))
-    }
+    FullyQualifiedNamespace::from(U256::from_be_bytes(qualified_namespace.0))
 }
 
 #[cfg(test)]
@@ -26,7 +24,7 @@ mod tests {
     fn test_new() {
         let state_namespace = B256::repeat_byte(0x1);
         let sender = Address::repeat_byte(0x2);
-        let namespace = CreateNamespace::qualify_namespace(state_namespace, sender);
+        let namespace = qualify_namespace(state_namespace, sender);
 
         // Got the below from chisel
         let expected =

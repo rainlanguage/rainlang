@@ -1,20 +1,21 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {OpTest} from "test/abstract/OpTest.sol";
-import {LibOpLessThanOrEqualTo} from "src/lib/op/logic/LibOpLessThanOrEqualTo.sol";
-import {IntegrityCheckState, BadOpInputsLength} from "src/lib/integrity/LibIntegrityCheck.sol";
+import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
+import {LibOpLessThanOrEqualTo} from "../../../../../src/lib/op/logic/LibOpLessThanOrEqualTo.sol";
+import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {
     OperandV2,
     SourceIndexV2,
     FullyQualifiedNamespace,
-    EvalV4
-} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {InterpreterState} from "src/lib/state/LibInterpreterState.sol";
-import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV3.sol";
+    EvalV4,
+    StackItem
+} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
+import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV4.sol";
 import {LibContext} from "rain.interpreter.interface/lib/caller/LibContext.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
 
 contract LibOpLessThanOrEqualToTest is OpTest {
     /// Directly test the integrity logic of LibOpLessThanOrEqualTo. No matter the
@@ -137,6 +138,26 @@ contract LibOpLessThanOrEqualToTest is OpTest {
         assertEq(kvs.length, 0);
     }
 
+    /// Test 1.1 <= 1.2, which should return 1.
+    function testOpLessThanOrEqualToEvalOnePointOneLteOnePointTwo() external view {
+        checkHappy("_: less-than-or-equal-to(1.1 1.2);", bytes32(uint256(1)), "");
+    }
+
+    /// Test 1.0 <= 1, which should return 1 (equal).
+    function testOpLessThanOrEqualToEvalOnePointZeroLteOne() external view {
+        checkHappy("_: less-than-or-equal-to(1.0 1);", bytes32(uint256(1)), "");
+    }
+
+    /// Test -1.1 <= -1.2, which should return 0.
+    function testOpLessThanOrEqualToEvalNegOnePointOneLteNegOnePointTwo() external view {
+        checkHappy("_: less-than-or-equal-to(-1.1 -1.2);", 0, "");
+    }
+
+    /// Test -1 <= 0, which should return 1.
+    function testOpLessThanOrEqualToEvalNegOneLteZero() external view {
+        checkHappy("_: less-than-or-equal-to(-1 0);", bytes32(uint256(1)), "");
+    }
+
     /// Test that a less than or equal to without inputs fails integrity check.
     function testOpLessThanOrEqualToEvalFail0Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 2, 0));
@@ -165,5 +186,10 @@ contract LibOpLessThanOrEqualToTest is OpTest {
 
     function testOpLessThanOrEqualToTwoOutputs() external {
         checkBadOutputs("_ _: less-than-or-equal-to(1 2);", 2, 1, 2);
+    }
+
+    /// Test that operand is disallowed.
+    function testOpLessThanOrEqualToEvalOperandDisallowed() external {
+        checkUnhappyParse("_: less-than-or-equal-to<0>(1 2);", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }

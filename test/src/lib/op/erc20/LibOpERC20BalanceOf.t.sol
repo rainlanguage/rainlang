@@ -1,20 +1,27 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {OpTest} from "test/abstract/OpTest.sol";
-import {IntegrityCheckState} from "src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {LibOpERC20BalanceOf} from "src/lib/op/erc20/LibOpERC20BalanceOf.sol";
+import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {LibOpERC20BalanceOf} from "../../../../../src/lib/op/erc20/LibOpERC20BalanceOf.sol";
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import {UnexpectedOperand} from "src/error/ErrParse.sol";
+import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {IERC20Metadata} from "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
 import {LibDecimalFloat, Float, LossyConversionToFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {TOFUOutcome, ITOFUTokenDecimals} from "rain.tofu.erc20-decimals/interface/ITOFUTokenDecimals.sol";
+import {NotAnAddress} from "../../../../../src/error/ErrRainType.sol";
+import {LibTestCast} from "test/lib/typecast/LibTestCast.sol";
+import {LibBytes32Array} from "rain.solmem/lib/LibBytes32Array.sol";
 
 /// @title LibOpERC20BalanceOfTest
 /// @notice Test the opcode for getting the balance of an erc20 token.
 contract LibOpERC20BalanceOfTest is OpTest {
+    using LibTestCast for StackItem[];
+    using LibBytes32Array for bytes32[];
+
     function testOpERC20BalanceOfIntegrity(IntegrityCheckState memory state, OperandV2 operand) external pure {
         (uint256 calcInputs, uint256 calcOutputs) = LibOpERC20BalanceOf.integrity(state, operand);
 
@@ -111,6 +118,52 @@ contract LibOpERC20BalanceOfTest is OpTest {
 
     function testOpERC20BalanceOfEvalTwoOutputs() external {
         checkBadOutputs("_ _: erc20-balance-of(0xdeadbeef 0xdeadc0de);", 2, 1, 2);
+    }
+
+    /// Test that a token without `decimals()` reverts with ReadFailure.
+    function testOpERC20BalanceOfDecimalsReadFailure() external {
+        vm.mockCall(
+            address(0xdeadbeef),
+            abi.encodeWithSelector(IERC20.balanceOf.selector, address(0xdeadc0de)),
+            abi.encode(uint256(1000))
+        );
+        // No mock for decimals — token doesn't implement it.
+        checkUnhappy(
+            "_: erc20-balance-of(0xdeadbeef 0xdeadc0de);",
+            abi.encodeWithSelector(
+                ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, address(0xdeadbeef), TOFUOutcome.ReadFailure
+            )
+        );
+    }
+
+    /// Test that non-address token input reverts.
+    function testOpERC20BalanceOfNotAnAddressToken(uint256 token) external {
+        // Casting to `uint160` is intentional to detect non-address values.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        vm.assume(token != uint256(uint160(token)));
+        StackItem[] memory inputs = new StackItem[](2);
+        inputs[0] = StackItem.wrap(bytes32(token));
+        inputs[1] = StackItem.wrap(bytes32(uint256(uint160(address(0xdeadc0de)))));
+        OperandV2 operand = LibOperand.build(2, 1, 0);
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, token));
+        this.externalRun(operand, inputs);
+    }
+
+    /// Test that non-address account input reverts.
+    function testOpERC20BalanceOfNotAnAddressAccount(uint256 account) external {
+        // Casting to `uint160` is intentional to detect non-address values.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        vm.assume(account != uint256(uint160(account)));
+        StackItem[] memory inputs = new StackItem[](2);
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(0xdeadbeef)))));
+        inputs[1] = StackItem.wrap(bytes32(account));
+        OperandV2 operand = LibOperand.build(2, 1, 0);
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, account));
+        this.externalRun(operand, inputs);
+    }
+
+    function externalRun(OperandV2 operand, StackItem[] memory inputs) external view {
+        LibOpERC20BalanceOf.run(opTestDefaultInterpreterState(), operand, inputs.asBytes32Array().dataPointer());
     }
 
     /// Test that operand is disallowed.

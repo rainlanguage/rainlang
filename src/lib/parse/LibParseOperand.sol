@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
 import {
     ExpectedOperand,
@@ -9,7 +10,7 @@ import {
     UnexpectedOperandValue,
     OperandOverflow
 } from "../../error/ErrParse.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {LibParseLiteral} from "./literal/LibParseLiteral.sol";
 import {CMASK_OPERAND_END, CMASK_WHITESPACE, CMASK_OPERAND_START} from "rain.string/lib/parse/LibParseCMask.sol";
 import {ParseState, OPERAND_VALUES_LENGTH, FSM_YANG_MASK} from "./LibParseState.sol";
@@ -17,6 +18,9 @@ import {LibParseError} from "./LibParseError.sol";
 import {LibParseInterstitial} from "./LibParseInterstitial.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
 
+/// @title LibParseOperand
+/// @notice Parses operand values from Rainlang source text and dispatches
+/// to type-specific operand handlers.
 library LibParseOperand {
     using LibParseError for ParseState;
     using LibParseLiteral for ParseState;
@@ -24,7 +28,14 @@ library LibParseOperand {
     using LibParseInterstitial for ParseState;
     using LibDecimalFloat for Float;
 
-    function parseOperand(ParseState memory state, uint256 cursor, uint256 end) internal pure returns (uint256) {
+    /// @notice Parses an operand from the source string at the cursor position,
+    /// extracting literal values between the operand delimiters into the
+    /// state's operandValues array.
+    /// @param state The current parse state.
+    /// @param cursor The current cursor position in the source string.
+    /// @param end The end of the source string.
+    /// @return The updated cursor position after parsing the operand.
+    function parseOperand(ParseState memory state, uint256 cursor, uint256 end) internal view returns (uint256) {
         uint256 char;
         assembly ("memory-safe") {
             //slither-disable-next-line incorrect-shift
@@ -114,7 +125,7 @@ library LibParseOperand {
         return cursor;
     }
 
-    /// Standard dispatch for handling an operand after it is parsed, using the
+    /// @notice Standard dispatch for handling an operand after it is parsed, using the
     /// encoded function pointers on the current parse state. Requires that the
     /// word index has been looked up by the parser, exists, and the literal
     /// values have all been parsed out of the operand string. In the case of
@@ -122,11 +133,14 @@ library LibParseOperand {
     /// parser the literal extraction will be done first, then the word lookup
     /// will have to be done by the sub parser, alongside the values provided
     /// by the main parser.
+    /// @param state The current parse state.
+    /// @param wordIndex The index of the word in the parse state's word list.
+    /// @return The operand constructed by the handler for the given word.
     function handleOperand(ParseState memory state, uint256 wordIndex) internal pure returns (OperandV2) {
-        function (bytes32[] memory) internal pure returns (OperandV2) handler;
+        function(bytes32[] memory) internal pure returns (OperandV2) handler;
         bytes memory handlers = state.operandHandlers;
         assembly ("memory-safe") {
-            // There is no bounds check here because the indexes are calcualted
+            // There is no bounds check here because the indexes are calculated
             // by the parser itself, NOT provided by the user. Therefore the
             // scope of corrupt data is limited to a bug in the parser itself,
             // which can and should have direct test coverage.
@@ -135,6 +149,10 @@ library LibParseOperand {
         return handler(state.operandValues);
     }
 
+    /// @notice Operand handler that disallows any operand values. Reverts if any
+    /// values are provided, otherwise returns a zero operand.
+    /// @param values The parsed operand values from the source string.
+    /// @return The zero operand.
     function handleOperandDisallowed(bytes32[] memory values) internal pure returns (OperandV2) {
         if (values.length != 0) {
             revert UnexpectedOperand();
@@ -142,6 +160,10 @@ library LibParseOperand {
         return OperandV2.wrap(0);
     }
 
+    /// @notice Operand handler that disallows any operand values but always returns
+    /// an operand of 1 instead of 0.
+    /// @param values The parsed operand values from the source string.
+    /// @return The operand with a constant value of 1.
     function handleOperandDisallowedAlwaysOne(bytes32[] memory values) internal pure returns (OperandV2) {
         if (values.length != 0) {
             revert UnexpectedOperand();
@@ -149,9 +171,12 @@ library LibParseOperand {
         return OperandV2.wrap(bytes32(uint256(1)));
     }
 
-    /// There must be one or zero values. The fallback is 0 if nothing is
-    /// provided, else the provided value MUST fit in two bytes and is used as
-    /// is.
+    /// @notice There must be one or zero values. The fallback is 0 if nothing is
+    /// provided, else the provided Float value is converted to a lossless
+    /// integer and MUST fit in a uint16.
+    /// @param values The parsed operand values from the source string.
+    /// @return operand The single full operand, defaulting to 0 if not
+    /// provided.
     function handleOperandSingleFull(bytes32[] memory values) internal pure returns (OperandV2 operand) {
         // Happy path at the top for efficiency.
         if (values.length == 1) {
@@ -171,7 +196,11 @@ library LibParseOperand {
         }
     }
 
-    /// There must be exactly one value. There is no default fallback.
+    /// @notice There must be exactly one value. There is no default fallback. The
+    /// provided Float value is converted to a lossless integer and MUST fit
+    /// in a uint16.
+    /// @param values The parsed operand values from the source string.
+    /// @return operand The single full operand with no default.
     function handleOperandSingleFullNoDefault(bytes32[] memory values) internal pure returns (OperandV2 operand) {
         // Happy path at the top for efficiency.
         if (values.length == 1) {
@@ -180,7 +209,7 @@ library LibParseOperand {
             }
             (int256 signedCoefficient, int256 exponent) = Float.wrap(OperandV2.unwrap(operand)).unpack();
             uint256 operandUint = LibDecimalFloat.toFixedDecimalLossless(signedCoefficient, exponent, 0);
-            if (operandUint > uint256(type(uint16).max)) {
+            if (operandUint > type(uint16).max) {
                 revert OperandOverflow();
             }
             operand = OperandV2.wrap(bytes32(operandUint));
@@ -191,8 +220,11 @@ library LibParseOperand {
         }
     }
 
-    /// There must be exactly two values. There is no default fallback. Each
-    /// value MUST fit in one byte and is used as is.
+    /// @notice There must be exactly two values. There is no default fallback. Each
+    /// Float value is converted to a lossless integer and MUST fit in a
+    /// uint8. Packed as `a | (b << 8)`.
+    /// @param values The parsed operand values from the source string.
+    /// @return operand The double-per-byte operand with no default.
     function handleOperandDoublePerByteNoDefault(bytes32[] memory values) internal pure returns (OperandV2 operand) {
         // Happy path at the top for efficiency.
         if (values.length == 2) {
@@ -220,8 +252,11 @@ library LibParseOperand {
         }
     }
 
-    /// 8 bit value then maybe 1 bit flag then maybe 1 bit flag. Fallback to 0
-    /// for both flags if not provided.
+    /// @notice 8 bit value then maybe 1 bit flag then maybe 1 bit flag. Fallback to 0
+    /// for both flags if not provided. Packed as `a | (b << 8) | (c << 9)`.
+    /// @param values The parsed operand values from the source string.
+    /// @return operand The operand encoding an 8-bit value and two optional
+    /// 1-bit flags.
     //forge-lint: disable-next-line(mixed-case-function)
     function handleOperand8M1M1(bytes32[] memory values) internal pure returns (OperandV2 operand) {
         // Happy path at the top for efficiency.
@@ -270,7 +305,10 @@ library LibParseOperand {
         }
     }
 
-    /// 2x maybe 1 bit flags. Fallback to 0 for both flags if not provided.
+    /// @notice 2x maybe 1 bit flags. Fallback to 0 for both flags if not provided.
+    /// Packed as `a | (b << 1)`.
+    /// @param values The parsed operand values from the source string.
+    /// @return operand The operand encoding two optional 1-bit flags.
     //forge-lint: disable-next-line(mixed-case-function)
     function handleOperandM1M1(bytes32[] memory values) internal pure returns (OperandV2 operand) {
         // Happy path at the top for efficiency.

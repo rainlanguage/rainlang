@@ -1,16 +1,18 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 
-import {LibParse} from "src/lib/parse/LibParse.sol";
-import {LibParseState, ParseState} from "src/lib/parse/LibParseState.sol";
-import {UnexpectedRightParen} from "src/error/ErrParse.sol";
-import {LibAllStandardOps} from "src/lib/op/LibAllStandardOps.sol";
+import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
+import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {UnexpectedRightParen} from "../../../../src/error/ErrParse.sol";
+import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseUnexpectedRightParenTest
-/// Test that the parser errors when it encounters an unexpected right paren.
+/// @notice Test that the parser errors when it encounters an unexpected right paren.
 contract LibParseUnexpectedRightParenTest is Test {
     using LibParse for ParseState;
 
@@ -32,7 +34,7 @@ contract LibParseUnexpectedRightParenTest is Test {
             LibAllStandardOps.literalParserFunctionPointers()
         );
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedRightParen.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedRightParen.selector, LibParseError.tagErrorOffset(1)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal(state);
         (bytecode, constants);
     }
@@ -47,7 +49,7 @@ contract LibParseUnexpectedRightParenTest is Test {
             LibAllStandardOps.literalParserFunctionPointers()
         );
 
-        vm.expectRevert(abi.encodeWithSelector(UnexpectedRightParen.selector, 7));
+        vm.expectRevert(abi.encodeWithSelector(UnexpectedRightParen.selector, LibParseError.tagErrorOffset(7)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal(state);
         (bytecode, constants);
     }

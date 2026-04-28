@@ -1,39 +1,45 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
-import {OperandV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
 import {
     IInterpreterExternV4,
     ExternDispatchV2,
-    EncodedExternDispatchV2,
-    // Export for convenience.
-    //forge-lint: disable-next-line(unused-import)
-    StackItem
-} from "rain.interpreter.interface/interface/unstable/IInterpreterExternV4.sol";
+    EncodedExternDispatchV2
+} from "rain.interpreter.interface/interface/IInterpreterExternV4.sol";
+// StackItem exported for convenience.
+//forge-lint: disable-next-line(unused-import)
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 
 /// @title LibExtern
-/// Defines and implements an encoding and decoding scheme for the data that
+/// @notice Defines and implements an encoding and decoding scheme for the data that
 /// controls the behaviour of externs.
 library LibExtern {
-    /// Converts an opcode and operand pair into a single 32-byte word.
+    /// @notice Converts an opcode and operand pair into a single 32-byte word.
     /// The encoding scheme is:
     /// - bits [0,16): the operand
     /// - bits [16,32): the opcode
     /// IMPORTANT: The encoding process does not check that either the opcode or
     /// operand fit within 16 bits. This is the responsibility of the caller.
+    /// @param opcode The opcode index.
+    /// @param operand The operand value.
+    /// @return The encoded extern dispatch.
     function encodeExternDispatch(uint256 opcode, OperandV2 operand) internal pure returns (ExternDispatchV2) {
         return ExternDispatchV2.wrap(bytes32(opcode) << 0x10 | OperandV2.unwrap(operand));
     }
 
-    /// Inverse of `encodeExternDispatch`.
+    /// @notice Inverse of `encodeExternDispatch`.
+    /// @param dispatch The encoded extern dispatch to decode.
+    /// @return The opcode index.
+    /// @return The operand value.
     function decodeExternDispatch(ExternDispatchV2 dispatch) internal pure returns (uint256, OperandV2) {
         return (
-            uint256(ExternDispatchV2.unwrap(dispatch) >> 0x10),
-            OperandV2.wrap(ExternDispatchV2.unwrap(dispatch) & bytes32(uint256(0xFFFF)))
+            uint256((ExternDispatchV2.unwrap(dispatch) >> 0x10) & bytes32(uint256(type(uint16).max))),
+            OperandV2.wrap(ExternDispatchV2.unwrap(dispatch) & bytes32(uint256(type(uint16).max)))
         );
     }
 
-    /// Encodes an extern address and dispatch pair into a single 32-byte word.
+    /// @notice Encodes an extern address and dispatch pair into a single 32-byte word.
     /// This is the full data required to actually call an extern contract.
     /// The encoding scheme is:
     /// - bits [0,160): the address of the extern contract
@@ -44,6 +50,9 @@ library LibExtern {
     /// IMPORTANT: The encoding process does not check that any of the values
     /// fit within their respective bit ranges. This is the responsibility of
     /// the caller.
+    /// @param extern The extern contract address.
+    /// @param dispatch The encoded extern dispatch.
+    /// @return The encoded extern call.
     function encodeExternCall(IInterpreterExternV4 extern, ExternDispatchV2 dispatch)
         internal
         pure
@@ -54,7 +63,10 @@ library LibExtern {
         );
     }
 
-    /// Inverse of `encodeExternCall`.
+    /// @notice Inverse of `encodeExternCall`.
+    /// @param dispatch The encoded extern call to decode.
+    /// @return The extern contract.
+    /// @return The extern dispatch.
     function decodeExternCall(EncodedExternDispatchV2 dispatch)
         internal
         pure

@@ -5431,38 +5431,34 @@ dependencies = [
 ]
 
 [[package]]
-name = "rain-i9r-cli"
+name = "rainlang-cli"
 version = "0.0.1"
 dependencies = [
  "alloy",
  "anyhow",
  "clap",
- "rain-interpreter-eval",
- "rain_interpreter_bindings",
- "rain_interpreter_test_fixtures",
- "serde",
- "serde_bytes",
+ "rainlang-eval",
+ "rainlang_bindings",
+ "rainlang_test_fixtures",
+ "tempfile",
  "tokio",
  "tracing",
  "tracing-subscriber 0.3.19",
 ]
 
 [[package]]
-name = "rain-interpreter-eval"
+name = "rainlang-eval"
 version = "0.1.0"
 dependencies = [
  "alloy",
  "eyre",
  "foundry-evm",
- "once_cell",
  "rain-error-decoding 0.1.0 (git+https://github.com/rainlanguage/rain.error?rev=3d2ed70fb2f7c6156706846e10f163d1e493a8d3)",
- "rain_interpreter_bindings",
- "rain_interpreter_test_fixtures",
- "reqwest 0.11.27",
+ "rainlang_bindings",
+ "rainlang_test_fixtures",
  "revm 24.0.1",
  "revm 25.0.0",
  "serde",
- "serde_json",
  "thiserror 1.0.69",
  "tokio",
  "tracing",
@@ -5470,49 +5466,37 @@ dependencies = [
 ]
 
 [[package]]
-name = "rain_interpreter_bindings"
+name = "rainlang_bindings"
 version = "0.1.0"
 dependencies = [
  "alloy",
 ]
 
 [[package]]
-name = "rain_interpreter_dispair"
+name = "rainlang_dispair"
 version = "0.1.0"
 dependencies = [
  "alloy",
- "alloy-ethers-typecast",
- "rain_interpreter_bindings",
- "rain_interpreter_test_fixtures",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "tracing-subscriber 0.3.19",
 ]
 
 [[package]]
-name = "rain_interpreter_parser"
+name = "rainlang_parser"
 version = "0.1.0"
 dependencies = [
  "alloy",
  "alloy-ethers-typecast",
- "rain_interpreter_bindings",
- "rain_interpreter_dispair",
- "serde",
- "serde_json",
+ "rainlang_bindings",
+ "rainlang_dispair",
  "thiserror 1.0.69",
  "tokio",
 ]
 
 [[package]]
-name = "rain_interpreter_test_fixtures"
+name = "rainlang_test_fixtures"
 version = "0.0.0"
 dependencies = [
  "alloy",
  "getrandom 0.2.16",
- "serde_json",
 ]
 
 [[package]]
@@ -6617,15 +6601,6 @@ name = "serde_arrays"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94a16b99c5ea4fe3daccd14853ad260ec00ea043b2708d1fd1da3106dcd8d9df"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "serde_bytes"
-version = "0.11.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8437fd221bde2d4ca316d61b90e337e9e702b3820b87d63caa9ba6c02bd06d96"
 dependencies = [
  "serde",
 ]

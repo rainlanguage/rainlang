@@ -1,19 +1,17 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {OpTest, IntegrityCheckState, InterpreterState} from "test/abstract/OpTest.sol";
-import {LibOpMin} from "src/lib/op/math/LibOpMin.sol";
+import {LibOpMin} from "../../../../../src/lib/op/math/LibOpMin.sol";
 import {LibOperand, OperandV2} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
 
 contract LibOpMinTest is OpTest {
     /// Directly test the integrity logic of LibOpMin. This tests the happy
     /// path where the inputs input and calc match.
-    function testOpMinIntegrityHappy(IntegrityCheckState memory state, uint8 inputs, uint16 operandData)
-        external
-        pure
-    {
+    function testOpMinIntegrityHappy(IntegrityCheckState memory state, uint8 inputs, uint16 operandData) external pure {
         inputs = uint8(bound(inputs, 2, 0x0F));
         (uint256 calcInputs, uint256 calcOutputs) = LibOpMin.integrity(state, LibOperand.build(inputs, 1, operandData));
 
@@ -252,6 +250,14 @@ contract LibOpMinTest is OpTest {
         checkHappy("_: min(0 0 -2);", Float.unwrap(LibDecimalFloat.packLossless(-2, 0)), "0 0 -2");
         checkHappy("_: min(1 0 -2);", Float.unwrap(LibDecimalFloat.packLossless(-2, 0)), "1 0 -2");
         checkHappy("_: min(-1.1 -1.0 0);", Float.unwrap(LibDecimalFloat.packLossless(-11, -1)), "-1.1 -1.0 0");
+    }
+
+    function testOpMinZeroOutputs() external {
+        checkBadOutputs(": min(1 1);", 2, 1, 0);
+    }
+
+    function testOpMinTwoOutputs() external {
+        checkBadOutputs("_ _: min(1 1);", 2, 1, 2);
     }
 
     /// Test the eval of `min` opcode parsed from a string.

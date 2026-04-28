@@ -1,10 +1,11 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, stdError} from "test/abstract/OpTest.sol";
-import {LibOpUint256Add} from "src/lib/op/math/uint256/LibOpUint256Add.sol";
+import {LibOpUint256Add} from "../../../../../../src/lib/op/math/uint256/LibOpUint256Add.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 
 contract LibOpUint256AddTest is OpTest {
     /// Directly test the integrity logic of LibOpUint256Add. This tests the happy

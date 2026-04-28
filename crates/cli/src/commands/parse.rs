@@ -2,17 +2,18 @@ use crate::execute::Execute;
 use crate::fork::NewForkedEvmCliArgs;
 use crate::output::SupportedOutputEncoding;
 use alloy::primitives::Address;
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use clap::Args;
-use rain_interpreter_eval::eval::ForkParseArgs;
-use rain_interpreter_eval::fork::Forker;
+use rainlang_eval::eval::ForkParseArgs;
+use rainlang_eval::fork::Forker;
 use std::path::PathBuf;
 
+/// CLI arguments for parsing a Rainlang expression.
 #[derive(Args, Clone, Debug)]
 pub struct ForkParseArgsCli {
-    #[arg(short, long, help = "The address of the deployer")]
-    deployer: Address,
+    #[arg(long, help = "The address of the Rainlang contract")]
+    rainlang: Address,
 
     #[arg(short, long, help = "The Rainlang string to parse")]
     rainlang_string: String,
@@ -21,6 +22,7 @@ pub struct ForkParseArgsCli {
     decode_errors: bool,
 }
 
+/// CLI subcommand that parses a Rainlang expression into bytecode.
 #[derive(Args, Clone)]
 pub struct Parse {
     /// Output path. If not specified, the output is written to stdout.
@@ -40,7 +42,7 @@ pub struct Parse {
 impl From<ForkParseArgsCli> for ForkParseArgs {
     fn from(args: ForkParseArgsCli) -> Self {
         ForkParseArgs {
-            deployer: args.deployer,
+            rainlang: args.rainlang,
             rainlang_string: args.rainlang_string,
             decode_errors: args.decode_errors,
         }
@@ -58,7 +60,36 @@ impl Execute for Parse {
                 self.output_encoding.clone(),
                 res.raw.result.to_owned().to_vec().as_slice(),
             ),
-            Err(e) => Err(anyhow!("Error: {:?}", e)),
+            Err(e) => Err(anyhow!(e)),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::fork::NewForkedEvmCliArgs;
+    use rainlang_test_fixtures::LocalEvm;
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+    async fn test_execute() {
+        let local_evm = LocalEvm::new().await;
+
+        let parse = Parse {
+            output_path: None,
+            output_encoding: SupportedOutputEncoding::Binary,
+            forked_evm: NewForkedEvmCliArgs {
+                fork_url: local_evm.url(),
+                fork_block_number: None,
+            },
+            fork_parse_args: ForkParseArgsCli {
+                rainlang: local_evm.rainlang,
+                rainlang_string: "_: 1;".into(),
+                decode_errors: false,
+            },
+        };
+
+        let result = parse.execute().await;
+        assert!(result.is_ok());
     }
 }

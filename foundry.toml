@@ -17,21 +17,20 @@ evm_version = "cancun"
 
 # These settings should be used for snapshots
 optimizer = true
-# set to match rain.orderbook
-# this is a bit low, was set to 1000000 previously but this caused deployment
-# code size cap to be hit.
-optimizer_runs = 1000
+optimizer_runs = 1000000
 
+ffi = true
 bytecode_hash = "none"
 cbor_metadata = false
 
 fs_permissions = [
+    {access="read-write", path="./out/test/"},
     { access = "read-write", path = "./meta" },
     { access = "read-write", path = "src/generated" },
-    { access = "write", path = "./deployments/latest/RainterpreterParser" },
-    { access = "write", path = "./deployments/latest/RainterpreterStore" },
-    { access = "write", path = "./deployments/latest/Rainterpreter" },
-    { access = "write", path = "./deployments/latest/RainterpreterExpressionDeployer" }
+    { access = "write", path = "./deployments/latest/RainlangParser" },
+    { access = "write", path = "./deployments/latest/RainlangStore" },
+    { access = "write", path = "./deployments/latest/RainlangInterpreter" },
+    { access = "write", path = "./deployments/latest/RainlangExpressionDeployer" }
 ]
 
 remappings = [
@@ -43,7 +42,25 @@ remappings = [
     "openzeppelin-contracts/=lib/rain.interpreter.interface/lib/openzeppelin-contracts/",
     "rain.math.float/=lib/rain.interpreter.interface/lib/rain.math.float/src/",
     "rain.intorastring/=lib/rain.interpreter.interface/lib/rain.intorastring/src/",
+    "rain.deploy/=lib/rain.deploy/src/",
+    "rain.tofu.erc20-decimals/=lib/rain.tofu.erc20-decimals/src/",
 ]
+
+gas_limit = "18446744073709551615"
 
 [fuzz]
 runs = 2048
+
+[rpc_endpoints]
+arbitrum = "${CI_DEPLOY_ARBITRUM_RPC_URL}"
+base = "${CI_DEPLOY_BASE_RPC_URL}"
+base_sepolia = "${CI_DEPLOY_BASE_SEPOLIA_RPC_URL}"
+flare = "${CI_DEPLOY_FLARE_RPC_URL}"
+polygon = "${CI_DEPLOY_POLYGON_RPC_URL}"
+
+[etherscan]
+arbitrum = { key = "${CI_DEPLOY_ARBITRUM_ETHERSCAN_API_KEY}" }
+base = { key = "${CI_DEPLOY_BASE_ETHERSCAN_API_KEY}" }
+base_sepolia = { key = "${CI_DEPLOY_BASE_SEPOLIA_ETHERSCAN_API_KEY}" }
+flare = { key = "${CI_DEPLOY_FLARE_ETHERSCAN_API_KEY}" }
+polygon = { key = "${CI_DEPLOY_POLYGON_ETHERSCAN_API_KEY}" }

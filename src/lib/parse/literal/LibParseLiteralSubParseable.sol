@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
 import {ParseState} from "../LibParseState.sol";
 import {LibParse} from "../LibParse.sol";
@@ -10,13 +11,16 @@ import {LibParseError} from "../LibParseError.sol";
 import {LibSubParse} from "../LibSubParse.sol";
 import {LibParseChar} from "rain.string/lib/parse/LibParseChar.sol";
 
+/// @title LibParseLiteralSubParseable
+/// @notice Parses sub-parseable literals delimited by `[` and `]` by
+/// delegating to registered sub-parser contracts.
 library LibParseLiteralSubParseable {
     using LibParse for ParseState;
     using LibParseInterstitial for ParseState;
     using LibParseError for ParseState;
     using LibSubParse for ParseState;
 
-    /// Parse a sub parseable literal. All sub parseable literals are bounded by
+    /// @notice Parse a sub parseable literal. All sub parseable literals are bounded by
     /// square brackets, and contain a dispatch and a body. The dispatch is the
     /// string immediately following the opening bracket, and the body is the
     /// string immediately following the dispatch, up to the closing bracket.
@@ -26,6 +30,11 @@ library LibParseLiteralSubParseable {
     /// Leading and trailing whitespace before/after the dispatch/body is NOT
     /// supported. The former will error and the latter will be treated as part
     /// of the body.
+    /// @param state The current parse state.
+    /// @param cursor The cursor position at the opening bracket.
+    /// @param end The end of the source string.
+    /// @return The updated cursor position after parsing.
+    /// @return The parsed literal value.
     function parseSubParseable(ParseState memory state, uint256 cursor, uint256 end)
         internal
         view
@@ -52,13 +61,17 @@ library LibParseLiteralSubParseable {
 
             uint256 bodyStart = cursor;
 
-            // Skip all chars til the close.
-            // Note that as multibyte is not supported, and the mask is 128 bits,
-            // non-ascii chars MAY either fail to be skipped or will be treated
-            // as a closing bracket.
+            // Skip all chars til the close. Each byte is checked independently
+            // against the mask — multibyte encodings are not understood. A byte
+            // in a multibyte sequence that equals `]` (0x5D) would stop the
+            // scan prematurely. This cannot happen in valid UTF-8 (continuation
+            // bytes are 0x80-0xBF), but is possible in other encodings.
             cursor = LibParseChar.skipMask(cursor, end, ~CMASK_SUB_PARSEABLE_LITERAL_END);
             uint256 bodyEnd = cursor;
 
+            if (cursor >= end) {
+                revert UnclosedSubParseableLiteral(state.parseErrorOffset(cursor));
+            }
             {
                 uint256 finalChar;
                 assembly ("memory-safe") {

@@ -1,8 +1,9 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
 import {Pointer} from "rain.solmem/lib/LibPointer.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {LibIntOrAString, IntOrAString} from "rain.intorastring/lib/LibIntOrAString.sol";
@@ -14,15 +15,20 @@ library LibOpEnsure {
     using LibDecimalFloat for Float;
     using LibIntOrAString for IntOrAString;
 
+    /// @notice `ensure` integrity check. Requires exactly 2 inputs and
+    /// produces 0 outputs.
+    /// @return The number of inputs.
+    /// @return The number of outputs.
     function integrity(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256) {
-        // There must be exactly 2 inputs.
         return (2, 0);
     }
 
-    /// `ensure`
+    /// @notice `ensure`
     /// If the condition is zero, the expression will revert with the given
     /// string.
     /// All conditions are eagerly evaluated and there are no outputs.
+    /// @param stackTop Pointer to the top of the stack.
+    /// @return The new stack top pointer after execution.
     function run(InterpreterState memory, OperandV2, Pointer stackTop) internal pure returns (Pointer) {
         Float condition;
         IntOrAString reason;
@@ -33,12 +39,14 @@ library LibOpEnsure {
         }
 
         if (condition.isZero()) {
-            revert(reason.toString());
+            revert(reason.toStringV3());
         }
         return stackTop;
     }
 
-    /// Gas intensive reference implementation of `ensure` for testing.
+    /// @notice Gas intensive reference implementation of `ensure` for testing.
+    /// @param inputs The input values from the stack.
+    /// @return outputs The output values to push onto the stack.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
         internal
         pure
@@ -46,7 +54,7 @@ library LibOpEnsure {
     {
         require(
             !Float.wrap(StackItem.unwrap(inputs[0])).isZero(),
-            IntOrAString.wrap(uint256(StackItem.unwrap(inputs[1]))).toString()
+            IntOrAString.wrap(uint256(StackItem.unwrap(inputs[1]))).toStringV3()
         );
         outputs = new StackItem[](0);
     }

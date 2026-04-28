@@ -1,16 +1,18 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {ParseTest} from "test/abstract/ParseTest.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 
-import {LibParse} from "src/lib/parse/LibParse.sol";
+import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
-import {ExcessLHSItems, ExcessRHSItems} from "src/error/ErrParse.sol";
-import {ParseState} from "src/lib/parse/LibParseState.sol";
+import {ExcessLHSItems, ExcessRHSItems} from "../../../../src/error/ErrParse.sol";
+import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseNOutputTest
-/// Test that the parser can handle multi and zero outputs for RHS items when
+/// @notice Test that the parser can handle multi and zero outputs for RHS items when
 /// they are singular on a line, and mandates individual items otherwise.
 contract LibParseNOutputTest is ParseTest {
     using LibParse for ParseState;
@@ -41,14 +43,14 @@ contract LibParseNOutputTest is ParseTest {
     /// Multiple RHS items MUST NOT have 0 outputs. Tests two RHS items and zero
     /// LHS items.
     function testParseNOutputExcessRHS1() external {
-        vm.expectRevert(abi.encodeWithSelector(ExcessRHSItems.selector, 8));
+        vm.expectRevert(abi.encodeWithSelector(ExcessRHSItems.selector, LibParseError.tagErrorOffset(8)));
         this.parseExternal(":a() b();");
     }
 
     /// Multiple RHS items MUST NOT have 0 outputs. Tests two RHS items and one
     /// LHS item.
     function testParseNOutputExcessRHS2() external {
-        vm.expectRevert(abi.encodeWithSelector(ExcessRHSItems.selector, 9));
+        vm.expectRevert(abi.encodeWithSelector(ExcessRHSItems.selector, LibParseError.tagErrorOffset(9)));
         this.parseExternal("_:a() b();");
     }
 
@@ -81,7 +83,7 @@ contract LibParseNOutputTest is ParseTest {
     /// Multiple RHS items MUST NOT have multiple outputs. Tests two RHS items
     /// and three LHS items.
     function testParseNOutputExcessRHS3() external {
-        vm.expectRevert(abi.encodeWithSelector(ExcessLHSItems.selector, 13));
+        vm.expectRevert(abi.encodeWithSelector(ExcessLHSItems.selector, LibParseError.tagErrorOffset(13)));
         this.parseExternal("_ _ _:a() b();");
     }
 

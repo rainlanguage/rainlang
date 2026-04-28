@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 // Exported for convenience in op tests.
@@ -9,8 +10,9 @@ import {MemoryKV} from "rain.lib.memkv/lib/LibMemoryKV.sol";
 import {LibUint256Array} from "rain.solmem/lib/LibUint256Array.sol";
 import {LibPointer, Pointer} from "rain.solmem/lib/LibPointer.sol";
 
-import {RainterpreterExpressionDeployerDeploymentTest} from "./RainterpreterExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionDeployerDeploymentTest} from "./RainlangExpressionDeployerDeploymentTest.sol";
 import {LibInterpreterState, InterpreterState} from "../../src/lib/state/LibInterpreterState.sol";
+import {LibInterpreterStateFingerprint} from "../lib/state/LibInterpreterStateFingerprint.sol";
 import {IntegrityCheckState, LibIntegrityCheck} from "../../src/lib/integrity/LibIntegrityCheck.sol";
 
 import {LibContext} from "rain.interpreter.interface/lib/caller/LibContext.sol";
@@ -22,11 +24,12 @@ import {
     IInterpreterStoreV3,
     EvalV4,
     StackItem
-} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {FullyQualifiedNamespace, StateNamespace} from "rain.interpreter.interface/interface/IInterpreterStoreV2.sol";
-import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV3.sol";
+} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {FullyQualifiedNamespace, StateNamespace} from "rain.interpreter.interface/interface/IInterpreterStoreV3.sol";
+import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV4.sol";
 import {LibNamespace} from "rain.interpreter.interface/lib/ns/LibNamespace.sol";
 import {ExponentOverflow, CoefficientOverflow} from "rain.math.float/error/ErrDecimalFloat.sol";
+import {LibTOFUTokenDecimals} from "rain.tofu.erc20-decimals/lib/LibTOFUTokenDecimals.sol";
 
 import {console2} from "forge-std/console2.sol";
 import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
@@ -34,8 +37,9 @@ import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
 bytes32 constant PRE = keccak256(abi.encodePacked("pre"));
 bytes32 constant POST = keccak256(abi.encodePacked("post"));
 
-abstract contract OpTest is RainterpreterExpressionDeployerDeploymentTest {
+abstract contract OpTest is RainlangExpressionDeployerDeploymentTest {
     using LibInterpreterState for InterpreterState;
+    using LibInterpreterStateFingerprint for InterpreterState;
     using LibUint256Array for uint256[];
     using LibPointer for Pointer;
 
@@ -64,6 +68,7 @@ abstract contract OpTest is RainterpreterExpressionDeployerDeploymentTest {
         vm.assume(account != address(expression));
         // The console.
         vm.assume(account != address(0x000000000000000000636F6e736F6c652e6c6f67));
+        vm.assume(account != address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT));
     }
 
     function opTestDefaultIngegrityCheckState() internal pure returns (IntegrityCheckState memory) {
@@ -95,7 +100,7 @@ abstract contract OpTest is RainterpreterExpressionDeployerDeploymentTest {
         IntegrityCheckState memory integrityState = LibIntegrityCheck.newState("", 0, constants);
         (uint256 calcInputs, uint256 calcOutputs) = integrityFn(integrityState, operand);
         assertEq(calcInputs, inputs.length, "inputs length");
-        assertEq(calcInputs, uint256((OperandV2.unwrap(operand) >> 0x10) & bytes32(uint256(0x0F))), "operand inputs");
+        assertEq(calcInputs, uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F, "operand inputs");
         assertEq(calcOutputs, uint256(OperandV2.unwrap(operand) >> 0x14), "operand outputs");
         return calcOutputs;
     }

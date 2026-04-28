@@ -1,19 +1,18 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {OpTest, IntegrityCheckState, OperandV2} from "test/abstract/OpTest.sol";
-import {LibOpSub} from "src/lib/op/math/LibOpSub.sol";
+import {UnexpectedOperandValue, UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
+import {LibOpSub} from "../../../../../src/lib/op/math/LibOpSub.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
 
 contract LibOpSubTest is OpTest {
     /// Directly test the integrity logic of LibOpSub. This tests the happy
     /// path where the inputs input and calc match.
-    function testOpSubIntegrityHappy(IntegrityCheckState memory state, uint8 inputs, uint16 operandData)
-        external
-        pure
-    {
+    function testOpSubIntegrityHappy(IntegrityCheckState memory state, uint8 inputs, uint16 operandData) external pure {
         inputs = uint8(bound(inputs, 2, 0x0F));
         (uint256 calcInputs, uint256 calcOutputs) = LibOpSub.integrity(state, LibOperand.build(inputs, 1, operandData));
 
@@ -106,5 +105,22 @@ contract LibOpSubTest is OpTest {
         checkHappy("_: sub(1 1 0);", Float.unwrap(LibDecimalFloat.packLossless(0, 0)), "1 1 0");
         checkHappy("_: sub(2 1 1);", Float.unwrap(LibDecimalFloat.packLossless(0, -76)), "2 1 1");
         checkHappy("_: sub(2 2 0);", Float.unwrap(LibDecimalFloat.packLossless(0, 0)), "2 2 0");
+    }
+
+    function testOpSubZeroOutputs() external {
+        checkBadOutputs(": sub(1 1);", 2, 1, 0);
+    }
+
+    function testOpSubTwoOutputs() external {
+        checkBadOutputs("_ _: sub(1 1);", 2, 1, 2);
+    }
+
+    function testOpSubEvalOperandDisallowed() external {
+        checkDisallowedOperand("_: sub<0>(1 1);");
+        checkDisallowedOperand("_: sub<1>(1 1);");
+        checkDisallowedOperand("_: sub<2>(1 1);");
+        checkDisallowedOperand("_: sub<0 0>(1 1);");
+        checkDisallowedOperand("_: sub<0 1>(1 1);");
+        checkDisallowedOperand("_: sub<1 0>(1 1);");
     }
 }

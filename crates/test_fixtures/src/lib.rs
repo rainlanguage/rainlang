@@ -1,3 +1,5 @@
+//! Shared test fixtures for Rainlang Rust crates.
+
 use alloy::{
     contract::SolCallBuilder,
     network::{AnyNetwork, AnyReceiptEnvelope, EthereumWallet},
@@ -5,6 +7,7 @@ use alloy::{
     primitives::{Address, Bytes, U256, utils::parse_units},
     providers::{
         PendingTransactionError, Provider, ProviderBuilder, RootProvider,
+        ext::AnvilApi,
         fillers::{FillProvider, JoinFill, WalletFiller},
         utils::JoinedRecommendedFillers,
     },
@@ -25,29 +28,36 @@ sol!(
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Interpreter,
-    "../../out/Rainterpreter.sol/Rainterpreter.json"
+    "../../out/RainlangInterpreter.sol/RainlangInterpreter.json"
 );
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Store,
-    "../../out/RainterpreterStore.sol/RainterpreterStore.json"
+    "../../out/RainlangStore.sol/RainlangStore.json"
 );
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Parser,
-    "../../out/RainterpreterParser.sol/RainterpreterParser.json"
+    "../../out/RainlangParser.sol/RainlangParser.json"
 );
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Deployer,
-    "../../out/RainterpreterExpressionDeployer.sol/RainterpreterExpressionDeployer.json"
+    "../../out/RainlangExpressionDeployer.sol/RainlangExpressionDeployer.json"
 );
 
-// type aliases for LocalEvm fillers and provider
+sol!(
+    #![sol(all_derives = true, rpc = true)]
+    RainlangContract,
+    "../../out/Rainlang.sol/Rainlang.json"
+);
+
+/// Filler stack used by `LocalEvm` combining recommended fillers with a wallet signer.
 pub type LocalEvmFillers = JoinFill<JoinedRecommendedFillers, WalletFiller<EthereumWallet>>;
+/// Provider type used by `LocalEvm`, combining the filler stack with a root provider.
 pub type LocalEvmProvider = FillProvider<LocalEvmFillers, RootProvider<AnyNetwork>, AnyNetwork>;
 
 /// LocalEvm is a thin wrapper around Anvil instance and alloy provider with
@@ -75,6 +85,10 @@ pub struct LocalEvm {
 
     /// Array of alloy ERC20 contract instances deployed on this blockchain
     pub tokens: Vec<ERC20::ERC20Instance<LocalEvmProvider, AnyNetwork>>,
+
+    /// Address of the deployed Rainlang instance. External tooling discovers
+    /// all component addresses by querying this single address.
+    pub rainlang: Address,
 
     /// All wallets of this local blockchain that can be used to perform transactions.
     /// the first wallet is the blockchain's default wallet, ie transactions that dont
@@ -107,16 +121,47 @@ impl LocalEvm {
             .wallet(signer_wallets[0].clone())
             .connect_http(anvil.endpoint_url());
 
-        // deploy rain contracts
+        // Deploy Rainlang to discover the deterministic addresses for all
+        // components.
+        let rainlang_instance = RainlangContract::deploy(provider.clone()).await.unwrap();
+        let rainlang_addr = *rainlang_instance.address();
+        let parser_addr = rainlang_instance.parserAddress().call().await.unwrap();
+        let store_addr = rainlang_instance.storeAddress().call().await.unwrap();
+        let interpreter_addr = rainlang_instance.interpreterAddress().call().await.unwrap();
+        let deployer_addr = rainlang_instance
+            .expressionDeployerAddress()
+            .call()
+            .await
+            .unwrap();
+
+        // Deploy rain contracts, then copy their runtime code to the
+        // deterministic addresses that Rainlang returns.
         let interpreter = Interpreter::deploy(provider.clone()).await.unwrap();
         let store = Store::deploy(provider.clone()).await.unwrap();
         let parser = Parser::deploy(provider.clone()).await.unwrap();
-        let config = Deployer::RainterpreterExpressionDeployerConstructionConfigV2 {
-            interpreter: *interpreter.address(),
-            parser: *parser.address(),
-            store: *store.address(),
-        };
-        let deployer = Deployer::deploy(provider.clone(), config).await.unwrap();
+        let deployer = Deployer::deploy(provider.clone()).await.unwrap();
+
+        let parser_code = provider.get_code_at(*parser.address()).await.unwrap();
+        let store_code = provider.get_code_at(*store.address()).await.unwrap();
+        let interpreter_code = provider.get_code_at(*interpreter.address()).await.unwrap();
+        let deployer_code = provider.get_code_at(*deployer.address()).await.unwrap();
+
+        provider
+            .anvil_set_code(parser_addr, parser_code)
+            .await
+            .unwrap();
+        provider
+            .anvil_set_code(store_addr, store_code)
+            .await
+            .unwrap();
+        provider
+            .anvil_set_code(interpreter_addr, interpreter_code)
+            .await
+            .unwrap();
+        provider
+            .anvil_set_code(deployer_addr, deployer_code)
+            .await
+            .unwrap();
 
         Self {
             anvil,
@@ -127,6 +172,7 @@ impl LocalEvm {
             deployer,
             tokens: vec![],
             signer_wallets,
+            rainlang: rainlang_addr,
         }
     }
 

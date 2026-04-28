@@ -1,13 +1,13 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {OpTest} from "test/abstract/OpTest.sol";
-import {LibOpGreaterThanOrEqualTo} from "src/lib/op/logic/LibOpGreaterThanOrEqualTo.sol";
-import {IntegrityCheckState, BadOpInputsLength} from "src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {InterpreterState} from "src/lib/state/LibInterpreterState.sol";
+import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
+import {LibOpGreaterThanOrEqualTo} from "../../../../../src/lib/op/logic/LibOpGreaterThanOrEqualTo.sol";
+import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
+import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
 
 contract LibOpGreaterThanOrEqualToTest is OpTest {
     /// Directly test the integrity logic of LibOpGreaterThanOrEqualTo. No matter the
@@ -63,6 +63,26 @@ contract LibOpGreaterThanOrEqualToTest is OpTest {
         checkHappy("_: greater-than-or-equal-to(1 1);", bytes32(uint256(1)), "");
     }
 
+    /// Test 1.1 >= 1.2, which should return 0.
+    function testOpGreaterThanOrEqualToEvalOnePointOneGteOnePointTwo() external view {
+        checkHappy("_: greater-than-or-equal-to(1.1 1.2);", 0, "");
+    }
+
+    /// Test 1.0 >= 1, which should return 1 (equal).
+    function testOpGreaterThanOrEqualToEvalOnePointZeroGteOne() external view {
+        checkHappy("_: greater-than-or-equal-to(1.0 1);", bytes32(uint256(1)), "");
+    }
+
+    /// Test -1.1 >= -1.2, which should return 1.
+    function testOpGreaterThanOrEqualToEvalNegOnePointOneGteNegOnePointTwo() external view {
+        checkHappy("_: greater-than-or-equal-to(-1.1 -1.2);", bytes32(uint256(1)), "");
+    }
+
+    /// Test -1 >= 0, which should return 0.
+    function testOpGreaterThanOrEqualToEvalNegOneGteZero() external view {
+        checkHappy("_: greater-than-or-equal-to(-1 0);", 0, "");
+    }
+
     /// Test that a greater than or equal to without inputs fails integrity check.
     function testOpGreaterThanOrEqualToEvalFail0Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 2, 0));
@@ -90,5 +110,10 @@ contract LibOpGreaterThanOrEqualToTest is OpTest {
 
     function testOpGreaterThanOrEqualToTwoOutputs() external {
         checkBadOutputs("_ _: greater-than-or-equal-to(1 2);", 2, 1, 2);
+    }
+
+    /// Test that operand is disallowed.
+    function testOpGreaterThanOrEqualToEvalOperandDisallowed() external {
+        checkUnhappyParse("_: greater-than-or-equal-to<0>(1 2);", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }

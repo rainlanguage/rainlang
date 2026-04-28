@@ -1,11 +1,12 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
-import {LibOpExp2} from "src/lib/op/math/LibOpExp2.sol";
+import {LibOpExp2} from "../../../../../src/lib/op/math/LibOpExp2.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 
 contract LibOpExp2Test is OpTest {
     function beforeOpTestConstructor() internal virtual override {
@@ -41,6 +42,13 @@ contract LibOpExp2Test is OpTest {
         checkHappy("_: exp2(0.5);", Float.unwrap(LibDecimalFloat.packLossless(1415, -3)), "2^0.5");
         checkHappy("_: exp2(2);", Float.unwrap(LibDecimalFloat.packLossless(4000, -3)), "2^2");
         checkHappy("_: exp2(3);", Float.unwrap(LibDecimalFloat.packLossless(8000, -3)), "2^3");
+    }
+
+    /// Test exp2 with negative input. exp2(-1) = 0.5.
+    function testOpExp2EvalNegativeInput() external view {
+        (Float expected,) =
+            LibDecimalFloat.packLossy(5000000000000000000000000000000000000000000000000000000000000000000, -67);
+        checkHappy("_: exp2(-1);", Float.unwrap(expected), "2^(-1)");
     }
 
     /// Test the eval of `exp2` for bad inputs.

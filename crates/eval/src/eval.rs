@@ -1,25 +1,29 @@
 use crate::error::ForkCallError;
 use crate::fork::{ForkTypedReturn, Forker};
 use alloy::primitives::{Address, U256};
-use rain_interpreter_bindings::DeployerISP::{I_INTERPRETERCall, I_STORECall};
-use rain_interpreter_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
-use rain_interpreter_bindings::IInterpreterV4::{EvalV4, eval4Call};
-use rain_interpreter_bindings::IParserV2::parse2Call;
+use rainlang_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
+use rainlang_bindings::IInterpreterV4::{EvalV4, eval4Call};
+use rainlang_bindings::IParserV2::parse2Call;
+use rainlang_bindings::Rainlang::{
+    expressionDeployerAddressCall, interpreterAddressCall, storeAddressCall,
+};
 
-#[derive(Debug, Clone)]
 /// Arguments for evaluating a Rainlang string in a forked EVM context
+#[derive(Debug, Clone)]
 pub struct ForkEvalArgs {
-    /// The Rainalang string to evaluate
+    /// The Rainlang string to evaluate
     pub rainlang_string: String,
     /// The source index of the rainlang to evaluate
     pub source_index: u16,
-    /// The address of the deployer
-    pub deployer: Address,
+    /// The address of the Rainlang contract. All component addresses
+    /// (deployer, interpreter, store, parser) are discovered from this
+    /// address.
+    pub rainlang: Address,
     /// The fully qualified namespace
     pub namespace: FullyQualifiedNamespace,
     /// The context matrix, that will be available in "context" word and its aliases
     pub context: Vec<Vec<U256>>,
-    /// Whether to decode errors from the registry
+    /// Whether to decode errors
     pub decode_errors: bool,
     /// Inputs vector which are prepopulated stack items
     pub inputs: Vec<U256>,
@@ -27,14 +31,14 @@ pub struct ForkEvalArgs {
     pub state_overlay: Vec<U256>,
 }
 
-#[derive(Debug, Clone)]
 /// Arguments for parsing a Rainlang string in a forked EVM context
+#[derive(Debug, Clone)]
 pub struct ForkParseArgs {
     /// The Rainlang string to parse
     pub rainlang_string: String,
-    /// The address of the deployer
-    pub deployer: Address,
-    /// Whether to decode errors from the registry
+    /// The address of the Rainlang contract.
+    pub rainlang: Address,
+    /// Whether to decode errors
     pub decode_errors: bool,
 }
 
@@ -42,7 +46,7 @@ impl From<ForkEvalArgs> for ForkParseArgs {
     fn from(args: ForkEvalArgs) -> Self {
         ForkParseArgs {
             rainlang_string: args.rainlang_string,
-            deployer: args.deployer,
+            rainlang: args.rainlang,
             decode_errors: args.decode_errors,
         }
     }
@@ -51,24 +55,27 @@ impl From<ForkEvalArgs> for ForkParseArgs {
 impl Forker {
     /// Parses Rainlang string and returns the parsed result.
     ///
-    /// # Arguments
-    ///
-    /// * `rainlang_string` - The Rainlang string to parse.
-    /// * `deployer` - The address of the deployer. Must be deployed before the
-    ///   fork's current block.
-    ///
-    /// # Returns
-    ///
-    /// The typed return of the parse and deployExpression2, plus Foundry's RawCallResult struct.
+    /// Discovers the deployer address from Rainlang, then calls
+    /// `parse2` on it.
     pub async fn fork_parse(
         &self,
         args: ForkParseArgs,
     ) -> Result<ForkTypedReturn<parse2Call>, ForkCallError> {
         let ForkParseArgs {
             rainlang_string,
-            deployer,
+            rainlang,
             decode_errors,
         } = args;
+
+        let deployer = self
+            .alloy_call(
+                Address::default(),
+                rainlang,
+                expressionDeployerAddressCall {},
+                decode_errors,
+            )
+            .await?
+            .typed_return;
 
         let parse_call = parse2Call {
             data: rainlang_string.as_bytes().to_vec().into(),
@@ -83,12 +90,8 @@ impl Forker {
 
     /// Evaluates the Rain language string and returns the evaluation result.
     ///
-    /// # Arguments
-    /// * `args` - The fork eval arguments for the evaluation
-    ///
-    /// # Returns
-    ///
-    /// The typed return of the eval, plus Foundry's RawCallResult struct, including the trace.
+    /// Discovers all component addresses from Rainlang, parses the
+    /// Rainlang string via the deployer, then evaluates via the interpreter.
     pub async fn fork_eval(
         &self,
         args: ForkEvalArgs,
@@ -96,35 +99,48 @@ impl Forker {
         let ForkEvalArgs {
             rainlang_string,
             source_index,
-            deployer,
+            rainlang,
             namespace,
             context,
             decode_errors,
             inputs,
             state_overlay,
         } = args;
-        let parse_result = self
-            .fork_parse(ForkParseArgs {
-                rainlang_string: rainlang_string.clone(),
-                deployer,
-                decode_errors,
-            })
-            .await?;
 
-        let store = self
-            .alloy_call(Address::default(), deployer, I_STORECall {}, decode_errors)
-            .await?
-            .typed_return;
-
-        let interpreter = self
+        let deployer = self
             .alloy_call(
                 Address::default(),
-                deployer,
-                I_INTERPRETERCall {},
+                rainlang,
+                expressionDeployerAddressCall {},
                 decode_errors,
             )
             .await?
             .typed_return;
+        let interpreter = self
+            .alloy_call(
+                Address::default(),
+                rainlang,
+                interpreterAddressCall {},
+                decode_errors,
+            )
+            .await?
+            .typed_return;
+        let store = self
+            .alloy_call(
+                Address::default(),
+                rainlang,
+                storeAddressCall {},
+                decode_errors,
+            )
+            .await?
+            .typed_return;
+
+        let parse_call = parse2Call {
+            data: rainlang_string.as_bytes().to_vec().into(),
+        };
+        let parse_result = self
+            .alloy_call(Address::default(), deployer, parse_call, decode_errors)
+            .await?;
 
         let eval_args = eval4Call {
             eval: EvalV4 {
@@ -154,13 +170,12 @@ mod tests {
     use super::*;
     use crate::fork::NewForkedEvm;
     use alloy::primitives::FixedBytes;
-    use rain_interpreter_test_fixtures::LocalEvm;
+    use rainlang_test_fixtures::LocalEvm;
     use std::{ops::Deref, sync::Arc};
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn test_fork_parse() {
         let local_evm = LocalEvm::new().await;
-        let deployer = *local_evm.deployer.address();
         let args = NewForkedEvm {
             fork_url: local_evm.url(),
             fork_block_number: None,
@@ -170,7 +185,7 @@ mod tests {
         let res = fork
             .fork_parse(ForkParseArgs {
                 rainlang_string: r"_: 1;".to_owned(),
-                deployer,
+                rainlang: local_evm.rainlang,
                 decode_errors: true,
             })
             .await
@@ -183,7 +198,6 @@ mod tests {
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn test_fork_eval() {
         let local_evm = LocalEvm::new().await;
-        let deployer = *local_evm.deployer.address();
         let args = NewForkedEvm {
             fork_url: local_evm.url(),
             fork_block_number: None,
@@ -193,7 +207,7 @@ mod tests {
             .fork_eval(ForkEvalArgs {
                 rainlang_string: r"_: 3;".into(),
                 source_index: 0,
-                deployer,
+                rainlang: local_evm.rainlang,
                 namespace: FullyQualifiedNamespace::default(),
                 context: vec![],
                 decode_errors: true,
@@ -232,7 +246,7 @@ mod tests {
     #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
     async fn test_fork_eval_parallel() {
         let local_evm = LocalEvm::new().await;
-        let deployer = *local_evm.deployer.address();
+        let rainlang = local_evm.rainlang;
         let args = NewForkedEvm {
             fork_url: local_evm.url(),
             fork_block_number: None,
@@ -248,7 +262,7 @@ mod tests {
                     .fork_eval(ForkEvalArgs {
                         rainlang_string: r"_: 3;".into(),
                         source_index: 0,
-                        deployer,
+                        rainlang,
                         namespace: FullyQualifiedNamespace::default(),
                         context: vec![],
                         decode_errors: true,

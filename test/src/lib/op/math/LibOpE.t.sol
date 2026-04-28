@@ -1,20 +1,24 @@
-// SPDX-License-Identifier: CAL
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {OpTest} from "test/abstract/OpTest.sol";
-import {InterpreterState} from "src/lib/state/LibInterpreterState.sol";
-import {LibOpE} from "src/lib/op/math/LibOpE.sol";
+import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
+import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
+import {LibOpE} from "../../../../../src/lib/op/math/LibOpE.sol";
 import {LibOperand, OperandV2} from "test/lib/operand/LibOperand.sol";
-import {IntegrityCheckState} from "src/lib/integrity/LibIntegrityCheck.sol";
-import {EvalV4} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV3.sol";
+import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
+import {
+    EvalV4,
+    StackItem,
+    FullyQualifiedNamespace,
+    SourceIndexV2
+} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV4.sol";
 import {LibContext} from "rain.interpreter.interface/lib/caller/LibContext.sol";
-import {FullyQualifiedNamespace} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {SourceIndexV2} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
-import {StackItem} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
 import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
 
 /// @title LibOpETest
+/// @notice Tests for the mathematical constant e opcode.
 contract LibOpETest is OpTest {
     /// Directly test the integrity logic of LibOpE.
     function testOpEIntegrity(IntegrityCheckState memory state, uint8 inputs, uint8 outputs, uint16 operandData)
@@ -69,5 +73,10 @@ contract LibOpETest is OpTest {
 
     function testOpEEvalTwoOutputs() external {
         checkBadOutputs("_ _: e();", 0, 1, 2);
+    }
+
+    /// Test that operand is disallowed.
+    function testOpEEvalOperandDisallowed() external {
+        checkUnhappyParse("_: e<0>();", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }

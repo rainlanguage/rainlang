@@ -1,42 +1,70 @@
-// SPDX-License-Identifier: CAL
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: LicenseRef-DCL-1.0
+// SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
+pragma solidity ^0.8.25;
 
-import {LibParseState, ParseState} from "./LibParseState.sol";
+import {LibParseState, ParseState, SUB_PARSER_POINTER_SHIFT} from "./LibParseState.sol";
 import {
     OPCODE_UNKNOWN,
     OPCODE_EXTERN,
     OPCODE_CONSTANT,
     OPCODE_CONTEXT,
     OperandV2
-} from "rain.interpreter.interface/interface/unstable/IInterpreterV4.sol";
+} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
 import {LibBytecode, Pointer} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
-import {ISubParserV4} from "rain.interpreter.interface/interface/unstable/ISubParserV4.sol";
+import {ISubParserV4} from "rain.interpreter.interface/interface/ISubParserV4.sol";
 import {BadSubParserResult, UnknownWord, UnsupportedLiteralType} from "../../error/ErrParse.sol";
 import {IInterpreterExternV4, LibExtern, EncodedExternDispatchV2} from "../extern/LibExtern.sol";
-import {ExternDispatchConstantsHeightOverflow} from "../../error/ErrSubParse.sol";
+import {
+    ExternDispatchConstantsHeightOverflow,
+    ConstantOpcodeConstantsHeightOverflow,
+    ContextGridOverflow,
+    SubParseLiteralDispatchLengthOverflow
+} from "../../error/ErrSubParse.sol";
 import {LibMemCpy} from "rain.solmem/lib/LibMemCpy.sol";
 import {LibParseError} from "./LibParseError.sol";
 
+/// @title LibSubParse
+/// @notice Handles delegation of unknown words and literals to external sub-parser
+/// contracts registered via `using-words-from`.
+///
+/// Trust model: sub-parsers are fully trusted by the Rainlang author who
+/// opted into them. A sub-parser can return arbitrary bytecode (opcode,
+/// operand, IO byte) and constants. The only parse-time validation is that
+/// the returned bytecode is exactly 4 bytes (`BadSubParserResult`). All
+/// other safety comes from the integrity check that runs on the complete
+/// bytecode after all sub-parsing is done — invalid opcodes, stack
+/// mismatches, or malformed operands will be caught there.
 library LibSubParse {
     using LibParseState for ParseState;
     using LibParseError for ParseState;
 
-    /// Sub parse a word into a context grid position.
+    /// @notice Sub parse a word into a context grid position. The column and row are
+    /// encoded as single bytes in the operand, so values MUST be <= 255.
+    /// Reverts with `ContextGridOverflow` if either value exceeds uint8.
+    /// @param column The column index in the context grid. Must fit in uint8.
+    /// @param row The row index in the context grid. Must fit in uint8.
+    /// @return Whether the sub parse succeeded.
+    /// @return The bytecode for the context opcode.
+    /// @return The constants array (empty for context ops).
     function subParserContext(uint256 column, uint256 row)
         internal
         pure
         returns (bool, bytes memory, bytes32[] memory)
     {
+        if (column > type(uint8).max || row > type(uint8).max) {
+            revert ContextGridOverflow(column, row);
+        }
         bytes memory bytecode;
         uint256 opIndex = OPCODE_CONTEXT;
         assembly ("memory-safe") {
             // Allocate the bytecode.
-            // This is an UNALIGNED allocation.
+            // This is an UNALIGNED allocation. The 4-byte bytecode is
+            // returned to the caller and copied directly over an opcode
+            // slot in the main bytecode, so it never reaches Solidity
+            // code that expects 32-byte aligned memory.
             bytecode := mload(0x40)
             mstore(0x40, add(bytecode, 0x24))
 
-            // The caller is responsible for ensuring the column and row are
-            // within `uint8`.
             mstore8(add(bytecode, 0x23), column)
             mstore8(add(bytecode, 0x22), row)
 
@@ -59,19 +87,30 @@ library LibSubParse {
         return (true, bytecode, constants);
     }
 
-    /// Sub parse a value into the bytecode that will run on the interpreter to
+    /// @notice Sub parse a value into the bytecode that will run on the interpreter to
     /// push the given value onto the stack, using the constant opcode at eval.
+    /// @param constantsHeight The current height of the constants array.
+    /// @param value The constant value to push onto the stack.
+    /// @return Whether the sub parse succeeded.
+    /// @return The bytecode for the constant opcode.
+    /// @return The constants array containing the value.
     function subParserConstant(uint256 constantsHeight, bytes32 value)
         internal
         pure
         returns (bool, bytes memory, bytes32[] memory)
     {
+        if (constantsHeight > type(uint16).max) {
+            revert ConstantOpcodeConstantsHeightOverflow(constantsHeight);
+        }
         // Build a constant opcode that the interpreter will run itself.
         bytes memory bytecode;
         uint256 opIndex = OPCODE_CONSTANT;
         assembly ("memory-safe") {
             // Allocate the bytecode.
-            // This is an UNALIGNED allocation.
+            // This is an UNALIGNED allocation. The 4-byte bytecode is
+            // returned to the caller and copied directly over an opcode
+            // slot in the main bytecode, so it never reaches Solidity
+            // code that expects 32-byte aligned memory.
             bytecode := mload(0x40)
             mstore(0x40, add(bytecode, 0x24))
 
@@ -103,11 +142,23 @@ library LibSubParse {
         return (true, bytecode, constants);
     }
 
-    /// Sub parse a known extern opcode index into the bytecode that will run
+    /// @notice Sub parse a known extern opcode index into the bytecode that will run
     /// on the interpreter to call the given extern contract. This requires the
     /// parsing has already matched a word to the extern opcode index, so it
     /// implies the parse meta has been traversed and the parse index has been
     /// mapped to an extern opcode index somehow.
+    /// @param extern The extern contract to call at eval time.
+    /// @param constantsHeight The current height of the constants array.
+    /// @param ioByte The IO byte encoding inputs and outputs for the opcode.
+    /// MUST fit in 8 bits. Written via `mstore8` which silently truncates
+    /// to the least significant byte if wider.
+    /// @param operand The operand for the extern dispatch.
+    /// @param opcodeIndex The opcode index on the extern contract. MUST fit
+    /// in 16 bits. Passed to `encodeExternDispatch` which does not validate
+    /// the range — wider values silently corrupt the encoding.
+    /// @return Whether the sub parse succeeded.
+    /// @return The bytecode for the extern opcode.
+    /// @return The constants array containing the encoded extern dispatch.
     function subParserExtern(
         IInterpreterExternV4 extern,
         uint256 constantsHeight,
@@ -118,7 +169,7 @@ library LibSubParse {
         // The constants height is an error check because the main parser can
         // provide two bytes for it. Everything else is expected to be more
         // directly controlled by the subparser itself.
-        if (constantsHeight > 0xFFFF) {
+        if (constantsHeight > type(uint16).max) {
             revert ExternDispatchConstantsHeightOverflow(constantsHeight);
         }
         // Build an extern call that dials back into the current contract at eval
@@ -127,7 +178,10 @@ library LibSubParse {
         uint256 opIndex = OPCODE_EXTERN;
         assembly ("memory-safe") {
             // Allocate the bytecode.
-            // This is an UNALIGNED allocation.
+            // This is an UNALIGNED allocation. The 4-byte bytecode is
+            // returned to the caller and copied directly over an opcode
+            // slot in the main bytecode, so it never reaches Solidity
+            // code that expects 32-byte aligned memory.
             bytecode := mload(0x40)
             mstore(0x40, add(bytecode, 0x24))
             mstore(add(bytecode, 4), constantsHeight)
@@ -154,6 +208,11 @@ library LibSubParse {
         return (true, bytecode, constants);
     }
 
+    /// @notice Iterates over a slice of bytecode ops and attempts to resolve any
+    /// unknown opcodes by delegating to the registered sub parsers.
+    /// @param state The current parse state containing sub parser references.
+    /// @param cursor The memory pointer to the start of the bytecode slice.
+    /// @param end The memory pointer to the end of the bytecode slice.
     function subParseWordSlice(ParseState memory state, uint256 cursor, uint256 end) internal view {
         unchecked {
             for (; cursor < end; cursor += 4) {
@@ -164,9 +223,9 @@ library LibSubParse {
                 if (memoryAtCursor >> 0xf8 == OPCODE_UNKNOWN) {
                     bytes32 deref = state.subParsers;
                     while (deref != 0) {
-                        ISubParserV4 subParser = ISubParserV4(address(uint160(uint256((deref)))));
+                        ISubParserV4 subParser = ISubParserV4(address(uint160(uint256(deref))));
                         assembly ("memory-safe") {
-                            deref := mload(shr(0xf0, deref))
+                            deref := mload(shr(SUB_PARSER_POINTER_SHIFT, deref))
                         }
 
                         // Subparse data is a fixed length header that provides the
@@ -255,6 +314,13 @@ library LibSubParse {
         }
     }
 
+    /// @notice Resolves all unknown words across every source in the given bytecode
+    /// by calling `subParseWordSlice` for each source, then returns the
+    /// mutated bytecode and the final constants array.
+    /// @param state The current parse state containing sub parser references.
+    /// @param bytecode The full bytecode containing all sources to resolve.
+    /// @return The mutated bytecode with unknown ops resolved.
+    /// @return The final constants array after all sub parses.
     function subParseWords(ParseState memory state, bytes memory bytecode)
         internal
         view
@@ -272,6 +338,15 @@ library LibSubParse {
         }
     }
 
+    /// @notice Delegates literal parsing to registered sub parsers. Packs the dispatch
+    /// and body regions into a single `bytes` payload and tries each sub parser
+    /// until one succeeds, reverting if none can handle the literal type.
+    /// @param state The current parse state containing sub parser references.
+    /// @param dispatchStart Memory pointer to the start of the dispatch region.
+    /// @param dispatchEnd Memory pointer to the end of the dispatch region.
+    /// @param bodyStart Memory pointer to the start of the body region.
+    /// @param bodyEnd Memory pointer to the end of the body region.
+    /// @return The parsed literal value as a bytes32.
     function subParseLiteral(
         ParseState memory state,
         uint256 dispatchStart,
@@ -285,12 +360,17 @@ library LibSubParse {
             {
                 uint256 copyPointer;
                 uint256 dispatchLength = dispatchEnd - dispatchStart;
+                if (dispatchLength > type(uint16).max) {
+                    revert SubParseLiteralDispatchLengthOverflow(dispatchLength);
+                }
                 uint256 bodyLength = bodyEnd - bodyStart;
                 {
                     uint256 dataLength = 2 + dispatchLength + bodyLength;
                     assembly ("memory-safe") {
                         data := mload(0x40)
-                        mstore(0x40, add(data, add(dataLength, 0x20)))
+                        // Round up to 32-byte alignment to maintain
+                        // Solidity's free memory pointer invariant.
+                        mstore(0x40, and(add(add(data, add(dataLength, 0x20)), 0x1f), not(0x1f)))
                         mstore(add(data, 2), dispatchLength)
                         mstore(data, dataLength)
                         copyPointer := add(data, 0x22)
@@ -306,7 +386,7 @@ library LibSubParse {
             while (deref != 0) {
                 ISubParserV4 subParser = ISubParserV4(address(uint160(uint256(deref))));
                 assembly ("memory-safe") {
-                    deref := mload(shr(0xf0, deref))
+                    deref := mload(shr(SUB_PARSER_POINTER_SHIFT, deref))
                 }
 
                 (bool success, bytes32 value) = subParser.subParseLiteral2(data);
@@ -319,6 +399,17 @@ library LibSubParse {
         }
     }
 
+    /// @notice Unpacks the sub-parse word input data by extracting the constants
+    /// height, IO byte, and operand values from the header, then constructs
+    /// a fresh `ParseState` from the remaining word string and provided meta.
+    /// @param data The raw sub-parse input data containing the header and
+    /// word string.
+    /// @param meta The parser meta bytes for the new parse state.
+    /// @param operandHandlers The operand handler bytes for the new parse
+    /// state.
+    /// @return constantsHeight The constants height from the header.
+    /// @return ioByte The IO byte from the header.
+    /// @return state The newly constructed parse state.
     function consumeSubParseWordInputData(bytes memory data, bytes memory meta, bytes memory operandHandlers)
         internal
         pure
@@ -338,11 +429,18 @@ library LibSubParse {
         }
         // Literal parsers are empty for the sub parser as the main parser should
         // be handling all literals in operands. The sub parser handles literal
-        // parsing as a dedicated interface seperately.
+        // parsing as a dedicated interface separately.
         state = LibParseState.newState(data, meta, operandHandlers, "");
         state.operandValues = operandValues;
     }
 
+    /// @notice Unpacks the sub-parse literal input data by extracting memory pointers
+    /// for the dispatch and body regions from the encoded `bytes` payload.
+    /// @param data The raw sub-parse literal input data.
+    /// @return dispatchStart Memory pointer to the start of the dispatch
+    /// region.
+    /// @return bodyStart Memory pointer to the start of the body region.
+    /// @return bodyEnd Memory pointer to the end of the body region.
     function consumeSubParseLiteralInputData(bytes memory data)
         internal
         pure
