@@ -1,4 +1,4 @@
 {
-    "detectors_to_exclude": "assembly-usage,solc-version,different-pragma-directives-are-used,unused-imports",
-    "filter_paths": "lib/rain.math.float,lib/openzeppelin-contracts,lib/prb-math,lib/rain.interpreter.interface,test/"
+  "detectors_to_exclude": "assembly-usage,solc-version,different-pragma-directives-are-used,unused-imports",
+  "filter_paths": "dependencies/"
 }
