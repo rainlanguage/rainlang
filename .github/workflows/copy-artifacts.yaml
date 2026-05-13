@@ -19,8 +19,10 @@ jobs:
       - name: Install soldeer dependencies
         if: hashFiles('soldeer.lock') != ''
         run: nix develop github:rainlanguage/rainix#sol-shell -c forge soldeer install
-      - name: Regenerate Solidity meta + pointer artifacts
-        run: nix develop -c rainlang-prelude && nix develop github:rainlanguage/rainix#sol-shell -c forge script ./script/BuildPointers.sol
+      - name: Regenerate meta files
+        run: nix run .#rainlang-prelude
+      - name: Regenerate pointer artifacts
+        run: nix develop github:rainlanguage/rainix#sol-shell -c forge script ./script/BuildPointers.sol
       - name: Build Solidity
         run: nix develop github:rainlanguage/rainix#sol-shell -c forge build
       - name: Copy forge artifacts into committed location
