@@ -10,7 +10,7 @@ import {StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpr
 
 contract LibOpExpTest is OpTest {
     function beforeOpTestConstructor() internal virtual override {
-        vm.createSelectFork(vm.envString("ETH_RPC_URL"));
+        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
     }
 
     /// Directly test the integrity logic of LibOpExp.

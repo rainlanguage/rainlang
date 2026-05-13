@@ -11,7 +11,7 @@ import {PowNegativeBase} from "rain-math-float-0.1.1/src/error/ErrDecimalFloat.s
 
 contract LibOpPowerTest is OpTest {
     function beforeOpTestConstructor() internal virtual override {
-        vm.createSelectFork(vm.envString("ETH_RPC_URL"));
+        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
     }
 
     /// Directly test the integrity logic of LibOpPower.

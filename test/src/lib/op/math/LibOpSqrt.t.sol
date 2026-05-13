@@ -13,7 +13,7 @@ contract LibOpSqrtTest is OpTest {
     using LibDecimalFloat for Float;
 
     function beforeOpTestConstructor() internal virtual override {
-        vm.createSelectFork(vm.envString("ETH_RPC_URL"));
+        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
     }
 
     /// Directly test the integrity logic of LibOpSqrt.

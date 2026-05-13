@@ -45,7 +45,7 @@ import {
 
 contract LibInterpreterDeployTest is Test {
     function testDeployAddressParser() external {
-        vm.createSelectFork(vm.envString("CI_FORK_ETH_RPC_URL"));
+        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
 
         console2.logBytes(LibRainDeploy.ZOLTU_FACTORY.code);
 
@@ -64,7 +64,7 @@ contract LibInterpreterDeployTest is Test {
     }
 
     function testDeployAddressStore() external {
-        vm.createSelectFork(vm.envString("CI_FORK_ETH_RPC_URL"));
+        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
 
         address deployedAddress = LibRainDeploy.deployZoltu(type(RainlangStore).creationCode);
 
@@ -81,7 +81,7 @@ contract LibInterpreterDeployTest is Test {
     }
 
     function testDeployAddressInterpreter() external {
-        vm.createSelectFork(vm.envString("CI_FORK_ETH_RPC_URL"));
+        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
 
         address deployedAddress = LibRainDeploy.deployZoltu(type(RainlangInterpreter).creationCode);
 
@@ -98,7 +98,7 @@ contract LibInterpreterDeployTest is Test {
     }
 
     function testDeployAddressExpressionDeployer() external {
-        vm.createSelectFork(vm.envString("CI_FORK_ETH_RPC_URL"));
+        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
 
         address deployedAddress = LibRainDeploy.deployZoltu(type(RainlangExpressionDeployer).creationCode);
 
@@ -117,7 +117,7 @@ contract LibInterpreterDeployTest is Test {
     }
 
     function testDeployAddressRainlang() external {
-        vm.createSelectFork(vm.envString("CI_FORK_ETH_RPC_URL"));
+        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
 
         address deployedAddress = LibRainDeploy.deployZoltu(type(Rainlang).creationCode);
 
