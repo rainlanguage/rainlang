@@ -1,0 +1,29 @@
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "parse2",
+      "inputs": [
+        {
+          "name": "data",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "bytecode",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "stateMutability": "view"
+    }
+  ],
+  "bytecode": {
+    "object": "0x"
+  },
+  "deployedBytecode": {
+    "object": "0x"
+  }
+}

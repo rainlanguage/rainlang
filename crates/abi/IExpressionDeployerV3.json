@@ -1,0 +1,148 @@
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "deployExpression2",
+      "inputs": [
+        {
+          "name": "bytecode",
+          "type": "bytes",
+          "internalType": "bytes"
+        },
+        {
+          "name": "constants",
+          "type": "uint256[]",
+          "internalType": "uint256[]"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "interpreter",
+          "type": "address",
+          "internalType": "contract IInterpreterV2"
+        },
+        {
+          "name": "store",
+          "type": "address",
+          "internalType": "contract IInterpreterStoreV2"
+        },
+        {
+          "name": "expression",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "io",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "event",
+      "name": "DISPair",
+      "inputs": [
+        {
+          "name": "sender",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "interpreter",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "store",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "parser",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "meta",
+          "type": "bytes",
+          "indexed": false,
+          "internalType": "bytes"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "DeployedExpression",
+      "inputs": [
+        {
+          "name": "sender",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "interpreter",
+          "type": "address",
+          "indexed": false,
+          "internalType": "contract IInterpreterV2"
+        },
+        {
+          "name": "store",
+          "type": "address",
+          "indexed": false,
+          "internalType": "contract IInterpreterStoreV2"
+        },
+        {
+          "name": "expression",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "io",
+          "type": "bytes",
+          "indexed": false,
+          "internalType": "bytes"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "NewExpression",
+      "inputs": [
+        {
+          "name": "sender",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "bytecode",
+          "type": "bytes",
+          "indexed": false,
+          "internalType": "bytes"
+        },
+        {
+          "name": "constants",
+          "type": "uint256[]",
+          "indexed": false,
+          "internalType": "uint256[]"
+        }
+      ],
+      "anonymous": false
+    }
+  ],
+  "bytecode": {
+    "object": "0x"
+  },
+  "deployedBytecode": {
+    "object": "0x"
+  }
+}

@@ -1,0 +1,35 @@
+name: copy-artifacts
+on: [push]
+jobs:
+  copy-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nixbuild/nix-quick-install-action@v30
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 1G
+      - name: Install soldeer dependencies
+        if: hashFiles('soldeer.lock') != ''
+        run: nix develop github:rainlanguage/rainix#sol-shell -c forge soldeer install
+      - name: Regenerate Solidity meta + pointer artifacts
+        run: nix develop -c rainlang-prelude && nix develop github:rainlanguage/rainix#sol-shell -c forge script ./script/BuildPointers.sol
+      - name: Build Solidity
+        run: nix develop github:rainlanguage/rainix#sol-shell -c forge build
+      - name: Copy forge artifacts into committed location
+        run: nix develop github:rainlanguage/rainix#sol-shell -c forge script ./script/CopyArtifacts.sol --ffi
+      - name: Format (so generated artifacts match committed style)
+        run: nix develop github:rainlanguage/rainix#sol-shell -c forge fmt
+      - name: Assert committed artifacts match freshly built
+        run: |
+          if ! git diff --exit-code; then
+            echo "::error::Committed meta/pointer/abi artifacts are stale. Run rainlang-prelude, BuildPointers.sol, CopyArtifacts.sol, forge fmt, and commit."
+            exit 1
+          fi
