@@ -5,11 +5,11 @@ pragma solidity ^0.8.25;
 import {ParseState} from "../LibParseState.sol";
 import {LibParse} from "../LibParse.sol";
 import {UnclosedSubParseableLiteral, SubParseableMissingDispatch} from "../../../error/ErrParse.sol";
-import {CMASK_WHITESPACE, CMASK_SUB_PARSEABLE_LITERAL_END} from "rain.string/lib/parse/LibParseCMask.sol";
+import {CMASK_WHITESPACE, CMASK_SUB_PARSEABLE_LITERAL_END} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
 import {LibParseInterstitial} from "../LibParseInterstitial.sol";
 import {LibParseError} from "../LibParseError.sol";
 import {LibSubParse} from "../LibSubParse.sol";
-import {LibParseChar} from "rain.string/lib/parse/LibParseChar.sol";
+import {LibParseChar} from "rain-string-0.2.0/src/lib/parse/LibParseChar.sol";
 
 /// @title LibParseLiteralSubParseable
 /// @notice Parses sub-parseable literals delimited by `[` and `]` by

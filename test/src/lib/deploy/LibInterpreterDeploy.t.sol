@@ -2,16 +2,16 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test, console2} from "forge-std/Test.sol";
-import {LibRainDeploy} from "rain.deploy/lib/LibRainDeploy.sol";
+import {Test, console2} from "forge-std-1.16.1/src/Test.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.2/src/lib/LibRainDeploy.sol";
 import {LibInterpreterDeploy} from "../../../../src/lib/deploy/LibInterpreterDeploy.sol";
 import {RainlangParser} from "../../../../src/concrete/RainlangParser.sol";
 import {RainlangStore} from "../../../../src/concrete/RainlangStore.sol";
 import {RainlangInterpreter} from "../../../../src/concrete/RainlangInterpreter.sol";
 import {RainlangExpressionDeployer} from "../../../../src/concrete/RainlangExpressionDeployer.sol";
 import {Rainlang} from "../../../../src/concrete/Rainlang.sol";
-import {LibExtrospectBytecode} from "rain.extrospection/lib/LibExtrospectBytecode.sol";
-import {LibExtrospectMetamorphic} from "rain.extrospection/lib/LibExtrospectMetamorphic.sol";
+import {LibExtrospectBytecode} from "rain-extrospection-0.1.0/src/lib/LibExtrospectBytecode.sol";
+import {LibExtrospectMetamorphic} from "rain-extrospection-0.1.0/src/lib/LibExtrospectMetamorphic.sol";
 import {RainlangReferenceExtern} from "../../../../src/concrete/extern/RainlangReferenceExtern.sol";
 import {
     CREATION_CODE as PARSER_CREATION_CODE,

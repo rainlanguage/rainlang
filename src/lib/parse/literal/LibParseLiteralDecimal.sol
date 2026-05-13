@@ -4,8 +4,8 @@ pragma solidity ^0.8.25;
 
 import {ParseState} from "../LibParseState.sol";
 import {LibParseError} from "../LibParseError.sol";
-import {LibParseDecimalFloat, Float} from "rain.math.float/lib/parse/LibParseDecimalFloat.sol";
-import {LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {LibParseDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/parse/LibParseDecimalFloat.sol";
+import {LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibParseLiteralDecimal
 /// @notice Parses decimal numeric literals from Rainlang source text into

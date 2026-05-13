@@ -5,7 +5,7 @@ pragma solidity =0.8.25;
 import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpBinaryEqualTo} from "../../../../../src/lib/op/logic/LibOpBinaryEqualTo.sol";
 import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 

@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 
 import {LibParseState, ParseState, SUB_PARSER_POINTER_SHIFT} from "../../../../src/lib/parse/LibParseState.sol";
 import {
@@ -10,17 +10,17 @@ import {
     PRAGMA_KEYWORD_BYTES_LENGTH,
     PRAGMA_KEYWORD_BYTES
 } from "../../../../src/lib/parse/LibParsePragma.sol";
-import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
+import {LibBytes, Pointer} from "rain-solmem-0.1.3/src/lib/LibBytes.sol";
 import {
     CMASK_WHITESPACE,
     CMASK_LITERAL_HEX_DISPATCH_START,
     CMASK_INTERSTITIAL_HEAD,
     CMASK_HEX
-} from "rain.string/lib/parse/LibParseCMask.sol";
-import {LibConformString} from "rain.string/lib/mut/LibConformString.sol";
+} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
+import {LibConformString} from "rain-string-0.2.0/src/lib/mut/LibConformString.sol";
 import {NoWhitespaceAfterUsingWordsFrom} from "../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
-import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
+import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 
 /// @title LibParsePragmaKeywordTest

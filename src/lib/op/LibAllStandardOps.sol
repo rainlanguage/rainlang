@@ -3,10 +3,10 @@
 pragma solidity ^0.8.25;
 
 import {BadDynamicLength} from "../../error/ErrOpList.sol";
-import {LibConvert} from "rain.lib.typecast/LibConvert.sol";
-import {Pointer} from "rain.solmem/lib/LibPointer.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
-import {AuthoringMetaV2} from "rain.interpreter.interface/interface/IParserV2.sol";
+import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
+import {Pointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
+import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {AuthoringMetaV2} from "rain-interpreter-interface-0.1.0/src/interface/IParserV2.sol";
 import {IntegrityCheckState} from "../integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../state/LibInterpreterState.sol";
 import {LibParseOperand} from "../parse/LibParseOperand.sol";

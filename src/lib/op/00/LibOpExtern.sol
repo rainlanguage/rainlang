@@ -9,18 +9,18 @@ import {
 } from "../../../error/ErrExtern.sol";
 import {OutOfBoundsConstantRead} from "../../../error/ErrIntegrity.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
-import {Pointer} from "rain.solmem/lib/LibPointer.sol";
+import {Pointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
 import {
     IInterpreterExternV4,
     ExternDispatchV2,
     EncodedExternDispatchV2,
     StackItem
-} from "rain.interpreter.interface/interface/IInterpreterExternV4.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterExternV4.sol";
 import {LibExtern} from "../../extern/LibExtern.sol";
-import {LibBytes32Array} from "rain.solmem/lib/LibBytes32Array.sol";
-import {ERC165Checker} from "openzeppelin-contracts/contracts/utils/introspection/ERC165Checker.sol";
+import {LibBytes32Array} from "rain-solmem-0.1.3/src/lib/LibBytes32Array.sol";
+import {ERC165Checker} from "@openzeppelin-contracts-5.6.1/utils/introspection/ERC165Checker.sol";
 import {BadOutputsLength} from "../../../error/ErrExtern.sol";
 
 /// @title LibOpExtern

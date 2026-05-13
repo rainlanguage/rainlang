@@ -2,13 +2,13 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {LibParseLiteralString} from "../../../../../src/lib/parse/literal/LibParseLiteralString.sol";
-import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
-import {IntOrAString, LibIntOrAString} from "rain.intorastring/lib/LibIntOrAString.sol";
+import {LibBytes, Pointer} from "rain-solmem-0.1.3/src/lib/LibBytes.sol";
+import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.0/src/lib/LibIntOrAString.sol";
 import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseState.sol";
-import {CMASK_STRING_LITERAL_TAIL} from "rain.string/lib/parse/LibParseCMask.sol";
-import {LibConformString} from "rain.string/lib/mut/LibConformString.sol";
+import {CMASK_STRING_LITERAL_TAIL} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
+import {LibConformString} from "rain-string-0.2.0/src/lib/mut/LibConformString.sol";
 import {UnclosedStringLiteral} from "../../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 

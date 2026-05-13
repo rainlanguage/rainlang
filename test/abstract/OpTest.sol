@@ -4,18 +4,18 @@ pragma solidity =0.8.25;
 
 // Exported for convenience in op tests.
 //forge-lint: disable-next-line(unused-import)
-import {Test, stdError} from "forge-std/Test.sol";
-import {LibMemCpy} from "rain.solmem/lib/LibMemCpy.sol";
-import {MemoryKV} from "rain.lib.memkv/lib/LibMemoryKV.sol";
-import {LibUint256Array} from "rain.solmem/lib/LibUint256Array.sol";
-import {LibPointer, Pointer} from "rain.solmem/lib/LibPointer.sol";
+import {Test, stdError} from "forge-std-1.16.1/src/Test.sol";
+import {LibMemCpy} from "rain-solmem-0.1.3/src/lib/LibMemCpy.sol";
+import {MemoryKV} from "rain-lib-memkv-0.1.0/src/lib/LibMemoryKV.sol";
+import {LibUint256Array} from "rain-solmem-0.1.3/src/lib/LibUint256Array.sol";
+import {LibPointer, Pointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
 
 import {RainlangExpressionDeployerDeploymentTest} from "./RainlangExpressionDeployerDeploymentTest.sol";
 import {LibInterpreterState, InterpreterState} from "../../src/lib/state/LibInterpreterState.sol";
 import {LibInterpreterStateFingerprint} from "../lib/state/LibInterpreterStateFingerprint.sol";
 import {IntegrityCheckState, LibIntegrityCheck} from "../../src/lib/integrity/LibIntegrityCheck.sol";
 
-import {LibContext} from "rain.interpreter.interface/lib/caller/LibContext.sol";
+import {LibContext} from "rain-interpreter-interface-0.1.0/src/lib/caller/LibContext.sol";
 import {UnexpectedOperand} from "../../src/error/ErrParse.sol";
 import {BadOpInputsLength, BadOpOutputsLength} from "../../src/lib/integrity/LibIntegrityCheck.sol";
 import {
@@ -24,15 +24,18 @@ import {
     IInterpreterStoreV3,
     EvalV4,
     StackItem
-} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
-import {FullyQualifiedNamespace, StateNamespace} from "rain.interpreter.interface/interface/IInterpreterStoreV3.sol";
-import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV4.sol";
-import {LibNamespace} from "rain.interpreter.interface/lib/ns/LibNamespace.sol";
-import {ExponentOverflow, CoefficientOverflow} from "rain.math.float/error/ErrDecimalFloat.sol";
-import {LibTOFUTokenDecimals} from "rain.tofu.erc20-decimals/lib/LibTOFUTokenDecimals.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {
+    FullyQualifiedNamespace,
+    StateNamespace
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterStoreV3.sol";
+import {SignedContextV1} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterCallerV4.sol";
+import {LibNamespace} from "rain-interpreter-interface-0.1.0/src/lib/ns/LibNamespace.sol";
+import {ExponentOverflow, CoefficientOverflow} from "rain-math-float-0.1.1/src/error/ErrDecimalFloat.sol";
+import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.1/src/lib/LibTOFUTokenDecimals.sol";
 
-import {console2} from "forge-std/console2.sol";
-import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {console2} from "forge-std-1.16.1/src/console2.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 
 bytes32 constant PRE = keccak256(abi.encodePacked("pre"));
 bytes32 constant POST = keccak256(abi.encodePacked("post"));

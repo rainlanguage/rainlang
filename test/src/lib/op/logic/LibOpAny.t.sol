@@ -2,17 +2,17 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Pointer} from "rain.solmem/lib/LibPointer.sol";
-import {LibUint256Array} from "rain.solmem/lib/LibUint256Array.sol";
-import {MemoryKV} from "rain.lib.memkv/lib/LibMemoryKV.sol";
+import {Pointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
+import {LibUint256Array} from "rain-solmem-0.1.3/src/lib/LibUint256Array.sol";
+import {MemoryKV} from "rain-lib-memkv-0.1.0/src/lib/LibMemoryKV.sol";
 
 import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpAny} from "../../../../../src/lib/op/logic/LibOpAny.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {
     IInterpreterStoreV3,
     FullyQualifiedNamespace
-} from "rain.interpreter.interface/interface/IInterpreterStoreV3.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterStoreV3.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibInterpreterState, InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";

@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibParseError, MAGIC_NUMBER_RAIN_PARSE_ERROR_V1} from "../../../../src/lib/parse/LibParseError.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";

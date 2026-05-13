@@ -2,13 +2,13 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
-import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
+import {LibBytes, Pointer} from "rain-solmem-0.1.3/src/lib/LibBytes.sol";
 import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseState.sol";
 import {LibParseLiteral} from "../../../../../src/lib/parse/literal/LibParseLiteral.sol";
 import {LibAllStandardOps} from "../../../../../src/lib/op/LibAllStandardOps.sol";
-import {IntOrAString, LibIntOrAString} from "rain.intorastring/lib/LibIntOrAString.sol";
-import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.0/src/lib/LibIntOrAString.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibParseLiteralSelectByIndexTest
 /// @notice Directly tests selectLiteralParserByIndex by calling the returned

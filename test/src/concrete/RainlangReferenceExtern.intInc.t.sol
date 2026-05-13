@@ -13,11 +13,11 @@ import {
     EncodedExternDispatchV2,
     IInterpreterExternV4,
     StackItem
-} from "rain.interpreter.interface/interface/IInterpreterExternV4.sol";
-import {OperandV2, OPCODE_EXTERN} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterExternV4.sol";
+import {OperandV2, OPCODE_EXTERN} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {LibExtern} from "../../../src/lib/extern/LibExtern.sol";
-import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
-import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 
 contract RainlangReferenceExternIntIncTest is OpTest {
     using Strings for address;

@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Script} from "forge-std/Script.sol";
+import {Script} from "forge-std-1.16.1/src/Script.sol";
 import {RainlangInterpreter} from "../src/concrete/RainlangInterpreter.sol";
 import {RainlangStore} from "../src/concrete/RainlangStore.sol";
 import {RainlangParser, PARSE_META_BUILD_DEPTH} from "../src/concrete/RainlangParser.sol";
@@ -14,10 +14,10 @@ import {
     EXTERN_PARSE_META_BUILD_DEPTH
 } from "../src/concrete/extern/RainlangReferenceExtern.sol";
 import {LibAllStandardOps} from "../src/lib/op/LibAllStandardOps.sol";
-import {LibCodeGen} from "rain.sol.codegen/lib/LibCodeGen.sol";
-import {LibGenParseMeta} from "rain.interpreter.interface/lib/codegen/LibGenParseMeta.sol";
-import {LibFs} from "rain.sol.codegen/lib/LibFs.sol";
-import {LibRainDeploy} from "rain.deploy/lib/LibRainDeploy.sol";
+import {LibCodeGen} from "rain-sol-codegen-0.1.0/src/lib/LibCodeGen.sol";
+import {LibGenParseMeta} from "rain-interpreter-interface-0.1.0/src/lib/codegen/LibGenParseMeta.sol";
+import {LibFs} from "rain-sol-codegen-0.1.0/src/lib/LibFs.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.2/src/lib/LibRainDeploy.sol";
 
 /// @title BuildPointers
 /// @notice Forge script that generates Solidity source files containing

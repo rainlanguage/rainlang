@@ -2,13 +2,13 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {RainlangStore} from "../../../src/concrete/RainlangStore.sol";
 import {
     LibNamespace,
     StateNamespace,
     FullyQualifiedNamespace
-} from "rain.interpreter.interface/lib/ns/LibNamespace.sol";
+} from "rain-interpreter-interface-0.1.0/src/lib/ns/LibNamespace.sol";
 
 contract RainlangStoreNamespaceIsolationTest is Test {
     using LibNamespace for StateNamespace;

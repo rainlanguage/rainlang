@@ -5,18 +5,23 @@ pragma solidity =0.8.25;
 import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 
 import {LibOpHash} from "../../../../../src/lib/op/crypto/LibOpHash.sol";
-import {LibContext} from "rain.interpreter.interface/lib/caller/LibContext.sol";
+import {LibContext} from "rain-interpreter-interface-0.1.0/src/lib/caller/LibContext.sol";
 
-import {LibPointer, Pointer} from "rain.solmem/lib/LibPointer.sol";
-import {LibUint256Array} from "rain.solmem/lib/LibUint256Array.sol";
+import {LibPointer, Pointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
+import {LibUint256Array} from "rain-solmem-0.1.3/src/lib/LibUint256Array.sol";
 
-import {OperandV2, SourceIndexV2, EvalV4, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
-import {FullyQualifiedNamespace} from "rain.interpreter.interface/interface/IInterpreterStoreV3.sol";
-import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV4.sol";
+import {
+    OperandV2,
+    SourceIndexV2,
+    EvalV4,
+    StackItem
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {FullyQualifiedNamespace} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterStoreV3.sol";
+import {SignedContextV1} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterCallerV4.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {InterpreterState, LibInterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpHashTest
 /// @notice Test the runtime and integrity time logic of LibOpHash.

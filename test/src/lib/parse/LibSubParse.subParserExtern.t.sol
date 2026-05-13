@@ -2,13 +2,13 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
-import {OperandV2, OPCODE_EXTERN} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
+import {OperandV2, OPCODE_EXTERN} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {
     IInterpreterExternV4,
     ExternDispatchV2,
     EncodedExternDispatchV2
-} from "rain.interpreter.interface/interface/IInterpreterExternV4.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterExternV4.sol";
 import {LibSubParse} from "../../../../src/lib/parse/LibSubParse.sol";
 import {LibExtern} from "../../../../src/lib/extern/LibExtern.sol";
 import {ExternDispatchConstantsHeightOverflow} from "../../../../src/error/ErrSubParse.sol";

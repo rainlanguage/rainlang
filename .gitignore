@@ -2,8 +2,8 @@ out
 cache
 result
 .env
-meta
 target
+dependencies
 docs
 .DS_Store
 .direnv

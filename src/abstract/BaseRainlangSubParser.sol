@@ -2,20 +2,20 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {ERC165} from "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
-import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
+import {ERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/ERC165.sol";
+import {LibBytes, Pointer} from "rain-solmem-0.1.3/src/lib/LibBytes.sol";
 
 // AuthoringMetaV2 exported for convenience.
 //forge-lint: disable-next-line(unused-import)
-import {ISubParserV4, AuthoringMetaV2} from "rain.interpreter.interface/interface/ISubParserV4.sol";
+import {ISubParserV4, AuthoringMetaV2} from "rain-interpreter-interface-0.1.0/src/interface/ISubParserV4.sol";
 import {LibSubParse, ParseState} from "../lib/parse/LibSubParse.sol";
-import {CMASK_RHS_WORD_TAIL} from "rain.string/lib/parse/LibParseCMask.sol";
+import {CMASK_RHS_WORD_TAIL} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
 import {LibParse, OperandV2} from "../lib/parse/LibParse.sol";
-import {LibParseMeta} from "rain.interpreter.interface/lib/parse/LibParseMeta.sol";
+import {LibParseMeta} from "rain-interpreter-interface-0.1.0/src/lib/parse/LibParseMeta.sol";
 import {LibParseOperand} from "../lib/parse/LibParseOperand.sol";
-import {IDescribedByMetaV1} from "rain.metadata/interface/IDescribedByMetaV1.sol";
-import {IParserToolingV1} from "rain.sol.codegen/interface/IParserToolingV1.sol";
-import {ISubParserToolingV1} from "rain.sol.codegen/interface/ISubParserToolingV1.sol";
+import {IDescribedByMetaV1} from "rain-metadata-0.1.0/src/interface/IDescribedByMetaV1.sol";
+import {IParserToolingV1} from "rain-sol-codegen-0.1.0/src/interface/IParserToolingV1.sol";
+import {ISubParserToolingV1} from "rain-sol-codegen-0.1.0/src/interface/ISubParserToolingV1.sol";
 import {SubParserIndexOutOfBounds} from "../error/ErrSubParse.sol";
 
 /// @dev This is a placeholder for the subparser function pointers.

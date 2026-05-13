@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Script} from "forge-std/Script.sol";
+import {Script} from "forge-std-1.16.1/src/Script.sol";
 import {LibAllStandardOps} from "../src/lib/op/LibAllStandardOps.sol";
 import {LibRainlangReferenceExtern} from "../src/concrete/extern/RainlangReferenceExtern.sol";
 

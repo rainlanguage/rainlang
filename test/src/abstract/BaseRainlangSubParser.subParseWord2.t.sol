@@ -2,16 +2,16 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {
     BaseRainlangSubParser,
     SubParserIndexOutOfBounds,
     AuthoringMetaV2
 } from "../../../src/abstract/BaseRainlangSubParser.sol";
-import {LibGenParseMeta} from "rain.interpreter.interface/lib/codegen/LibGenParseMeta.sol";
+import {LibGenParseMeta} from "rain-interpreter-interface-0.1.0/src/lib/codegen/LibGenParseMeta.sol";
 import {LibParseOperand} from "../../../src/lib/parse/LibParseOperand.sol";
-import {LibConvert} from "rain.lib.typecast/LibConvert.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
+import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 
 /// @dev Sub parser with 2 words in meta but only 1 word parser pointer.
 /// Looking up the word at index 1 triggers SubParserIndexOutOfBounds.

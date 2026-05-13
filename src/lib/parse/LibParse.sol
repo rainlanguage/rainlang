@@ -2,8 +2,8 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {LibPointer, Pointer} from "rain.solmem/lib/LibPointer.sol";
-import {LibMemCpy} from "rain.solmem/lib/LibMemCpy.sol";
+import {LibPointer, Pointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
+import {LibMemCpy} from "rain-solmem-0.1.3/src/lib/LibMemCpy.sol";
 import {
     CMASK_COMMENT_HEAD,
     CMASK_EOS,
@@ -18,11 +18,15 @@ import {
     CMASK_LHS_STACK_TAIL,
     CMASK_LHS_STACK_HEAD,
     CMASK_IDENTIFIER_HEAD
-} from "rain.string/lib/parse/LibParseCMask.sol";
-import {LibParseChar} from "rain.string/lib/parse/LibParseChar.sol";
-import {LibParseMeta} from "rain.interpreter.interface/lib/parse/LibParseMeta.sol";
+} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
+import {LibParseChar} from "rain-string-0.2.0/src/lib/parse/LibParseChar.sol";
+import {LibParseMeta} from "rain-interpreter-interface-0.1.0/src/lib/parse/LibParseMeta.sol";
 import {LibParseOperand} from "./LibParseOperand.sol";
-import {OperandV2, OPCODE_STACK, OPCODE_UNKNOWN} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {
+    OperandV2,
+    OPCODE_STACK,
+    OPCODE_UNKNOWN
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {LibParseStackName} from "./LibParseStackName.sol";
 import {
     UnexpectedRHSChar,
@@ -51,8 +55,8 @@ import {LibParsePragma} from "./LibParsePragma.sol";
 import {LibParseInterstitial} from "./LibParseInterstitial.sol";
 import {LibParseError} from "./LibParseError.sol";
 import {LibSubParse} from "./LibSubParse.sol";
-import {LibBytes} from "rain.solmem/lib/LibBytes.sol";
-import {LibBytes32Array} from "rain.solmem/lib/LibBytes32Array.sol";
+import {LibBytes} from "rain-solmem-0.1.3/src/lib/LibBytes.sol";
+import {LibBytes32Array} from "rain-solmem-0.1.3/src/lib/LibBytes32Array.sol";
 
 /// @dev Size in bytes of the fixed header prepended to sub-parser bytecode.
 /// Comprises the operand values tail pointer (2 bytes), the literal parsers

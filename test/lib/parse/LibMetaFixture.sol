@@ -2,12 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.18;
 
-import {AuthoringMetaV2} from "rain.interpreter.interface/interface/IParserV2.sol";
+import {AuthoringMetaV2} from "rain-interpreter-interface-0.1.0/src/interface/IParserV2.sol";
 import {OperandV2, LibParseOperand} from "../../../src/lib/parse/LibParseOperand.sol";
 import {LibParseState, ParseState} from "../../../src/lib/parse/LibParseState.sol";
-import {LibConvert} from "rain.lib.typecast/LibConvert.sol";
+import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
 import {LibAllStandardOps} from "../../../src/lib/op/LibAllStandardOps.sol";
-import {LibGenParseMeta} from "rain.interpreter.interface/lib/codegen/LibGenParseMeta.sol";
+import {LibGenParseMeta} from "rain-interpreter-interface-0.1.0/src/lib/codegen/LibGenParseMeta.sol";
 
 uint256 constant FIXTURE_OPS_LENGTH = 18;
 

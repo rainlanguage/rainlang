@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 
 /// @title LibTestCast
 /// @notice Type casts for test code. These are zero-cost reinterpretations

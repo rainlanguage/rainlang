@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {OpTest} from "test/abstract/OpTest.sol";
 
-import {LibContext} from "rain.interpreter.interface/lib/caller/LibContext.sol";
+import {LibContext} from "rain-interpreter-interface-0.1.0/src/lib/caller/LibContext.sol";
 import {LibOpConstant} from "../../../../../src/lib/op/00/LibOpConstant.sol";
 import {OutOfBoundsConstantRead} from "../../../../../src/error/ErrIntegrity.sol";
 import {LibInterpreterState, InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
@@ -15,11 +15,11 @@ import {
     FullyQualifiedNamespace,
     EvalV4,
     StackItem
-} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
-import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV4.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {SignedContextV1} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterCallerV4.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {BadOpOutputsLength} from "rain.interpreter.interface/error/ErrIntegrity.sol";
-import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {BadOpOutputsLength} from "rain-interpreter-interface-0.1.0/src/error/ErrIntegrity.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpConstantTest
 /// @notice Test the runtime and integrity time logic of LibOpConstant.

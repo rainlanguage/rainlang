@@ -2,11 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
-import {Pointer} from "rain.solmem/lib/LibPointer.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {Pointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloatDeploy} from "rain-math-float-0.1.1/src/lib/deploy/LibDecimalFloatDeploy.sol";
 
 /// @title LibOpGm
 /// @notice Opcode for the signed geometric mean of two decimal floating point
@@ -38,7 +39,8 @@ library LibOpGm {
         }
         bool aNeg = a.lt(LibDecimalFloat.FLOAT_ZERO);
         bool bNeg = b.lt(LibDecimalFloat.FLOAT_ZERO);
-        Float result = a.abs().mul(b.abs()).pow(LibDecimalFloat.FLOAT_HALF, LibDecimalFloat.LOG_TABLES_ADDRESS);
+        Float result = a.abs().mul(b.abs())
+            .pow(LibDecimalFloat.FLOAT_HALF, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
         if (aNeg != bNeg) {
             result = result.minus();
         }
@@ -63,7 +65,8 @@ library LibOpGm {
         Float b = Float.wrap(StackItem.unwrap(inputs[1]));
         bool aNeg = a.lt(LibDecimalFloat.FLOAT_ZERO);
         bool bNeg = b.lt(LibDecimalFloat.FLOAT_ZERO);
-        Float result = a.abs().mul(b.abs()).pow(LibDecimalFloat.FLOAT_HALF, LibDecimalFloat.LOG_TABLES_ADDRESS);
+        Float result = a.abs().mul(b.abs())
+            .pow(LibDecimalFloat.FLOAT_HALF, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
         if (aNeg != bNeg) {
             result = result.minus();
         }

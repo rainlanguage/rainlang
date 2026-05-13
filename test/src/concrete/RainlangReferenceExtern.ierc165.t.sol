@@ -2,17 +2,17 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 
-import {IERC165} from "openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
-import {IInterpreterExternV4} from "rain.interpreter.interface/interface/IInterpreterExternV4.sol";
-import {ISubParserV4} from "rain.interpreter.interface/interface/ISubParserV4.sol";
+import {IERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/IERC165.sol";
+import {IInterpreterExternV4} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterExternV4.sol";
+import {ISubParserV4} from "rain-interpreter-interface-0.1.0/src/interface/ISubParserV4.sol";
 import {RainlangReferenceExtern} from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
-import {IDescribedByMetaV1} from "rain.metadata/interface/IDescribedByMetaV1.sol";
-import {ISubParserToolingV1} from "rain.sol.codegen/interface/ISubParserToolingV1.sol";
-import {IParserToolingV1} from "rain.sol.codegen/interface/IParserToolingV1.sol";
-import {IIntegrityToolingV1} from "rain.sol.codegen/interface/IIntegrityToolingV1.sol";
-import {IOpcodeToolingV1} from "rain.sol.codegen/interface/IOpcodeToolingV1.sol";
+import {IDescribedByMetaV1} from "rain-metadata-0.1.0/src/interface/IDescribedByMetaV1.sol";
+import {ISubParserToolingV1} from "rain-sol-codegen-0.1.0/src/interface/ISubParserToolingV1.sol";
+import {IParserToolingV1} from "rain-sol-codegen-0.1.0/src/interface/IParserToolingV1.sol";
+import {IIntegrityToolingV1} from "rain-sol-codegen-0.1.0/src/interface/IIntegrityToolingV1.sol";
+import {IOpcodeToolingV1} from "rain-sol-codegen-0.1.0/src/interface/IOpcodeToolingV1.sol";
 
 contract RainlangReferenceExternIERC165Test is Test {
     /// Test that ERC165 is implemented for the reference extern contract.

@@ -2,9 +2,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {BaseRainlangSubParser, SubParserIndexOutOfBounds} from "../../../src/abstract/BaseRainlangSubParser.sol";
-import {LibConvert} from "rain.lib.typecast/LibConvert.sol";
+import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
 
 /// @dev Simple literal parser that returns the dispatch value unchanged.
 function echoLiteralParser(bytes32 dispatchValue, uint256, uint256) pure returns (bytes32) {

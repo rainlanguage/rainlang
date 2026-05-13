@@ -4,14 +4,14 @@ pragma solidity =0.8.25;
 
 import {OpTest} from "test/abstract/OpTest.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {LibOpERC5313Owner} from "../../../../../src/lib/op/erc5313/LibOpERC5313Owner.sol";
-import {IERC5313} from "openzeppelin-contracts/contracts/interfaces/IERC5313.sol";
+import {IERC5313} from "@openzeppelin-contracts-5.6.1/interfaces/IERC5313.sol";
 import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {NotAnAddress} from "../../../../../src/error/ErrRainType.sol";
 import {LibTestCast} from "test/lib/typecast/LibTestCast.sol";
-import {LibBytes32Array} from "rain.solmem/lib/LibBytes32Array.sol";
+import {LibBytes32Array} from "rain-solmem-0.1.3/src/lib/LibBytes32Array.sol";
 
 /// @title LibOpERC5313OwnerTest
 /// @notice Test the opcode for getting the owner of an erc5313 contract.

@@ -2,11 +2,11 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 
-import {IERC165} from "openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
+import {IERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/IERC165.sol";
 import {RainlangParser} from "../../../src/concrete/RainlangParser.sol";
-import {IParserToolingV1} from "rain.sol.codegen/interface/IParserToolingV1.sol";
+import {IParserToolingV1} from "rain-sol-codegen-0.1.0/src/interface/IParserToolingV1.sol";
 
 contract RainlangParserIERC165Test is Test {
     /// Test that ERC165 is implemented for all interfaces.
