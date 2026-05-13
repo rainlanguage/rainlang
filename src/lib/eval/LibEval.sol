@@ -4,11 +4,11 @@ pragma solidity ^0.8.25;
 
 import {LibInterpreterState, InterpreterState} from "../state/LibInterpreterState.sol";
 
-import {LibMemCpy} from "rain.solmem/lib/LibMemCpy.sol";
-import {LibMemoryKV, MemoryKV} from "rain.lib.memkv/lib/LibMemoryKV.sol";
-import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
-import {Pointer} from "rain.solmem/lib/LibPointer.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {LibMemCpy} from "rain-solmem-0.1.3/src/lib/LibMemCpy.sol";
+import {LibMemoryKV, MemoryKV} from "rain-lib-memkv-0.1.0/src/lib/LibMemoryKV.sol";
+import {LibBytecode} from "rain-interpreter-interface-0.1.0/src/lib/bytecode/LibBytecode.sol";
+import {Pointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 
 import {InputsLengthMismatch} from "../../error/ErrEval.sol";
 

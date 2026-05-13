@@ -2,9 +2,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {RainlangStore} from "../../../src/concrete/RainlangStore.sol";
-import {StateNamespace} from "rain.interpreter.interface/lib/ns/LibNamespace.sol";
+import {StateNamespace} from "rain-interpreter-interface-0.1.0/src/lib/ns/LibNamespace.sol";
 
 /// @title RainlangStoreSetEmptyArrayTest
 /// @notice Test that `set()` with an empty (zero-length) `kvs` array

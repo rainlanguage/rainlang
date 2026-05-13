@@ -2,17 +2,17 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 
 import {LibInterpreterState, InterpreterState} from "../../../../src/lib/state/LibInterpreterState.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 import {LibEval} from "../../../../src/lib/eval/LibEval.sol";
-import {MemoryKV} from "rain.lib.memkv/lib/LibMemoryKV.sol";
+import {MemoryKV} from "rain-lib-memkv-0.1.0/src/lib/LibMemoryKV.sol";
 import {
     IInterpreterStoreV3,
     FullyQualifiedNamespace
-} from "rain.interpreter.interface/interface/IInterpreterStoreV3.sol";
-import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterStoreV3.sol";
+import {StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 
 contract LibEvalFBoundsTest is Test {
     /// Due to the mod of indexes to function pointers the indexes wrap at the

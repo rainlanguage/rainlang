@@ -6,10 +6,10 @@ import {
     IInterpreterExternV4,
     ExternDispatchV2,
     EncodedExternDispatchV2
-} from "rain.interpreter.interface/interface/IInterpreterExternV4.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterExternV4.sol";
 // StackItem exported for convenience.
 //forge-lint: disable-next-line(unused-import)
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 
 /// @title LibExtern
 /// @notice Defines and implements an encoding and decoding scheme for the data that

@@ -1,0 +1,36 @@
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "parsePragma1",
+      "inputs": [
+        {
+          "name": "data",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct PragmaV1",
+          "components": [
+            {
+              "name": "usingWordsFrom",
+              "type": "address[]",
+              "internalType": "address[]"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    }
+  ],
+  "bytecode": {
+    "object": "0x"
+  },
+  "deployedBytecode": {
+    "object": "0x"
+  }
+}

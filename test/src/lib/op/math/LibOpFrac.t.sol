@@ -5,8 +5,8 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpFrac} from "../../../../../src/lib/op/math/LibOpFrac.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
-import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 
 contract LibOpFracTest is OpTest {
     /// Directly test the integrity logic of LibOpFrac.

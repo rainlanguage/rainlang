@@ -2,12 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Script, console2} from "forge-std/Script.sol";
-import {LibRainDeploy} from "rain.deploy/lib/LibRainDeploy.sol";
+import {Script, console2} from "forge-std-1.16.1/src/Script.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.2/src/lib/LibRainDeploy.sol";
 import {LibInterpreterDeploy} from "../src/lib/deploy/LibInterpreterDeploy.sol";
-import {LibDecimalFloatDeploy} from "rain.math.float/lib/deploy/LibDecimalFloatDeploy.sol";
+import {LibDecimalFloatDeploy} from "rain-math-float-0.1.1/src/lib/deploy/LibDecimalFloatDeploy.sol";
 import {UnknownDeploymentSuite} from "../src/error/ErrDeploy.sol";
-import {LibTOFUTokenDecimals} from "rain.tofu.erc20-decimals/lib/LibTOFUTokenDecimals.sol";
+import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.1/src/lib/LibTOFUTokenDecimals.sol";
 import {CREATION_CODE as PARSER_CREATION_CODE} from "../src/generated/RainlangParser.pointers.sol";
 import {CREATION_CODE as STORE_CREATION_CODE} from "../src/generated/RainlangStore.pointers.sol";
 import {CREATION_CODE as INTERPRETER_CREATION_CODE} from "../src/generated/RainlangInterpreter.pointers.sol";

@@ -10,13 +10,17 @@ import {
     UnexpectedOperandValue,
     OperandOverflow
 } from "../../error/ErrParse.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {LibParseLiteral} from "./literal/LibParseLiteral.sol";
-import {CMASK_OPERAND_END, CMASK_WHITESPACE, CMASK_OPERAND_START} from "rain.string/lib/parse/LibParseCMask.sol";
+import {
+    CMASK_OPERAND_END,
+    CMASK_WHITESPACE,
+    CMASK_OPERAND_START
+} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
 import {ParseState, OPERAND_VALUES_LENGTH, FSM_YANG_MASK} from "./LibParseState.sol";
 import {LibParseError} from "./LibParseError.sol";
 import {LibParseInterstitial} from "./LibParseInterstitial.sol";
-import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibParseOperand
 /// @notice Parses operand values from Rainlang source text and dispatches

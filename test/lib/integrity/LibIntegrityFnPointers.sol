@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.19;
 
-import {LibConvert} from "rain.lib.typecast/LibConvert.sol";
+import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
 
 library LibIntegrityFnPointers {
     /// Generates fake IO function pointers as the index of each word, as a

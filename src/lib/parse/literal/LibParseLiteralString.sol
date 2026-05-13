@@ -3,9 +3,9 @@
 pragma solidity ^0.8.25;
 
 import {ParseState} from "../LibParseState.sol";
-import {IntOrAString, LibIntOrAString} from "rain.intorastring/lib/LibIntOrAString.sol";
+import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.0/src/lib/LibIntOrAString.sol";
 import {UnclosedStringLiteral, StringTooLong} from "../../../error/ErrParse.sol";
-import {CMASK_STRING_LITERAL_END, CMASK_STRING_LITERAL_TAIL} from "rain.string/lib/parse/LibParseCMask.sol";
+import {CMASK_STRING_LITERAL_END, CMASK_STRING_LITERAL_TAIL} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
 import {LibParseError} from "../LibParseError.sol";
 
 /// @title LibParseLiteralString

@@ -3,11 +3,11 @@
 pragma solidity =0.8.25;
 
 import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
-import {StateNamespace} from "rain.interpreter.interface/interface/IInterpreterStoreV3.sol";
-import {EvalV4, SourceIndexV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
-import {LibNamespace} from "rain.interpreter.interface/lib/ns/LibNamespace.sol";
+import {StateNamespace} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterStoreV3.sol";
+import {EvalV4, SourceIndexV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {LibNamespace} from "rain-interpreter-interface-0.1.0/src/lib/ns/LibNamespace.sol";
 import {InputsLengthMismatch} from "../../../src/error/ErrEval.sol";
-import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 
 contract RainlangInterpreterEvalTest is RainlangExpressionDeployerDeploymentTest {
     using LibDecimalFloat for Float;

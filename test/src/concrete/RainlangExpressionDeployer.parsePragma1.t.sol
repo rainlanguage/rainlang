@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {OpTest} from "test/abstract/OpTest.sol";
-import {PragmaV1} from "rain.interpreter.interface/interface/IParserPragmaV1.sol";
+import {PragmaV1} from "rain-interpreter-interface-0.1.0/src/interface/IParserPragmaV1.sol";
 import {NoWhitespaceAfterUsingWordsFrom} from "../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../src/lib/parse/LibParseError.sol";
 

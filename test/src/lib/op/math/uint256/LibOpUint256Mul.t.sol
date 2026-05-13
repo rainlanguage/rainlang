@@ -5,7 +5,7 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, stdError} from "test/abstract/OpTest.sol";
 import {LibOpUint256Mul} from "../../../../../../src/lib/op/math/uint256/LibOpUint256Mul.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 
 contract LibOpUint256MulTest is OpTest {
     /// Directly test the integrity logic of LibOpUint256Mul. This tests the happy

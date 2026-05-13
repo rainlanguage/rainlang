@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {LibSubParse} from "../../../parse/LibSubParse.sol";
 
 /// @title LibExternOpStackOperand

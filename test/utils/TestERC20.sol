@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {ERC20} from "@openzeppelin-contracts-5.6.1/token/ERC20/ERC20.sol";
 
 // an erc20 contract for testing purposes in `test_fixtures` crate to deploy erc20 tokens on the local evm
 contract TestERC20 is ERC20 {

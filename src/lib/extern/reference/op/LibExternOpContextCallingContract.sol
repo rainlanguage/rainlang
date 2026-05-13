@@ -2,12 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {LibSubParse} from "../../../parse/LibSubParse.sol";
 import {
     CONTEXT_BASE_COLUMN,
     CONTEXT_BASE_ROW_CALLING_CONTRACT
-} from "rain.interpreter.interface/lib/caller/LibContext.sol";
+} from "rain-interpreter-interface-0.1.0/src/lib/caller/LibContext.sol";
 
 /// @title LibExternOpContextCallingContract
 /// @notice This op is a simple reference to the contract that called the interpreter.

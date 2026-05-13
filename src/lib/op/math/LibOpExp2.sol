@@ -2,11 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
-import {Pointer} from "rain.solmem/lib/LibPointer.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {Pointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {LibDecimalFloat, Float} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloatDeploy} from "rain-math-float-0.1.1/src/lib/deploy/LibDecimalFloatDeploy.sol";
 
 /// @title LibOpExp2
 /// @notice Opcode for the binary exponential 2^x as decimal floating point.
@@ -31,7 +32,7 @@ library LibOpExp2 {
             a := mload(stackTop)
         }
 
-        a = LibDecimalFloat.FLOAT_TWO.pow(a, LibDecimalFloat.LOG_TABLES_ADDRESS);
+        a = LibDecimalFloat.FLOAT_TWO.pow(a, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
 
         assembly ("memory-safe") {
             mstore(stackTop, a)
@@ -48,7 +49,7 @@ library LibOpExp2 {
         returns (StackItem[] memory)
     {
         Float a = Float.wrap(StackItem.unwrap(inputs[0]));
-        a = LibDecimalFloat.FLOAT_TWO.pow(a, LibDecimalFloat.LOG_TABLES_ADDRESS);
+        a = LibDecimalFloat.FLOAT_TWO.pow(a, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
 
         StackItem[] memory outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(Float.unwrap(a));

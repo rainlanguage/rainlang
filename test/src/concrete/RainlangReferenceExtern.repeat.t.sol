@@ -9,7 +9,7 @@ import {
     InvalidRepeatCount,
     UnconsumedRepeatDispatchBytes
 } from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
-import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
+import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
 
 contract RainlangReferenceExternRepeatTest is OpTest {
     using Strings for address;

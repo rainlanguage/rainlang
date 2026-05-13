@@ -1,7 +1,7 @@
 [profile.default]
 src = 'src'
 out = 'out'
-libs = ['lib']
+libs = ['dependencies']
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
 
@@ -24,39 +24,50 @@ bytecode_hash = "none"
 cbor_metadata = false
 
 fs_permissions = [
-    {access="read-write", path="./out/test/"},
-    { access = "read-write", path = "./meta" },
-    { access = "read-write", path = "src/generated" },
-    { access = "write", path = "./deployments/latest/RainlangParser" },
-    { access = "write", path = "./deployments/latest/RainlangStore" },
-    { access = "write", path = "./deployments/latest/RainlangInterpreter" },
-    { access = "write", path = "./deployments/latest/RainlangExpressionDeployer" }
-]
-
-remappings = [
-    # The auto remapping wasn't appending /src/ for some reason.
-    "forge-std/=lib/rain.interpreter.interface/lib/forge-std/src/",
-    "rain.metadata/=lib/rain.metadata/src/",
-    "rain.sol.codegen/=lib/rain.interpreter.interface/lib/rain.sol.codegen/src/",
-    "rain.solmem/=lib/rain.interpreter.interface/lib/rain.solmem/src/",
-    "openzeppelin-contracts/=lib/rain.interpreter.interface/lib/openzeppelin-contracts/",
-    "rain.math.float/=lib/rain.interpreter.interface/lib/rain.math.float/src/",
-    "rain.intorastring/=lib/rain.interpreter.interface/lib/rain.intorastring/src/",
-    "rain.deploy/=lib/rain.deploy/src/",
-    "rain.tofu.erc20-decimals/=lib/rain.tofu.erc20-decimals/src/",
+  { access = "read-write", path = "./out/test/" },
+  { access = "read-write", path = "./meta" },
+  { access = "read-write", path = "src/generated" },
+  { access = "read-write", path = "./crates/abi" },
+  { access = "read", path = "./out" },
+  { access = "write", path = "./deployments/latest/RainlangParser" },
+  { access = "write", path = "./deployments/latest/RainlangStore" },
+  { access = "write", path = "./deployments/latest/RainlangInterpreter" },
+  { access = "write", path = "./deployments/latest/RainlangExpressionDeployer" },
 ]
 
 gas_limit = "18446744073709551615"
+
+[dependencies]
+forge-std = "1.16.1"
+"@openzeppelin-contracts" = "5.6.1"
+"rain-datacontract" = "0.1.0"
+"rain-deploy" = "0.1.2"
+"rain-extrospection" = "0.1.0"
+"rain-interpreter-interface" = "0.1.0"
+"rain-intorastring" = "0.1.0"
+"rain-lib-hash" = "0.1.0"
+"rain-lib-memkv" = "0.1.0"
+"rain-lib-typecast" = "0.1.0"
+"rain-math-binary" = "0.1.1"
+"rain-math-float" = "0.1.1"
+"rain-metadata" = "0.1.0"
+"rain-sol-codegen" = "0.1.0"
+"rain-solmem" = "0.1.3"
+"rain-string" = "0.2.0"
+"rain-tofu-erc20-decimals" = "0.1.1"
+
+[soldeer]
+recursive_deps = false
 
 [fuzz]
 runs = 2048
 
 [rpc_endpoints]
-arbitrum = "${CI_DEPLOY_ARBITRUM_RPC_URL}"
-base = "${CI_DEPLOY_BASE_RPC_URL}"
-base_sepolia = "${CI_DEPLOY_BASE_SEPOLIA_RPC_URL}"
-flare = "${CI_DEPLOY_FLARE_RPC_URL}"
-polygon = "${CI_DEPLOY_POLYGON_RPC_URL}"
+arbitrum = "${ARBITRUM_RPC_URL}"
+base = "${BASE_RPC_URL}"
+base_sepolia = "${BASE_SEPOLIA_RPC_URL}"
+flare = "${FLARE_RPC_URL}"
+polygon = "${POLYGON_RPC_URL}"
 
 [etherscan]
 arbitrum = { key = "${CI_DEPLOY_ARBITRUM_ETHERSCAN_API_KEY}" }

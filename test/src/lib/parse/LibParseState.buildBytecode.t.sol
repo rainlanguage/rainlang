@@ -2,10 +2,10 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {LibParseState, ParseState, EMPTY_ACTIVE_SOURCE} from "../../../../src/lib/parse/LibParseState.sol";
-import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
-import {OperandV2} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {LibBytecode} from "rain-interpreter-interface-0.1.0/src/lib/bytecode/LibBytecode.sol";
+import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 
 contract LibParseStateBuildBytecodeTest is Test {
     using LibParseState for ParseState;

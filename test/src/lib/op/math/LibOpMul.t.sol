@@ -2,13 +2,13 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {console2} from "forge-std/Test.sol";
+import {console2} from "forge-std-1.16.1/src/Test.sol";
 import {LibOpMul} from "../../../../../src/lib/op/math/LibOpMul.sol";
 import {OpTest, IntegrityCheckState, OperandV2} from "test/abstract/OpTest.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
-import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
-import {ExponentOverflow, CoefficientOverflow} from "rain.math.float/error/ErrDecimalFloat.sol";
+import {StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {ExponentOverflow, CoefficientOverflow} from "rain-math-float-0.1.1/src/error/ErrDecimalFloat.sol";
 
 contract LibOpMulTest is OpTest {
     /// Directly test the integrity logic of LibOpMul. This tests the

@@ -2,11 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
-import {Pointer} from "rain.solmem/lib/LibPointer.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {Pointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../../integrity/LibIntegrityCheck.sol";
-import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloatDeploy} from "rain-math-float-0.1.1/src/lib/deploy/LibDecimalFloatDeploy.sol";
 
 /// @title LibOpExponentialGrowth
 /// @notice Exponential growth is base(1 + rate)^t where base is the initial
@@ -35,7 +36,9 @@ library LibOpExponentialGrowth {
             stackTop := add(stackTop, 0x40)
             t := mload(stackTop)
         }
-        base = base.mul(rate.add(LibDecimalFloat.FLOAT_ONE).pow(t, LibDecimalFloat.LOG_TABLES_ADDRESS));
+        base = base.mul(
+            rate.add(LibDecimalFloat.FLOAT_ONE).pow(t, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS)
+        );
 
         assembly ("memory-safe") {
             mstore(stackTop, base)
@@ -54,7 +57,9 @@ library LibOpExponentialGrowth {
         Float base = Float.wrap(StackItem.unwrap(inputs[0]));
         Float rate = Float.wrap(StackItem.unwrap(inputs[1]));
         Float t = Float.wrap(StackItem.unwrap(inputs[2]));
-        base = base.mul(rate.add(LibDecimalFloat.FLOAT_ONE).pow(t, LibDecimalFloat.LOG_TABLES_ADDRESS));
+        base = base.mul(
+            rate.add(LibDecimalFloat.FLOAT_ONE).pow(t, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS)
+        );
         StackItem[] memory outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(Float.unwrap(base));
         return outputs;

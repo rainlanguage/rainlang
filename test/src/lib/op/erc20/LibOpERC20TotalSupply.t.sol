@@ -4,17 +4,17 @@ pragma solidity =0.8.25;
 
 import {OpTest} from "test/abstract/OpTest.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {LibOpERC20TotalSupply} from "../../../../../src/lib/op/erc20/LibOpERC20TotalSupply.sol";
-import {IERC20} from "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
+import {IERC20} from "@openzeppelin-contracts-5.6.1/interfaces/IERC20.sol";
 import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {IERC20Metadata} from "openzeppelin-contracts/contracts/interfaces/IERC20Metadata.sol";
-import {LibDecimalFloat, Float, LossyConversionToFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
-import {TOFUOutcome, ITOFUTokenDecimals} from "rain.tofu.erc20-decimals/interface/ITOFUTokenDecimals.sol";
+import {IERC20Metadata} from "@openzeppelin-contracts-5.6.1/interfaces/IERC20Metadata.sol";
+import {LibDecimalFloat, Float, LossyConversionToFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {TOFUOutcome, ITOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.1/src/interface/ITOFUTokenDecimals.sol";
 import {NotAnAddress} from "../../../../../src/error/ErrRainType.sol";
 import {LibTestCast} from "test/lib/typecast/LibTestCast.sol";
-import {LibBytes32Array} from "rain.solmem/lib/LibBytes32Array.sol";
+import {LibBytes32Array} from "rain-solmem-0.1.3/src/lib/LibBytes32Array.sol";
 
 /// @title LibOpERC20TotalSupplyTest
 /// @notice Test the opcode for getting the total supply of an erc20 contract.

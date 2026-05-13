@@ -3,15 +3,20 @@
 pragma solidity =0.8.25;
 
 import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
-import {Pointer, LibPointer} from "rain.solmem/lib/LibPointer.sol";
-import {LibStackPointer} from "rain.solmem/lib/LibStackPointer.sol";
+import {Pointer, LibPointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
+import {LibStackPointer} from "rain-solmem-0.1.3/src/lib/LibStackPointer.sol";
 import {LibInterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
-import {OperandV2, SourceIndexV2, EvalV4, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {
+    OperandV2,
+    SourceIndexV2,
+    EvalV4,
+    StackItem
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {FullyQualifiedNamespace} from "rain.interpreter.interface/interface/IInterpreterStoreV3.sol";
-import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV4.sol";
-import {LibContext} from "rain.interpreter.interface/lib/caller/LibContext.sol";
+import {FullyQualifiedNamespace} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterStoreV3.sol";
+import {SignedContextV1} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterCallerV4.sol";
+import {LibContext} from "rain-interpreter-interface-0.1.0/src/lib/caller/LibContext.sol";
 
 import {LibOpBlockTimestamp} from "../../../../../src/lib/op/evm/LibOpBlockTimestamp.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";

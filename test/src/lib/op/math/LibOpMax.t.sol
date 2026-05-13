@@ -6,9 +6,9 @@ import {OpTest} from "test/abstract/OpTest.sol";
 import {LibOpMax} from "../../../../../src/lib/op/math/LibOpMax.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 
 contract LibOpMaxTest is OpTest {
     /// Directly test the integrity logic of LibOpMax. This tests the happy

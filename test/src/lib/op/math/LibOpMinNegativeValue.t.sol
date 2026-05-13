@@ -5,10 +5,10 @@ pragma solidity =0.8.25;
 import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpMinNegativeValue} from "../../../../../src/lib/op/math/LibOpMinNegativeValue.sol";
 import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {InterpreterState, LibInterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {Float, LibDecimalFloat} from "rain.math.float/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpMinNegativeValueTest
 /// @notice Test the runtime and integrity time logic of LibOpMinNegativeValue.

@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {LibInterpreterDeploy} from "../lib/deploy/LibInterpreterDeploy.sol";
 import {IRainlang} from "../interface/IRainlang.sol";
-import {ERC165} from "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
+import {ERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/ERC165.sol";
 
 /// @title Rainlang
 /// @notice Rainlang contract that exposes the deterministic Zoltu deploy

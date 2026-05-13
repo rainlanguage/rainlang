@@ -6,12 +6,12 @@ import {OpTest} from "test/abstract/OpTest.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibOpBitwiseCountOnes} from "../../../../../src/lib/op/bitwise/LibOpBitwiseCountOnes.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
-import {OperandV2, StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
-import {LibCtPop} from "rain.math.binary/lib/LibCtPop.sol";
+import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {LibCtPop} from "rain-math-binary-0.1.1/src/lib/LibCtPop.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
 
-import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
+import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
 
 contract LibOpBitwiseCountOnesTest is OpTest {
     /// Directly test the integrity logic of LibOpBitwiseCountOnes. All possible operands

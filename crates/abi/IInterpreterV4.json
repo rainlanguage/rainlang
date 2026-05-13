@@ -1,0 +1,71 @@
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "eval4",
+      "inputs": [
+        {
+          "name": "eval",
+          "type": "tuple",
+          "internalType": "struct EvalV4",
+          "components": [
+            {
+              "name": "store",
+              "type": "address",
+              "internalType": "contract IInterpreterStoreV3"
+            },
+            {
+              "name": "namespace",
+              "type": "uint256",
+              "internalType": "FullyQualifiedNamespace"
+            },
+            {
+              "name": "bytecode",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "sourceIndex",
+              "type": "uint256",
+              "internalType": "SourceIndexV2"
+            },
+            {
+              "name": "context",
+              "type": "bytes32[][]",
+              "internalType": "bytes32[][]"
+            },
+            {
+              "name": "inputs",
+              "type": "bytes32[]",
+              "internalType": "StackItem[]"
+            },
+            {
+              "name": "stateOverlay",
+              "type": "bytes32[]",
+              "internalType": "bytes32[]"
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "stack",
+          "type": "bytes32[]",
+          "internalType": "StackItem[]"
+        },
+        {
+          "name": "writes",
+          "type": "bytes32[]",
+          "internalType": "bytes32[]"
+        }
+      ],
+      "stateMutability": "view"
+    }
+  ],
+  "bytecode": {
+    "object": "0x"
+  },
+  "deployedBytecode": {
+    "object": "0x"
+  }
+}

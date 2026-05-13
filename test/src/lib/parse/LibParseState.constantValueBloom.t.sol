@@ -2,9 +2,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.18;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {LibParseState} from "../../../../src/lib/parse/LibParseState.sol";
-import {LibCtPop} from "rain.math.binary/lib/LibCtPop.sol";
+import {LibCtPop} from "rain-math-binary-0.1.1/src/lib/LibCtPop.sol";
 
 /// @title LibParseStateConstantValueBloomTest
 /// @notice Tests for the constant value bloom filter in LibParseState.

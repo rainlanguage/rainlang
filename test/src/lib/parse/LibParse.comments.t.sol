@@ -6,7 +6,7 @@ import {OperandTest} from "test/abstract/OperandTest.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 
 import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
-import {LibBytecode} from "rain.interpreter.interface/lib/bytecode/LibBytecode.sol";
+import {LibBytecode} from "rain-interpreter-interface-0.1.0/src/lib/bytecode/LibBytecode.sol";
 
 import {UnclosedComment, UnexpectedComment, UnexpectedLHSChar} from "../../../../src/error/ErrParse.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";

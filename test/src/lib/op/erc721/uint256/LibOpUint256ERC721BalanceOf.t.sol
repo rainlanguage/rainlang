@@ -5,21 +5,21 @@ pragma solidity =0.8.25;
 import {OpTest} from "test/abstract/OpTest.sol";
 import {IntegrityCheckState, BadOpInputsLength} from "../../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibOpUint256ERC721BalanceOf} from "../../../../../../src/lib/op/erc721/uint256/LibOpUint256ERC721BalanceOf.sol";
-import {IERC721} from "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
+import {IERC721} from "@openzeppelin-contracts-5.6.1/token/ERC721/IERC721.sol";
 import {
     FullyQualifiedNamespace,
     OperandV2,
     SourceIndexV2,
     EvalV4,
     StackItem
-} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
-import {LibContext} from "rain.interpreter.interface/lib/caller/LibContext.sol";
-import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV4.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {LibContext} from "rain-interpreter-interface-0.1.0/src/lib/caller/LibContext.sol";
+import {SignedContextV1} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterCallerV4.sol";
 import {UnexpectedOperand} from "../../../../../../src/error/ErrParse.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
+import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
 import {NotAnAddress} from "../../../../../../src/error/ErrRainType.sol";
-import {LibBytes32Array} from "rain.solmem/lib/LibBytes32Array.sol";
+import {LibBytes32Array} from "rain-solmem-0.1.3/src/lib/LibBytes32Array.sol";
 import {LibTestCast} from "test/lib/typecast/LibTestCast.sol";
 
 /// @title LibOpUint256ERC721BalanceOfTest

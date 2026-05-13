@@ -9,7 +9,7 @@ import {
     CMASK_LHS_RHS_DELIMITER,
     CMASK_LHS_STACK_DELIMITER,
     CMASK_LHS_STACK_HEAD
-} from "rain.string/lib/parse/LibParseCMask.sol";
+} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
 import {LibParse, UnexpectedLHSChar} from "../../../../src/lib/parse/LibParse.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";

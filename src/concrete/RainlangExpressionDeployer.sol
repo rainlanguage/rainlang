@@ -2,12 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {ERC165} from "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
-import {Pointer} from "rain.solmem/lib/LibPointer.sol";
-import {IParserV2} from "rain.interpreter.interface/interface/IParserV2.sol";
-import {IParserPragmaV1, PragmaV1} from "rain.interpreter.interface/interface/IParserPragmaV1.sol";
+import {ERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/ERC165.sol";
+import {Pointer} from "rain-solmem-0.1.3/src/lib/LibPointer.sol";
+import {IParserV2} from "rain-interpreter-interface-0.1.0/src/interface/IParserV2.sol";
+import {IParserPragmaV1, PragmaV1} from "rain-interpreter-interface-0.1.0/src/interface/IParserPragmaV1.sol";
 
-import {IDescribedByMetaV1} from "rain.metadata/interface/IDescribedByMetaV1.sol";
+import {IDescribedByMetaV1} from "rain-metadata-0.1.0/src/interface/IDescribedByMetaV1.sol";
 
 import {LibIntegrityCheck} from "../lib/integrity/LibIntegrityCheck.sol";
 import {LibInterpreterStateDataContract} from "../lib/state/LibInterpreterStateDataContract.sol";
@@ -16,7 +16,7 @@ import {
     INTEGRITY_FUNCTION_POINTERS,
     DESCRIBED_BY_META_HASH
 } from "../generated/RainlangExpressionDeployer.pointers.sol";
-import {IIntegrityToolingV1} from "rain.sol.codegen/interface/IIntegrityToolingV1.sol";
+import {IIntegrityToolingV1} from "rain-sol-codegen-0.1.0/src/interface/IIntegrityToolingV1.sol";
 import {RainlangParser} from "./RainlangParser.sol";
 import {LibInterpreterDeploy} from "../lib/deploy/LibInterpreterDeploy.sol";
 

@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {
     RainlangReferenceExtern,
     OPCODE_FUNCTION_POINTERS,
@@ -14,7 +14,7 @@ import {
     LITERAL_PARSER_FUNCTION_POINTERS,
     OPERAND_HANDLER_FUNCTION_POINTERS
 } from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
-import {LibGenParseMeta} from "rain.interpreter.interface/lib/codegen/LibGenParseMeta.sol";
+import {LibGenParseMeta} from "rain-interpreter-interface-0.1.0/src/lib/codegen/LibGenParseMeta.sol";
 
 contract RainlangReferenceExternPointersTest is Test {
     function testOpcodeFunctionPointers() external {

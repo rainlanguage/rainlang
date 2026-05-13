@@ -9,7 +9,7 @@ import {
     CMASK_SUB_PARSEABLE_LITERAL_HEAD,
     CMASK_ZERO,
     CMASK_UPPER_X
-} from "rain.string/lib/parse/LibParseCMask.sol";
+} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
 
 import {UnsupportedLiteralType, UppercaseHexPrefix} from "../../../error/ErrParse.sol";
 import {ParseState} from "../LibParseState.sol";

@@ -6,12 +6,12 @@ import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangEx
 import {LibInterpreterState, InterpreterState} from "../../../../src/lib/state/LibInterpreterState.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 import {LibEval} from "../../../../src/lib/eval/LibEval.sol";
-import {MemoryKV} from "rain.lib.memkv/lib/LibMemoryKV.sol";
+import {MemoryKV} from "rain-lib-memkv-0.1.0/src/lib/LibMemoryKV.sol";
 import {
     IInterpreterStoreV3,
     FullyQualifiedNamespace
-} from "rain.interpreter.interface/interface/IInterpreterStoreV3.sol";
-import {StackItem} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterStoreV3.sol";
+import {StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 
 /// @title LibEvalMaxOutputsTest
 /// @notice Tests that eval4 truncates outputs when maxOutputs < sourceOutputs.

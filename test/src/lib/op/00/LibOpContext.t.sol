@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {stdError} from "forge-std/Test.sol";
+import {stdError} from "forge-std-1.16.1/src/Test.sol";
 
 import {LibOpContext} from "../../../../../src/lib/op/00/LibOpContext.sol";
 import {OpTest} from "test/abstract/OpTest.sol";
@@ -13,7 +13,7 @@ import {
     FullyQualifiedNamespace,
     EvalV4,
     StackItem
-} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 

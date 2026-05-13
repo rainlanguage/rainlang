@@ -2,15 +2,15 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {ERC165} from "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
+import {ERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/ERC165.sol";
 
 import {LibParse} from "../lib/parse/LibParse.sol";
 
-import {PragmaV1} from "rain.interpreter.interface/interface/IParserPragmaV1.sol";
+import {PragmaV1} from "rain-interpreter-interface-0.1.0/src/interface/IParserPragmaV1.sol";
 import {LibParseState, ParseState} from "../lib/parse/LibParseState.sol";
 import {LibParsePragma} from "../lib/parse/LibParsePragma.sol";
 import {LibAllStandardOps} from "../lib/op/LibAllStandardOps.sol";
-import {LibBytes, Pointer} from "rain.solmem/lib/LibBytes.sol";
+import {LibBytes, Pointer} from "rain-solmem-0.1.3/src/lib/LibBytes.sol";
 import {LibParseInterstitial} from "../lib/parse/LibParseInterstitial.sol";
 import {
     LITERAL_PARSER_FUNCTION_POINTERS,
@@ -25,7 +25,7 @@ import {
     //forge-lint: disable-next-line(unused-import)
     PARSE_META_BUILD_DEPTH
 } from "../generated/RainlangParser.pointers.sol";
-import {IParserToolingV1} from "rain.sol.codegen/interface/IParserToolingV1.sol";
+import {IParserToolingV1} from "rain-sol-codegen-0.1.0/src/interface/IParserToolingV1.sol";
 
 /// @title RainlangParser
 /// @notice Converts Rainlang text to bytecode.

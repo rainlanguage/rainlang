@@ -11,10 +11,10 @@ import {
     FullyQualifiedNamespace,
     EvalV4,
     StackItem
-} from "rain.interpreter.interface/interface/IInterpreterV4.sol";
+} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
-import {SignedContextV1} from "rain.interpreter.interface/interface/IInterpreterCallerV4.sol";
-import {LibContext} from "rain.interpreter.interface/lib/caller/LibContext.sol";
+import {SignedContextV1} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterCallerV4.sol";
+import {LibContext} from "rain-interpreter-interface-0.1.0/src/lib/caller/LibContext.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 
 contract LibOpLessThanOrEqualToTest is OpTest {
