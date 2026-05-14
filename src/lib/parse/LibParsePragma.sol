@@ -25,6 +25,32 @@ bytes32 constant PRAGMA_KEYWORD_MASK = bytes32(~((1 << (32 - PRAGMA_KEYWORD_BYTE
 /// @title LibParsePragma
 /// @notice Parses the `using-words-from` pragma from Rainlang source text
 /// and registers sub-parser contract addresses on the parse state.
+///
+/// @dev Sub-parsers are external contracts called during parse to resolve
+/// words this parser doesn't recognise. They are invoked at parse time,
+/// receive parser state context, and return bytecode that is spliced
+/// into the result. `integrityCheck2` then validates the assembled
+/// bytecode's structural and stack-tracking correctness.
+///
+/// Trust model: sub-parsers run under the same trust assumption as the
+/// expression author. A buggy or malicious sub-parser can:
+/// - emit syntactically valid bytecode that nevertheless encodes
+///   behaviour the user did not write (e.g. wrong opcode index, swapped
+///   inputs);
+/// - emit constants of its choosing, including ones that look like
+///   addresses the user did not specify;
+/// - decline to parse legitimate input and revert the entire expression.
+///
+/// The integrity check on the assembled bytecode catches stack-shape and
+/// pointer-bounds violations. It does NOT verify semantic equivalence
+/// between the source text and the bytecode the sub-parser produced —
+/// that's a function of the sub-parser's correctness, not the
+/// interpreter's.
+///
+/// Integrators MUST vet every sub-parser address they accept (or that
+/// users include via the `using-words-from` pragma) under the same trust
+/// model they apply to the expression itself. An expression with a
+/// hostile sub-parser is equivalent to a hostile expression.
 library LibParsePragma {
     using LibParseError for ParseState;
     using LibParseInterstitial for ParseState;
