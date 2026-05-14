@@ -8,21 +8,23 @@ import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpr
 
 /// @title LibParseStatePushOpToSourceLHSCorruptionTest
 /// @notice The LHS counter byte at `state + 0x5F` (the last byte of
-/// `topLevel1`) belongs to a different counter than the per-item op
-/// counters tracked across `topLevel0`/`topLevel1`. `pushOpToSource`
-/// computes its write address as `state + 0x20 + stackRHSOffset + 1`, so
-/// when the offset takes its maximum allowed value
-/// (`MAX_STACK_RHS_OFFSET - 1`) the write must land before byte 0x5F.
-/// Pin that boundary directly: any future change to `MAX_STACK_RHS_OFFSET`
-/// that lets the offset reach 0x3e silently increments the LHS counter
-/// every time an op is pushed to the affected item.
+/// @notice `topLevel1`) belongs to a different counter than the per-item op
+/// @notice counters tracked across `topLevel0`/`topLevel1`. `pushOpToSource`
+/// @notice computes its write address as `state + 0x20 + stackRHSOffset + 1`,
+/// @notice so when the offset takes its maximum allowed value
+/// @notice (`MAX_STACK_RHS_OFFSET - 1`) the write must land before byte 0x5F.
+/// @notice Pin that boundary directly: any future change to
+/// @notice `MAX_STACK_RHS_OFFSET` that lets the offset reach 0x3e silently
+/// @notice increments the LHS counter every time an op is pushed to the
+/// @notice affected item.
 contract LibParseStatePushOpToSourceLHSCorruptionTest is Test {
     using LibParseState for ParseState;
 
-    /// Use the highest offset that `highwater()` will accept. Pre-populate
-    /// the per-item op counter so `snapshotSourceHeadToLineTracker` skips
-    /// (it only acts when the counter is zero), exercising the bare
-    /// `pushOpToSource` increment.
+    /// @notice Use the highest offset that `highwater()` will accept.
+    /// @notice Pre-populate the per-item op counter so
+    /// @notice `snapshotSourceHeadToLineTracker` skips (it only acts when the
+    /// @notice counter is zero), exercising the bare `pushOpToSource`
+    /// @notice increment.
     function testPushOpToSourceAtMaxOffsetDoesNotTouchLHSCounter() external pure {
         ParseState memory state = LibParseState.newState("", "", "", "");
 
