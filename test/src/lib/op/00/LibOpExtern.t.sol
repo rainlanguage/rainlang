@@ -10,6 +10,7 @@ import {
     ExternIntegrityInputsMismatch,
     ExternIntegrityOutputsMismatch
 } from "../../../../../src/error/ErrExtern.sol";
+import {OutOfBoundsConstantRead} from "../../../../../src/error/ErrIntegrity.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
@@ -199,6 +200,28 @@ contract LibOpExternTest is OpTest {
         returns (uint256, uint256)
     {
         return LibOpExtern.integrity(state, operand);
+    }
+
+    /// When the operand's encoded extern dispatch index points past the end
+    /// of the constants array, integrity must revert with
+    /// `OutOfBoundsConstantRead` (a domain-specific error) instead of the
+    /// generic Solidity 0x32 panic.
+    function testOpExternIntegrityOutOfBoundsConstantIndex(
+        IntegrityCheckState memory state,
+        uint16 oobIndex,
+        uint8 inputs,
+        uint8 outputs
+    ) external {
+        inputs = uint8(bound(inputs, 0, 0x0F));
+        outputs = uint8(bound(outputs, 0, 0x0F));
+        oobIndex = uint16(bound(oobIndex, state.constants.length, type(uint16).max));
+
+        OperandV2 operand = LibOperand.build(inputs, outputs, oobIndex);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(OutOfBoundsConstantRead.selector, state.opIndex, state.constants.length, oobIndex)
+        );
+        this.externalIntegrity(state, operand);
     }
 
     /// Test that `run` reverts with `BadOutputsLength` when the extern returns
