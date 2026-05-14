@@ -1,5 +1,7 @@
 .DS_Store
+.cargo
 .coderabbit.yaml
+.devcontainer.json
 .envrc
 .gas-snapshot
 .git
@@ -7,6 +9,7 @@
 .gitignore
 .gitmodules
 .pre-commit-config.yaml
+.prettierignore
 .soldeerignore
 .vscode
 CLAUDE.md
