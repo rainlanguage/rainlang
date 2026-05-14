@@ -51,6 +51,16 @@ contract RainlangInterpreter is IInterpreterV4, IOpcodeToolingV1, ERC165 {
     }
 
     /// @inheritdoc IInterpreterV4
+    /// @dev `eval4` does NOT re-run integrity checks on `eval.bytecode`. It
+    /// deserialises via `unsafeDeserialize` and dispatches opcodes through
+    /// raw function pointer arithmetic. Memory safety, stack bounds, and
+    /// opcode well-formedness all rely on the bytecode having passed
+    /// `LibIntegrityCheck.integrityCheck2` at deploy time. Callers MUST
+    /// source `eval.bytecode` from a `RainterpreterExpressionDeployer`
+    /// that validated it against this interpreter's opcode function
+    /// pointer table. Calling `eval4` with raw, manually constructed, or
+    /// otherwise unverified bytecode is undefined behaviour and can read
+    /// from or write to arbitrary memory.
     function eval4(EvalV4 calldata eval) external view virtual override returns (StackItem[] memory, bytes32[] memory) {
         InterpreterState memory state = eval.bytecode
             .unsafeDeserialize(
