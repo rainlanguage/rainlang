@@ -9,6 +9,27 @@ import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 
 /// @title LibOpContext
 /// @notice Implementation of reading from the context matrix onto the stack.
+///
+/// @dev The interpreter exposes the context grid that the calling contract
+/// passed to `eval4` as a 2D `bytes32` matrix indexed by `(i, j)` via this
+/// opcode. The interpreter does NOT authenticate, validate, or otherwise
+/// inspect the contents of the context. It returns whatever the caller
+/// supplied at the requested indices, with OOB protection from Solidity's
+/// array bounds.
+///
+/// Trust model:
+/// - The CALLING CONTRACT is the authentication boundary. It MUST validate
+///   any signed payloads, verify signer identity, enforce that the
+///   context grid it builds reflects authenticated state, and reject
+///   replay before invoking the interpreter. Anything an attacker can put
+///   into the context grid IS the input the expression sees.
+/// - The EXPRESSION must enforce its own semantic constraints over the
+///   context it reads: deadlines (e.g. block.timestamp comparisons),
+///   nonces (via `get`/`set` with the store), and any per-signer logic.
+///   `context` reads alone do not prove authenticity — only structure.
+///
+/// Integrators MUST treat the context matrix as adversary-controlled
+/// unless their calling contract has explicitly authenticated each cell.
 library LibOpContext {
     /// @notice `context` integrity check. Requires 0 inputs and produces 1 output.
     /// @return The number of inputs.
