@@ -32,9 +32,12 @@ library LibOpChainId {
     }
 
     /// @notice Reference implementation of `chain-id` for testing.
-    /// Uses the float conversion with exponent 0 to verify that
-    /// `fromFixedDecimalLosslessPacked(value, 0)` is identity, unlike `run()`
-    /// which stores the raw value directly as a gas optimization.
+    /// `run()` writes the raw EVM integer directly because
+    /// `fromFixedDecimalLosslessPacked(x, 0)` is bitwise-identical to
+    /// `bytes32(x)` for any `x` that fits in `int224` — an invariant
+    /// owned and tested by `LibDecimalFloat`. The reference path goes
+    /// through the float conversion so that fact is explicit at the
+    /// opcode boundary.
     /// @return The output values to push onto the stack.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory)
         internal
