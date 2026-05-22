@@ -7,10 +7,13 @@ description = "Rainlang Parser Rust Crate."
 homepage.workspace = true
 
 [dependencies]
-alloy-ethers-typecast = { workspace = true }
 rainlang_dispair = { workspace = true }
 rainlang_bindings = { workspace = true }
-alloy = { workspace = true }
+alloy = { workspace = true, features = [
+  "providers",
+  "network",
+  "rpc-types-eth",
+] }
 thiserror = { workspace = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
