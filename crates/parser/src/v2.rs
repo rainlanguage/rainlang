@@ -1,52 +1,67 @@
 use crate::error::ParserError;
 use alloy::primitives::Address;
-use alloy_ethers_typecast::{ReadContractParametersBuilder, ReadableClient};
+use alloy::providers::Provider;
+use alloy::rpc::types::TransactionRequest;
+use alloy::sol_types::SolCall;
 use rainlang_bindings::IParserPragmaV1::*;
 use rainlang_bindings::IParserV2::*;
 use rainlang_dispair::DISPaiR;
+
+async fn eth_call<C: SolCall, P: Provider>(
+    provider: &P,
+    to: Address,
+    call: C,
+) -> Result<C::Return, ParserError> {
+    let tx = TransactionRequest::default()
+        .to(to)
+        .input(call.abi_encode().into());
+    let bytes = provider.call(tx).await?;
+    Ok(C::abi_decode_returns(&bytes)?)
+}
 
 /// Trait for interacting with the on-chain Rainlang parser contract.
 #[cfg(not(target_family = "wasm"))]
 pub trait Parser2 {
     /// Call Parser contract to parse the provided rainlang text.
-    fn parse_text(
+    fn parse_text<P: Provider + Sync>(
         &self,
         text: &str,
-        client: ReadableClient,
+        provider: &P,
     ) -> impl std::future::Future<Output = Result<parse2Return, ParserError>> + Send
     where
         Self: Sync,
     {
-        self.parse(text.as_bytes().to_vec(), client)
+        self.parse(text.as_bytes().to_vec(), provider)
     }
 
-    /// Call Parser contract to parse the provided data
+    /// Call Parser contract to parse the provided data.
     /// The provided data must contain valid UTF-8 encoding of valid rainlang text.
-    fn parse(
+    fn parse<P: Provider + Sync>(
         &self,
         data: Vec<u8>,
-        client: ReadableClient,
+        provider: &P,
     ) -> impl std::future::Future<Output = Result<parse2Return, ParserError>> + Send;
 
     /// Call Parser contract to parse the provided rainlang text and provide the pragma.
-    /// The provided rainlang text must be valid UTF-8 encoding of valid rainlang text.
-    fn parse_pragma(
+    fn parse_pragma<P: Provider + Sync>(
         &self,
         data: Vec<u8>,
-        client: ReadableClient,
+        provider: &P,
     ) -> impl std::future::Future<Output = Result<parsePragma1Return, ParserError>> + Send;
 
     /// Call Parser contract to parse the provided rainlang text and return the pragma addresses.
-    fn parse_pragma_text(
+    fn parse_pragma_text<P: Provider + Sync>(
         &self,
         text: &str,
-        client: ReadableClient,
+        provider: &P,
     ) -> impl std::future::Future<Output = Result<Vec<Address>, ParserError>> + Send
     where
         Self: Sync,
     {
-        async {
-            let res = self.parse_pragma(text.as_bytes().to_vec(), client).await?;
+        async move {
+            let res = self
+                .parse_pragma(text.as_bytes().to_vec(), provider)
+                .await?;
             Ok(res._0.usingWordsFrom)
         }
     }
@@ -55,45 +70,41 @@ pub trait Parser2 {
 /// Trait for interacting with the on-chain Rainlang parser contract.
 #[cfg(target_family = "wasm")]
 pub trait Parser2 {
-    /// Call Parser contract to parse the provided rainlang text.
-    fn parse_text(
+    fn parse_text<P: Provider>(
         &self,
         text: &str,
-        client: ReadableClient,
+        provider: &P,
     ) -> impl std::future::Future<Output = Result<parse2Return, ParserError>>
     where
         Self: Sync,
     {
-        self.parse(text.as_bytes().to_vec(), client)
+        self.parse(text.as_bytes().to_vec(), provider)
     }
 
-    /// Call Parser contract to parse the provided data
-    /// The provided data must contain valid UTF-8 encoding of valid rainlang text.
-    fn parse(
+    fn parse<P: Provider>(
         &self,
         data: Vec<u8>,
-        client: ReadableClient,
+        provider: &P,
     ) -> impl std::future::Future<Output = Result<parse2Return, ParserError>>;
 
-    /// Call Parser contract to parse the provided rainlang text and provide the pragma.
-    /// The provided rainlang text must be valid UTF-8 encoding of valid rainlang text.
-    fn parse_pragma(
+    fn parse_pragma<P: Provider>(
         &self,
         data: Vec<u8>,
-        client: ReadableClient,
+        provider: &P,
     ) -> impl std::future::Future<Output = Result<parsePragma1Return, ParserError>>;
 
-    /// Call Parser contract to parse the provided rainlang text and return the pragma addresses.
-    fn parse_pragma_text(
+    fn parse_pragma_text<P: Provider>(
         &self,
         text: &str,
-        client: ReadableClient,
+        provider: &P,
     ) -> impl std::future::Future<Output = Result<Vec<Address>, ParserError>>
     where
         Self: Sync,
     {
-        async {
-            let res = self.parse_pragma(text.as_bytes().to_vec(), client).await?;
+        async move {
+            let res = self
+                .parse_pragma(text.as_bytes().to_vec(), provider)
+                .await?;
             Ok(res._0.usingWordsFrom)
         }
     }
@@ -133,42 +144,64 @@ impl ParserV2 {
     }
 }
 
+#[cfg(not(target_family = "wasm"))]
 impl Parser2 for ParserV2 {
-    async fn parse(
+    async fn parse<P: Provider + Sync>(
         &self,
         data: Vec<u8>,
-        client: ReadableClient,
+        provider: &P,
     ) -> Result<parse2Return, ParserError> {
-        let bytecode = client
-            .read(
-                ReadContractParametersBuilder::default()
-                    .address(self.deployer_address)
-                    .call(parse2Call { data: data.into() })
-                    .build()
-                    .map_err(ParserError::ReadContractParametersBuilderError)?,
-            )
-            .await
-            .map_err(ParserError::ReadableClientError)?;
-
+        let bytecode = eth_call(
+            provider,
+            self.deployer_address,
+            parse2Call { data: data.into() },
+        )
+        .await?;
         Ok(parse2Return { bytecode })
     }
 
-    async fn parse_pragma(
+    async fn parse_pragma<P: Provider + Sync>(
         &self,
         data: Vec<u8>,
-        client: ReadableClient,
+        provider: &P,
     ) -> Result<parsePragma1Return, ParserError> {
-        let pragma = client
-            .read(
-                ReadContractParametersBuilder::default()
-                    .address(self.deployer_address)
-                    .call(parsePragma1Call { data: data.into() })
-                    .build()
-                    .map_err(ParserError::ReadContractParametersBuilderError)?,
-            )
-            .await
-            .map_err(ParserError::ReadableClientError)?;
+        let pragma = eth_call(
+            provider,
+            self.deployer_address,
+            parsePragma1Call { data: data.into() },
+        )
+        .await?;
+        Ok(parsePragma1Return { _0: pragma })
+    }
+}
 
+#[cfg(target_family = "wasm")]
+impl Parser2 for ParserV2 {
+    async fn parse<P: Provider>(
+        &self,
+        data: Vec<u8>,
+        provider: &P,
+    ) -> Result<parse2Return, ParserError> {
+        let bytecode = eth_call(
+            provider,
+            self.deployer_address,
+            parse2Call { data: data.into() },
+        )
+        .await?;
+        Ok(parse2Return { bytecode })
+    }
+
+    async fn parse_pragma<P: Provider>(
+        &self,
+        data: Vec<u8>,
+        provider: &P,
+    ) -> Result<parsePragma1Return, ParserError> {
+        let pragma = eth_call(
+            provider,
+            self.deployer_address,
+            parsePragma1Call { data: data.into() },
+        )
+        .await?;
         Ok(parsePragma1Return { _0: pragma })
     }
 }
@@ -176,7 +209,11 @@ impl Parser2 for ParserV2 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloy::{hex, primitives::Address, providers::mock::Asserter};
+    use alloy::{
+        hex,
+        primitives::Address,
+        providers::{ProviderBuilder, mock::Asserter},
+    };
 
     #[tokio::test]
     async fn test_from_dispair() {
@@ -207,12 +244,12 @@ mod tests {
             .concat(),
         );
 
-        let client = ReadableClient::new_mocked(asserter);
+        let provider = ProviderBuilder::new().connect_mocked_client(asserter);
         let parser = ParserV2 {
             deployer_address: Address::repeat_byte(0x1),
         };
 
-        let result = parser.parse_text("my rainlang", client).await.unwrap();
+        let result = parser.parse_text("my rainlang", &provider).await.unwrap();
 
         assert_eq!(**result.bytecode, hex!("1234"));
     }
@@ -231,19 +268,19 @@ mod tests {
             .concat(),
         );
 
-        let client = ReadableClient::new_mocked(asserter);
+        let provider = ProviderBuilder::new().connect_mocked_client(asserter);
         let parser = ParserV2 {
             deployer_address: Address::repeat_byte(0x1),
         };
 
-        let result = parser.parse_text(rainlang, client).await.unwrap();
+        let result = parser.parse_text(rainlang, &provider).await.unwrap();
 
         assert_eq!(**result.bytecode, hex!("6d79207261696e6c616e67"));
     }
 
     #[tokio::test]
     async fn test_parse_pragma_text() {
-        let rainlang = "my rainlang"; // we aren't actually using the onchian parser so this could be anything
+        let rainlang = "my rainlang";
 
         let pragma1 = Address::repeat_byte(0x11);
         let pragma2 = Address::repeat_byte(0x22);
@@ -260,12 +297,12 @@ mod tests {
             .concat(),
         );
 
-        let client = ReadableClient::new_mocked(asserter);
+        let provider = ProviderBuilder::new().connect_mocked_client(asserter);
         let parser = ParserV2 {
             deployer_address: Address::repeat_byte(0x1),
         };
 
-        let result = parser.parse_pragma_text(rainlang, client).await.unwrap();
+        let result = parser.parse_pragma_text(rainlang, &provider).await.unwrap();
 
         assert_eq!(result[0], pragma1);
         assert_eq!(result[1], pragma2);
