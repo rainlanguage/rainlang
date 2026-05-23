@@ -1,0 +1,23 @@
+name: Package Release
+on:
+  push:
+    branches:
+      - main
+jobs:
+  # rainlang_bindings (leaf, only depends on alloy registry crate)
+  bindings:
+    uses: rainlanguage/rainix/.github/workflows/rainix-autopublish.yaml@main
+    with:
+      crate: rainlang_bindings
+    secrets: inherit
+  # rainlang_dispair (leaf, only depends on alloy registry crate)
+  dispair:
+    uses: rainlanguage/rainix/.github/workflows/rainix-autopublish.yaml@main
+    needs: bindings
+    with:
+      crate: rainlang_dispair
+    secrets: inherit
+  # rainlang_parser and rainlang-eval are intentionally not wired up here:
+  # - parser's workspace deps (rainlang_dispair, rainlang_bindings) need
+  #   `version = ...` once those land on crates.io
+  # - eval has a foundry-evm git dep that blocks cargo publish entirely
