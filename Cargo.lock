@@ -5367,7 +5367,7 @@ dependencies = [
 
 [[package]]
 name = "rainlang_bindings"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "alloy",
 ]
