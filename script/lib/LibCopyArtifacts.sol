@@ -35,7 +35,7 @@ library LibCopyArtifacts {
     /// @notice Path of the committed ABI copy that the Rust crates read
     /// at compile time.
     function committedPath(string memory contractName) internal pure returns (string memory) {
-        return string.concat("crates/abi/", contractName, ".json");
+        return string.concat("crates/bindings/abi/", contractName, ".json");
     }
 
     /// @notice Extracts the deterministic subset of the live forge
