@@ -5,6 +5,9 @@
     flake-utils.url = "github:numtide/flake-utils";
     rainix.url = "github:rainlanguage/rainix";
     rain.url = "github:rainlanguage/rain.cli";
+    # rain.cli pulls its own rainix; make it follow ours so the lock has a
+    # single rainix (and one rust toolchain / nixpkgs) instead of two revs.
+    rain.inputs.rainix.follows = "rainix";
   };
 
   outputs =
