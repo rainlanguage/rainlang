@@ -4,20 +4,18 @@ on:
     branches:
       - main
 jobs:
-  # rainlang_bindings (leaf, only depends on alloy registry crate)
-  bindings:
+  release:
+    # Single workspace publish (rainix#191): one job bumps + publishes the
+    # rainlang crates in dependency order — bindings then dispair (both leaves
+    # on alloy). One commit, one push (via the PUBLISH_PRIVATE_KEY deploy key,
+    # which bypasses main's required-review protection), namespaced tags.
+    #
+    # rainlang_parser and rainlang-eval are not included yet:
+    # - parser's workspace deps (rainlang_bindings/dispair) need `version = ...`
+    #   added before `cargo publish` accepts it (path-only today); fold it in
+    #   once bindings + dispair are on crates.io.
+    # - eval has a foundry-evm git dep that blocks `cargo publish` entirely.
     uses: rainlanguage/rainix/.github/workflows/rainix-autopublish.yaml@main
     with:
-      crate: rainlang_bindings
+      crates: rainlang_bindings rainlang_dispair
     secrets: inherit
-  # rainlang_dispair (leaf, only depends on alloy registry crate)
-  dispair:
-    uses: rainlanguage/rainix/.github/workflows/rainix-autopublish.yaml@main
-    needs: bindings
-    with:
-      crate: rainlang_dispair
-    secrets: inherit
-  # rainlang_parser and rainlang-eval are intentionally not wired up here:
-  # - parser's workspace deps (rainlang_dispair, rainlang_bindings) need
-  #   `version = ...` once those land on crates.io
-  # - eval has a foundry-evm git dep that blocks cargo publish entirely
