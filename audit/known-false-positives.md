@@ -1,19 +1,19 @@
 # Known False Positives
 
-Audit findings that have been triaged and dismissed. Documented here so
-future audits do not re-flag the same issues.
+Audit findings that have been triaged and dismissed. Documented here so future
+audits do not re-flag the same issues.
 
 ## LibOpGet — read-only key persistence (gas tradeoff)
 
 **File:** `src/lib/op/store/LibOpGet.sol`
 
 When `get` has a cache miss it writes the fetched value into the in-memory
-`stateKV` so that subsequent reads hit the cache. Because `stateKV` is
-persisted at the end of eval, read-only keys pay an unnecessary `SSTORE`.
+`stateKV` so that subsequent reads hit the cache. Because `stateKV` is persisted
+at the end of eval, read-only keys pay an unnecessary `SSTORE`.
 
-This is a deliberate design tradeoff: caching repeated reads saves more gas
-than the extra `SSTORE` costs for read-only keys. Documented inline and in
-commit `25c7c56f`.
+This is a deliberate design tradeoff: caching repeated reads saves more gas than
+the extra `SSTORE` costs for read-only keys. Documented inline and in commit
+`25c7c56f`.
 
 ## ERC20 float opcodes — `decimals()` is optional
 
