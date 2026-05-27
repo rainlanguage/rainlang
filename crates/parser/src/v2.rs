@@ -1,20 +1,20 @@
 use crate::error::ParserError;
+use alloy::network::{Network, TransactionBuilder};
 use alloy::primitives::Address;
 use alloy::providers::Provider;
-use alloy::rpc::types::TransactionRequest;
 use alloy::sol_types::SolCall;
 use rainlang_bindings::IParserPragmaV1::*;
 use rainlang_bindings::IParserV2::*;
 use rainlang_dispair::DISPaiR;
 
-async fn eth_call<C: SolCall, P: Provider>(
+async fn eth_call<C: SolCall, N: Network, P: Provider<N>>(
     provider: &P,
     to: Address,
     call: C,
 ) -> Result<C::Return, ParserError> {
-    let tx = TransactionRequest::default()
-        .to(to)
-        .input(call.abi_encode().into());
+    let tx = N::TransactionRequest::default()
+        .with_to(to)
+        .with_input(call.abi_encode());
     let bytes = provider.call(tx).await?;
     Ok(C::abi_decode_returns(&bytes)?)
 }
@@ -23,7 +23,7 @@ async fn eth_call<C: SolCall, P: Provider>(
 #[cfg(not(target_family = "wasm"))]
 pub trait Parser2 {
     /// Call Parser contract to parse the provided rainlang text.
-    fn parse_text<P: Provider + Sync>(
+    fn parse_text<N: Network, P: Provider<N> + Sync>(
         &self,
         text: &str,
         provider: &P,
@@ -36,21 +36,21 @@ pub trait Parser2 {
 
     /// Call Parser contract to parse the provided data.
     /// The provided data must contain valid UTF-8 encoding of valid rainlang text.
-    fn parse<P: Provider + Sync>(
+    fn parse<N: Network, P: Provider<N> + Sync>(
         &self,
         data: Vec<u8>,
         provider: &P,
     ) -> impl std::future::Future<Output = Result<parse2Return, ParserError>> + Send;
 
     /// Call Parser contract to parse the provided rainlang text and provide the pragma.
-    fn parse_pragma<P: Provider + Sync>(
+    fn parse_pragma<N: Network, P: Provider<N> + Sync>(
         &self,
         data: Vec<u8>,
         provider: &P,
     ) -> impl std::future::Future<Output = Result<parsePragma1Return, ParserError>> + Send;
 
     /// Call Parser contract to parse the provided rainlang text and return the pragma addresses.
-    fn parse_pragma_text<P: Provider + Sync>(
+    fn parse_pragma_text<N: Network, P: Provider<N> + Sync>(
         &self,
         text: &str,
         provider: &P,
@@ -70,7 +70,7 @@ pub trait Parser2 {
 /// Trait for interacting with the on-chain Rainlang parser contract.
 #[cfg(target_family = "wasm")]
 pub trait Parser2 {
-    fn parse_text<P: Provider>(
+    fn parse_text<N: Network, P: Provider<N>>(
         &self,
         text: &str,
         provider: &P,
@@ -81,19 +81,19 @@ pub trait Parser2 {
         self.parse(text.as_bytes().to_vec(), provider)
     }
 
-    fn parse<P: Provider>(
+    fn parse<N: Network, P: Provider<N>>(
         &self,
         data: Vec<u8>,
         provider: &P,
     ) -> impl std::future::Future<Output = Result<parse2Return, ParserError>>;
 
-    fn parse_pragma<P: Provider>(
+    fn parse_pragma<N: Network, P: Provider<N>>(
         &self,
         data: Vec<u8>,
         provider: &P,
     ) -> impl std::future::Future<Output = Result<parsePragma1Return, ParserError>>;
 
-    fn parse_pragma_text<P: Provider>(
+    fn parse_pragma_text<N: Network, P: Provider<N>>(
         &self,
         text: &str,
         provider: &P,
@@ -146,7 +146,7 @@ impl ParserV2 {
 
 #[cfg(not(target_family = "wasm"))]
 impl Parser2 for ParserV2 {
-    async fn parse<P: Provider + Sync>(
+    async fn parse<N: Network, P: Provider<N> + Sync>(
         &self,
         data: Vec<u8>,
         provider: &P,
@@ -160,7 +160,7 @@ impl Parser2 for ParserV2 {
         Ok(parse2Return { bytecode })
     }
 
-    async fn parse_pragma<P: Provider + Sync>(
+    async fn parse_pragma<N: Network, P: Provider<N> + Sync>(
         &self,
         data: Vec<u8>,
         provider: &P,
@@ -177,7 +177,7 @@ impl Parser2 for ParserV2 {
 
 #[cfg(target_family = "wasm")]
 impl Parser2 for ParserV2 {
-    async fn parse<P: Provider>(
+    async fn parse<N: Network, P: Provider<N>>(
         &self,
         data: Vec<u8>,
         provider: &P,
@@ -191,7 +191,7 @@ impl Parser2 for ParserV2 {
         Ok(parse2Return { bytecode })
     }
 
-    async fn parse_pragma<P: Provider>(
+    async fn parse_pragma<N: Network, P: Provider<N>>(
         &self,
         data: Vec<u8>,
         provider: &P,
