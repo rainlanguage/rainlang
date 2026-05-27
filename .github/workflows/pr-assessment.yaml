@@ -3,7 +3,6 @@ on:
   pull_request:
     types:
       - closed
-
 jobs:
   assess-pr-size-on-merge:
     uses: rainlanguage/github-chore/.github/workflows/pr-assessment.yml@main

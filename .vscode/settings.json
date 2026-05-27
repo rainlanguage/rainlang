@@ -1,7 +1,5 @@
 {
-    "editor.rulers": [
-        80
-    ],
-    "solidity.compileUsingRemoteVersion": "v0.8.25+commit.b61c2a91",
-    "solidity.formatter": "forge"
+  "editor.rulers": [80],
+  "solidity.compileUsingRemoteVersion": "v0.8.25+commit.b61c2a91",
+  "solidity.formatter": "forge"
 }
