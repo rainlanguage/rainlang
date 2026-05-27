@@ -20,7 +20,10 @@ contract CopyArtifacts is Script {
             //forge-lint: disable-next-line(unsafe-cheatcode)
             vm.removeFile(dst);
         }
+        // Trailing newline so the written file matches the prettier-formatted
+        // committed artifact (prettier adds a final newline to JSON; without it
+        // the copy-artifacts determinism check and the prettier hook fight).
         //forge-lint: disable-next-line(unsafe-cheatcode)
-        vm.writeFile(dst, string(artifact));
+        vm.writeFile(dst, string.concat(string(artifact), "\n"));
     }
 }
