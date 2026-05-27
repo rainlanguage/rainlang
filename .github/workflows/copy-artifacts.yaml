@@ -10,12 +10,22 @@ jobs:
           nix_conf: |
             keep-env-derivations = true
             keep-outputs = true
+      # Substitute prebuilt derivations from the shared Cachix cache so the
+      # rain CLI build (rainlang-prelude) and the sol toolchain don't refetch
+      # crates from crates.io — whose download endpoint 403s nix's User-Agent
+      # (rainlanguage/rainix#196/#198). Pushes new paths when CACHIX_AUTH_TOKEN
+      # is set; continue-on-error degrades gracefully if the cache is absent.
+      - uses: cachix/cachix-action@v15
+        continue-on-error: true
+        with:
+          name: rainlanguage
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@v7
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
-          gc-max-store-size-linux: 1G
+          gc-max-store-size-linux: 8G
       - name: Install soldeer dependencies
         if: hashFiles('soldeer.lock') != ''
         run: nix develop github:rainlanguage/rainix#sol-shell -c forge soldeer install
