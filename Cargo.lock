@@ -5367,21 +5367,21 @@ dependencies = [
 
 [[package]]
 name = "rainlang_bindings"
-version = "0.1.13"
+version = "0.1.14"
 dependencies = [
  "alloy",
 ]
 
 [[package]]
 name = "rainlang_dispair"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "alloy",
 ]
 
 [[package]]
 name = "rainlang_parser"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "alloy",
  "rainlang_bindings",
