@@ -1,9 +1,11 @@
 [package]
 name = "rainlang-eval"
 version = "0.1.0"
+description = "Fork-based evaluation and parsing of Rainlang expressions against a live EVM, with Rain stack-trace decoding."
 edition.workspace = true
 license.workspace = true
 homepage.workspace = true
+repository = "https://github.com/rainlanguage/rainlang"
 
 [dependencies]
 alloy = { workspace = true }

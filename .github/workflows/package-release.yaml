@@ -5,19 +5,11 @@ on:
       - main
 jobs:
   release:
-    # Single workspace publish (rainix#191): one job bumps + publishes the
-    # rainlang crates in dependency order — bindings and dispair (leaves on
-    # alloy), then parser (depends on both). One commit, one push (via the
-    # PUBLISH_PRIVATE_KEY deploy key, which bypasses main's required-review
-    # protection), namespaced tags.
-    #
-    # The set releases as a unit (lockstep): a change to any member bumps and
-    # republishes all three, so parser's workspace pins on bindings/dispair are
-    # rewritten to the matching versions in the same cargo-release commit.
-    #
-    # rainlang-eval is still excluded — its foundry-evm git dep blocks
-    # `cargo publish` entirely.
+    # Bumps + publishes the rainlang crates to crates.io as a lockstep set, in
+    # dependency order (bindings, dispair, parser, then eval): changing any
+    # member republishes the others with matching version pins, via the
+    # PUBLISH_PRIVATE_KEY deploy key.
     uses: rainlanguage/rainix/.github/workflows/rainix-autopublish.yaml@main
     with:
-      crates: rainlang_bindings rainlang_dispair rainlang_parser
+      crates: rainlang_bindings rainlang_dispair rainlang_parser rainlang-eval
     secrets: inherit
