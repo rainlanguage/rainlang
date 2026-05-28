@@ -11,19 +11,6 @@ homepage = "https://github.com/rainlanguage/rainlang"
 alloy = { version = "1.0.9", features = ["sol-types", "json", "json-abi"] }
 anyhow = "1.0.70"
 clap = { version = "4.2.5", features = ["cargo", "derive"] }
-foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "ed86c645f037f1cc4e5c1583f074a7b2142c4f66" }
-foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "ed86c645f037f1cc4e5c1583f074a7b2142c4f66" }
-foundry-fork-db = "0.15.0"
-foundry-block-explorers = "0.18.0"
-revm = { version = "24.0.1", default-features = false, features = [
-  "std",
-  "serde",
-  "memory_limit",
-  "optional_eip3607",
-  "optional_block_gas_limit",
-  "optional_no_base_fee",
-  "arbitrary",
-] }
 serde = "1.0.160"
 serde_bytes = "0.11.9"
 serde_json = "1.0.112"

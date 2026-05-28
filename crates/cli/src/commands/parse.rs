@@ -5,7 +5,7 @@ use alloy::primitives::Address;
 use anyhow::Result;
 use anyhow::anyhow;
 use clap::Args;
-use rainlang_eval::eval::ForkParseArgs;
+use rainlang_eval::eval::{ForkEvalExt, ForkParseArgs};
 use rainlang_eval::fork::Forker;
 use std::path::PathBuf;
 

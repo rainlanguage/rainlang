@@ -8,7 +8,10 @@ use anyhow::anyhow;
 use clap::Args;
 use rainlang_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
 use rainlang_eval::trace::RainEvalResult;
-use rainlang_eval::{eval::ForkEvalArgs, fork::Forker};
+use rainlang_eval::{
+    eval::{ForkEvalArgs, ForkEvalExt},
+    fork::Forker,
+};
 use std::path::PathBuf;
 
 /// CLI arguments for evaluating a Rainlang expression.
