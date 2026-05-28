@@ -52,12 +52,26 @@ impl From<ForkEvalArgs> for ForkParseArgs {
     }
 }
 
-impl Forker {
-    /// Parses Rainlang string and returns the parsed result.
-    ///
-    /// Discovers the deployer address from Rainlang, then calls
-    /// `parse2` on it.
-    pub async fn fork_parse(
+/// Rain-specific parse/eval helpers on top of the generic [`Forker`].
+///
+/// Defined as an extension trait because `Forker` now lives in the external
+/// `rain-forker` crate, so inherent methods can't be added to it here.
+pub trait ForkEvalExt {
+    /// Parses a Rainlang string against the deployer discovered from `rainlang`.
+    fn fork_parse(
+        &self,
+        args: ForkParseArgs,
+    ) -> impl std::future::Future<Output = Result<ForkTypedReturn<parse2Call>, ForkCallError>>;
+
+    /// Evaluates a Rainlang string against the interpreter discovered from `rainlang`.
+    fn fork_eval(
+        &self,
+        args: ForkEvalArgs,
+    ) -> impl std::future::Future<Output = Result<ForkTypedReturn<eval4Call>, ForkCallError>>;
+}
+
+impl ForkEvalExt for Forker {
+    async fn fork_parse(
         &self,
         args: ForkParseArgs,
     ) -> Result<ForkTypedReturn<parse2Call>, ForkCallError> {
@@ -92,7 +106,7 @@ impl Forker {
     ///
     /// Discovers all component addresses from Rainlang, parses the
     /// Rainlang string via the deployer, then evaluates via the interpreter.
-    pub async fn fork_eval(
+    async fn fork_eval(
         &self,
         args: ForkEvalArgs,
     ) -> Result<ForkTypedReturn<eval4Call>, ForkCallError> {
@@ -171,7 +185,7 @@ mod tests {
     use crate::fork::NewForkedEvm;
     use alloy::primitives::FixedBytes;
     use rainlang_test_fixtures::LocalEvm;
-    use std::{ops::Deref, sync::Arc};
+    use std::sync::Arc;
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn test_fork_parse() {
@@ -229,10 +243,8 @@ mod tests {
         let mut expected_stack_trace = vec![0u8, 0u8, 0u8, 0u8];
         expected_stack_trace.append(&mut <FixedBytes<32>>::left_padding_from(&[3u8]).to_vec());
 
-        let sparsed_trace_arena = res.raw.traces.unwrap();
-        let source_index_zero_trace = sparsed_trace_arena.deref().clone().into_nodes()[1]
-            .to_owned()
-            .trace;
+        let trace_arena = res.raw.traces.unwrap();
+        let source_index_zero_trace = trace_arena.into_nodes()[1].to_owned().trace;
         assert_eq!(source_index_zero_trace.data.to_vec(), expected_stack_trace);
 
         // asserting the known trace address

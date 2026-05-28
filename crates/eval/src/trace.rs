@@ -1,11 +1,11 @@
 #[cfg(not(target_family = "wasm"))]
 use crate::fork::ForkTypedReturn;
+use alloy::primitives::address;
 use alloy::primitives::{Address, U256};
 #[cfg(not(target_family = "wasm"))]
-use foundry_evm::executors::RawCallResult;
+use rain_forker::RawCallResult;
 #[cfg(not(target_family = "wasm"))]
 use rainlang_bindings::IInterpreterV4::{eval4Call, eval4Return};
-use revm::primitives::address;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 #[cfg(target_family = "wasm")]
@@ -120,7 +120,6 @@ impl TryFrom<RawCallResult> for RainEvalResult {
             .ok_or(RainEvalResultFromRawCallResultError::MissingTraces)?;
 
         let traces: Vec<RainSourceTrace> = trace_arena
-            .arena
             .nodes()
             .iter()
             .filter_map(|trace_node| {
@@ -321,7 +320,7 @@ pub fn flattened_trace_path_names(traces: &[RainSourceTrace]) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::eval::ForkEvalArgs;
+    use crate::eval::{ForkEvalArgs, ForkEvalExt};
     use crate::fork::{Forker, NewForkedEvm};
     use rainlang_bindings::IInterpreterStoreV3::FullyQualifiedNamespace;
     use rainlang_test_fixtures::LocalEvm;
