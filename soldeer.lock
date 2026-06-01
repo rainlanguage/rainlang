@@ -21,17 +21,17 @@ integrity = "f2e43fcbe27e7251ff981285271eec0a5ad49e1425dd02213f8a03df404f6670"
 
 [[dependencies]]
 name = "rain-deploy"
-version = "0.1.2"
-url = "https://soldeer-revisions.s3.amazonaws.com/rain-deploy/0_1_2_09-05-2026_19:49:20_rain.zip"
-checksum = "94d3daf2f9f90062d2e676077c2b4ccd2bdd66201665a2209e98016e155f619a"
+version = "0.1.3"
+url = "https://soldeer-revisions.s3.amazonaws.com/rain-deploy/0_1_3_20-05-2026_13:02:35_rain.zip"
+checksum = "6e9a7a1562ee2766a1cc3a4a077b853ec628a3070b282e6e9102a252f2a6a5b5"
 integrity = "10bff708d9e5d8b77655b8a8fc0c755cef8e3fc876cc3ff100425d27b08294a0"
 
 [[dependencies]]
 name = "rain-extrospection"
-version = "0.1.0"
-url = "https://soldeer-revisions.s3.amazonaws.com/rain-extrospection/0_1_0_11-05-2026_12:26:12_rain.zip"
-checksum = "97297c3f1d623c63f5996b4266a4c26f895a1ca17ab271a619af601f8950521d"
-integrity = "30f7e23c71b24267d2db46085049aec5baaa693825ff8bc8fd72bd685da479ad"
+version = "0.1.1"
+url = "https://soldeer-revisions.s3.amazonaws.com/rain-extrospection/0_1_1_20-05-2026_13:01:40_rain.zip"
+checksum = "c2d1ad4b6a749a788616535635c8a19bbe61e514ecc907291ff270a67f832aed"
+integrity = "aa7366cac7d9c7610350a49b8126c667d83812a974539e79ccd38a5577cd626b"
 
 [[dependencies]]
 name = "rain-interpreter-interface"
