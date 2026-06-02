@@ -236,4 +236,53 @@ contract RainlangInterpreterStateOverlayTest is RainlangExpressionDeployerDeploy
         assertEq(kvs[0], k);
         assertEq(kvs[1], setTo);
     }
+
+    /// @notice A returned kvs is the seeded `stateOverlay` MERGED with new
+    /// writes: a seeded key the source never touches is preserved, and a `set`
+    /// of a distinct key is added alongside it. This is the property that lets a
+    /// caller thread one eval's returned kvs straight into the next eval's
+    /// overlay to accumulate state across evals (e.g. across same-owner orders
+    /// in a batch) without concatenating prior writes.
+    function testStateOverlayMergesUntouchedSeedWithNewWrite() external view {
+        // Sets key 2; never reads or writes the seeded key 1.
+        bytes memory bytecode = I_DEPLOYER.parse2(":set(2 22);");
+
+        bytes32 k1 = Float.unwrap(LibDecimalFloat.packLossless(1, 0));
+        bytes32 v1 = Float.unwrap(LibDecimalFloat.packLossless(11, 0));
+        bytes32 k2 = Float.unwrap(LibDecimalFloat.packLossless(2, 0));
+        bytes32 v2 = Float.unwrap(LibDecimalFloat.packLossless(22, 0));
+
+        bytes32[] memory stateOverlay = new bytes32[](2);
+        stateOverlay[0] = k1;
+        stateOverlay[1] = v1;
+
+        (, bytes32[] memory kvs) = I_INTERPRETER.eval4(
+            EvalV4({
+                store: I_STORE,
+                namespace: LibNamespace.qualifyNamespace(StateNamespace.wrap(0), address(this)),
+                bytecode: bytecode,
+                sourceIndex: SourceIndexV2.wrap(0),
+                context: new bytes32[][](0),
+                inputs: new StackItem[](0),
+                stateOverlay: stateOverlay
+            })
+        );
+
+        // Both the untouched seeded pair and the new write are present.
+        assertEq(kvs.length, 4, "kvs should contain the untouched seed plus the new write");
+        bool foundSeed;
+        bool foundWrite;
+        for (uint256 i = 0; i < kvs.length; i += 2) {
+            if (kvs[i] == k1) {
+                assertEq(kvs[i + 1], v1, "untouched seeded value preserved");
+                foundSeed = true;
+            }
+            if (kvs[i] == k2) {
+                assertEq(kvs[i + 1], v2, "new write value present");
+                foundWrite = true;
+            }
+        }
+        assertTrue(foundSeed, "untouched seeded key present in returned kvs");
+        assertTrue(foundWrite, "new write key present in returned kvs");
+    }
 }
