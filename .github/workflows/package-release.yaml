@@ -12,4 +12,5 @@ jobs:
     uses: rainlanguage/rainix/.github/workflows/rainix-autopublish.yaml@main
     with:
       crates: rainlang_bindings rainlang_dispair rainlang_parser rainlang-eval
+      soldeer-package: rainlang
     secrets: inherit
