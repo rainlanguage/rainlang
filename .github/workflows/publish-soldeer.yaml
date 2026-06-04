@@ -1,8 +1,0 @@
-name: Publish to Soldeer
-on:
-  push:
-    tags: ["v*"]
-jobs:
-  publish:
-    uses: rainlanguage/rainix/.github/workflows/publish-soldeer.yaml@main
-    secrets: inherit
