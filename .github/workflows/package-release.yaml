@@ -6,11 +6,12 @@ on:
 jobs:
   release:
     # Bumps + publishes the rainlang crates to crates.io as a lockstep set, in
-    # dependency order (bindings, dispair, parser, then eval): changing any
-    # member republishes the others with matching version pins, via the
-    # PUBLISH_PRIVATE_KEY deploy key.
+    # dependency order (bindings, dispair, parser, eval, then test_fixtures):
+    # changing any member republishes the others with matching version pins, via
+    # the PUBLISH_PRIVATE_KEY deploy key. test_fixtures depends on none of the
+    # others but is released in lockstep so its embedded bytecode stays in sync.
     uses: rainlanguage/rainix/.github/workflows/rainix-autopublish.yaml@main
     with:
-      crates: rainlang_bindings rainlang_dispair rainlang_parser rainlang-eval
+      crates: rainlang_bindings rainlang_dispair rainlang_parser rainlang-eval rainlang_test_fixtures
       soldeer-package: rainlang
     secrets: inherit
