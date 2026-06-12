@@ -311,4 +311,45 @@ contract LibInterpreterStateDataContractTest is Test {
         assertEq(lengths[0], stackAllocation0);
         assertEq(lengths[1], stackAllocation1);
     }
+
+    /// `bytecode` returns exactly the body `unsafeDeserialize` references, for
+    /// fuzzed constants — the constants-skip in both must agree.
+    function testBytecodeMatchesDeserialize(bytes32[] memory constants) external view {
+        bytes memory expected = buildTwoSourceBytecode(3, 5);
+        bytes memory serialized = serialize(expected, constants);
+
+        bytes memory got = LibInterpreterStateDataContract.bytecodeOf(serialized);
+        assertEq(got.length, expected.length);
+        assertEq(keccak256(got), keccak256(expected));
+
+        InterpreterState memory state = iExtern.deserialize(
+            serialized, 0, FullyQualifiedNamespace.wrap(0), IInterpreterStoreV3(address(0)), new bytes32[][](0), ""
+        );
+        assertEq(keccak256(got), keccak256(state.bytecode));
+    }
+
+    /// `bytecode` round-trips a single-source body behind fuzzed constants.
+    function testBytecodeSingleSource(bytes32[] memory constants) external pure {
+        bytes memory expected = buildSingleSourceBytecode(1, 2, 0, 1);
+        bytes memory serialized = serialize(expected, constants);
+        bytes memory got = LibInterpreterStateDataContract.bytecodeOf(serialized);
+        assertEq(got.length, expected.length);
+        assertEq(keccak256(got), keccak256(expected));
+    }
+
+    /// A blob too short to hold both length words yields empty bytecode.
+    function testBytecodeTooShortIsEmpty(bytes memory serialized) external view {
+        vm.assume(serialized.length < 0x40);
+        assertEq(LibInterpreterStateDataContract.bytecodeOf(serialized).length, 0);
+    }
+
+    /// A declared constants length that overruns the blob yields empty bytecode.
+    function testBytecodeOverrunConstantsIsEmpty(uint256 constantsLength) external view {
+        constantsLength = bound(constantsLength, 1, type(uint256).max);
+        bytes memory serialized = new bytes(0x40);
+        assembly ("memory-safe") {
+            mstore(add(serialized, 0x20), constantsLength)
+        }
+        assertEq(LibInterpreterStateDataContract.bytecodeOf(serialized).length, 0);
+    }
 }
