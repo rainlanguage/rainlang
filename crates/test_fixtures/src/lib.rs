@@ -22,37 +22,37 @@ use std::marker::PhantomData;
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
-    ERC20, "../bindings/abi/TestERC20.json"
+    ERC20, "abi/TestERC20.json"
 );
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Interpreter,
-    "../bindings/abi/RainlangInterpreter.json"
+    "abi/RainlangInterpreter.json"
 );
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Store,
-    "../bindings/abi/RainlangStore.json"
+    "abi/RainlangStore.json"
 );
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Parser,
-    "../bindings/abi/RainlangParser.json"
+    "abi/RainlangParser.json"
 );
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
     Deployer,
-    "../bindings/abi/RainlangExpressionDeployer.json"
+    "abi/RainlangExpressionDeployer.json"
 );
 
 sol!(
     #![sol(all_derives = true, rpc = true)]
     RainlangContract,
-    "../bindings/abi/Rainlang.json"
+    "abi/Rainlang.json"
 );
 
 /// Filler stack used by `LocalEvm` combining recommended fillers with a wallet signer.
