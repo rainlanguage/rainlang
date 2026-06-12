@@ -1,6 +1,6 @@
 [package]
 name = "rainlang_test_fixtures"
-version = "0.1.2"
+version = "0.1.3"
 edition.workspace = true
 license.workspace = true
 description = "Local EVM test fixtures (deployer, interpreter, parser, store, and ERC20 helpers) for testing against the Rainlang interpreter."
