@@ -1,6 +1,10 @@
 [package]
 name = "rainlang_test_fixtures"
 version = "0.1.2"
+# Path dev-dependency of `cli`/`eval` tests only; never resolved from crates.io,
+# and its `sol!` macros read ABI JSON from the sibling `bindings` crate so it
+# cannot build standalone in a published tarball. Not a published crate.
+publish = false
 edition.workspace = true
 license.workspace = true
 description = "Local EVM test fixtures (deployer, interpreter, parser, store, and ERC20 helpers) for testing against the Rainlang interpreter."
