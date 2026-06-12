@@ -32,6 +32,7 @@ fs_permissions = [
   { access = "read-write", path = "./meta" },
   { access = "read-write", path = "src/generated" },
   { access = "read-write", path = "./crates/bindings/abi" },
+  { access = "read-write", path = "./crates/test_fixtures/abi" },
   { access = "read", path = "./out" },
   { access = "write", path = "./deployments/latest/RainlangParser" },
   { access = "write", path = "./deployments/latest/RainlangStore" },

@@ -15,15 +15,18 @@ contract CopyArtifacts is Script {
 
     function _copyAbi(string memory contractName) internal {
         bytes memory artifact = LibCopyArtifacts.extractStable(vm, contractName);
-        string memory dst = LibCopyArtifacts.committedPath(contractName);
-        if (vm.exists(dst)) {
+        string[] memory dsts = LibCopyArtifacts.committedPaths(contractName);
+        for (uint256 i = 0; i < dsts.length; i++) {
+            string memory dst = dsts[i];
+            if (vm.exists(dst)) {
+                //forge-lint: disable-next-line(unsafe-cheatcode)
+                vm.removeFile(dst);
+            }
+            // Trailing newline so the written file matches the prettier-formatted
+            // committed artifact (prettier adds a final newline to JSON; without it
+            // the copy-artifacts determinism check and the prettier hook fight).
             //forge-lint: disable-next-line(unsafe-cheatcode)
-            vm.removeFile(dst);
+            vm.writeFile(dst, string.concat(string(artifact), "\n"));
         }
-        // Trailing newline so the written file matches the prettier-formatted
-        // committed artifact (prettier adds a final newline to JSON; without it
-        // the copy-artifacts determinism check and the prettier hook fight).
-        //forge-lint: disable-next-line(unsafe-cheatcode)
-        vm.writeFile(dst, string.concat(string(artifact), "\n"));
     }
 }
