@@ -141,4 +141,31 @@ library LibInterpreterStateDataContract {
             );
         }
     }
+
+    /// @notice Returns the bytecode portion of a serialized `(constants, bytecode)`
+    /// blob as produced by `unsafeSerialize` (and so by `IParserV2.parse2`),
+    /// referenced in place without copying. The layout is
+    /// `[constants length][constants data][bytecode length][bytecode data]`, so
+    /// the bytecode begins after the constants block — the same skip
+    /// `unsafeDeserialize` performs. Returns empty bytes when `serialized` is too
+    /// short to hold both length words or declares a constants length that would
+    /// overrun it, so a caller introspecting untrusted input reads an empty
+    /// (zero source) bytecode rather than reading out of bounds.
+    /// @param serialized The serialized blob to read.
+    /// @return bc The embedded rain bytecode, referenced in place.
+    function bytecodeOf(bytes memory serialized) internal pure returns (bytes memory bc) {
+        if (serialized.length < 0x40) {
+            return "";
+        }
+        uint256 constantsLength;
+        assembly ("memory-safe") {
+            constantsLength := mload(add(serialized, 0x20))
+        }
+        if (constantsLength > (serialized.length - 0x40) / 0x20) {
+            return "";
+        }
+        assembly ("memory-safe") {
+            bc := add(add(serialized, 0x20), mul(0x20, add(constantsLength, 1)))
+        }
+    }
 }
