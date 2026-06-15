@@ -17,7 +17,7 @@ import {LibAllStandardOps} from "../src/lib/op/LibAllStandardOps.sol";
 import {LibCodeGen} from "rain-sol-codegen-0.1.0/src/lib/LibCodeGen.sol";
 import {LibGenParseMeta} from "rain-interpreter-interface-0.1.0/src/lib/codegen/LibGenParseMeta.sol";
 import {LibFs} from "rain-sol-codegen-0.1.0/src/lib/LibFs.sol";
-import {LibRainDeploy} from "rain-deploy-0.1.2/src/lib/LibRainDeploy.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.3/src/lib/LibRainDeploy.sol";
 
 /// @title BuildPointers
 /// @notice Forge script that generates Solidity source files containing

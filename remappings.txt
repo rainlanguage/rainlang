@@ -2,7 +2,9 @@
 forge-std-1.16.1/=dependencies/forge-std-1.16.1/
 rain-datacontract-0.1.0/=dependencies/rain-datacontract-0.1.0/
 rain-deploy-0.1.2/=dependencies/rain-deploy-0.1.2/
+rain-deploy-0.1.3/=dependencies/rain-deploy-0.1.3/
 rain-extrospection-0.1.0/=dependencies/rain-extrospection-0.1.0/
+rain-extrospection-0.1.1/=dependencies/rain-extrospection-0.1.1/
 rain-interpreter-interface-0.1.0/=dependencies/rain-interpreter-interface-0.1.0/
 rain-intorastring-0.1.0/=dependencies/rain-intorastring-0.1.0/
 rain-lib-hash-0.1.0/=dependencies/rain-lib-hash-0.1.0/
