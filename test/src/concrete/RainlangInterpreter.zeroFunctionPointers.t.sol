@@ -6,12 +6,7 @@ import {Test} from "forge-std-1.16.1/src/Test.sol";
 
 import {RainlangInterpreter} from "../../../src/concrete/RainlangInterpreter.sol";
 import {ZeroFunctionPointers} from "../../../src/error/ErrEval.sol";
-
-contract ZeroFPRainlangInterpreter is RainlangInterpreter {
-    function opcodeFunctionPointers() internal pure override returns (bytes memory) {
-        return hex"";
-    }
-}
+import {ZeroFPRainlangInterpreter} from "./ZeroFPRainlangInterpreter.sol";
 
 contract RainlangInterpreterZeroFunctionPointersTest is Test {
     /// Deploying a RainlangInterpreter with empty function pointers must revert.
