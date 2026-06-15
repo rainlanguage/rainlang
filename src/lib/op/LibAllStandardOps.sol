@@ -78,6 +78,7 @@ import {LibOpMin} from "./math/LibOpMin.sol";
 import {LibOpMinNegativeValue} from "./math/LibOpMinNegativeValue.sol";
 import {LibOpMinPositiveValue} from "./math/LibOpMinPositiveValue.sol";
 import {LibOpMul} from "./math/LibOpMul.sol";
+import {LibOpPi} from "./math/LibOpPi.sol";
 import {LibOpPower} from "./math/LibOpPower.sol";
 import {LibOpSqrt} from "./math/LibOpSqrt.sol";
 import {LibOpSub} from "./math/LibOpSub.sol";
@@ -102,7 +103,7 @@ import {LibParseLiteralHex} from "../parse/literal/LibParseLiteralHex.sol";
 import {LibParseLiteralSubParseable} from "../parse/literal/LibParseLiteralSubParseable.sol";
 
 /// @dev Number of ops currently provided by `AllStandardOps`.
-uint256 constant ALL_STANDARD_OPS_LENGTH = 72;
+uint256 constant ALL_STANDARD_OPS_LENGTH = 73;
 
 /// @title LibAllStandardOps
 /// @notice Every opcode available from the core repository laid out as a single
@@ -287,6 +288,7 @@ library LibAllStandardOps {
                 "The minimum positive representable float value. This is the smallest number that can be represented that is still greater than zero."
             ),
             AuthoringMetaV2("mul", "Multiplies all numbers together."),
+            AuthoringMetaV2("pi", "The mathematical constant pi."),
             AuthoringMetaV2("power", "Raises the first number to the power of the second number."),
             AuthoringMetaV2("sqrt", "Calculates the square root of the input. Errors if the input is negative."),
             AuthoringMetaV2("sub", "Subtracts all numbers from the first number."),
@@ -502,6 +504,8 @@ library LibAllStandardOps {
                     LibParseOperand.handleOperandDisallowed,
                     // mul
                     LibParseOperand.handleOperandDisallowed,
+                    // pi
+                    LibParseOperand.handleOperandDisallowed,
                     // power
                     LibParseOperand.handleOperandDisallowed,
                     // sqrt
@@ -620,6 +624,7 @@ library LibAllStandardOps {
                     LibOpMinNegativeValue.integrity,
                     LibOpMinPositiveValue.integrity,
                     LibOpMul.integrity,
+                    LibOpPi.integrity,
                     LibOpPower.integrity,
                     LibOpSqrt.integrity,
                     LibOpSub.integrity,
@@ -724,6 +729,7 @@ library LibAllStandardOps {
                     LibOpMinNegativeValue.run,
                     LibOpMinPositiveValue.run,
                     LibOpMul.run,
+                    LibOpPi.run,
                     LibOpPower.run,
                     LibOpSqrt.run,
                     LibOpSub.run,
