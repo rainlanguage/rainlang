@@ -8,7 +8,7 @@ import {RainlangStore} from "../../src/concrete/RainlangStore.sol";
 import {RainlangParser} from "../../src/concrete/RainlangParser.sol";
 import {RainlangInterpreter} from "../../src/concrete/RainlangInterpreter.sol";
 import {RainlangExpressionDeployer} from "../../src/concrete/RainlangExpressionDeployer.sol";
-import {LibRainDeploy} from "rain-deploy-0.1.2/src/lib/LibRainDeploy.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.3/src/lib/LibRainDeploy.sol";
 import {LibInterpreterDeploy} from "../../src/lib/deploy/LibInterpreterDeploy.sol";
 import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.1/src/lib/LibTOFUTokenDecimals.sol";
 
