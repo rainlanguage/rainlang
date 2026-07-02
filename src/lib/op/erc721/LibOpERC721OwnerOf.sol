@@ -36,7 +36,7 @@ library LibOpERC721OwnerOf {
         // of token as an address.
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (token != uint256(uint160(token))) revert NotAnAddress(token);
+        if (token != uint256(uint160(token))) revert NotAnAddress(bytes32(token));
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
@@ -58,7 +58,7 @@ library LibOpERC721OwnerOf {
         uint256 tokenValue = uint256(StackItem.unwrap(inputs[0]));
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (tokenValue != uint256(uint160(tokenValue))) revert NotAnAddress(tokenValue);
+        if (tokenValue != uint256(uint160(tokenValue))) revert NotAnAddress(bytes32(tokenValue));
         uint256 tokenId = uint256(StackItem.unwrap(inputs[1]));
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.

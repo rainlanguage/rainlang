@@ -35,10 +35,10 @@ library LibOpUint256ERC721BalanceOf {
         }
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (token != uint256(uint160(token))) revert NotAnAddress(token);
+        if (token != uint256(uint160(token))) revert NotAnAddress(bytes32(token));
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (account != uint256(uint160(account))) revert NotAnAddress(account);
+        if (account != uint256(uint160(account))) revert NotAnAddress(bytes32(account));
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
@@ -60,11 +60,11 @@ library LibOpUint256ERC721BalanceOf {
         uint256 tokenValue = uint256(StackItem.unwrap(inputs[0]));
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (tokenValue != uint256(uint160(tokenValue))) revert NotAnAddress(tokenValue);
+        if (tokenValue != uint256(uint160(tokenValue))) revert NotAnAddress(bytes32(tokenValue));
         uint256 accountValue = uint256(StackItem.unwrap(inputs[1]));
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (accountValue != uint256(uint160(accountValue))) revert NotAnAddress(accountValue);
+        if (accountValue != uint256(uint160(accountValue))) revert NotAnAddress(bytes32(accountValue));
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)

@@ -81,7 +81,7 @@ contract LibOpERC5313OwnerTest is OpTest {
         StackItem[] memory inputs = new StackItem[](1);
         inputs[0] = StackItem.wrap(bytes32(account));
         OperandV2 operand = LibOperand.build(1, 1, 0);
-        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, account));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, bytes32(account)));
         this.externalRun(operand, inputs);
     }
 

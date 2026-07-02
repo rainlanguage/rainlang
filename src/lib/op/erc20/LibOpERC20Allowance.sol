@@ -40,13 +40,13 @@ library LibOpERC20Allowance {
         // of token, owner, and spender as addresses.
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (token != uint256(uint160(token))) revert NotAnAddress(token);
+        if (token != uint256(uint160(token))) revert NotAnAddress(bytes32(token));
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (owner != uint256(uint160(owner))) revert NotAnAddress(owner);
+        if (owner != uint256(uint160(owner))) revert NotAnAddress(bytes32(owner));
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (spender != uint256(uint160(spender))) revert NotAnAddress(spender);
+        if (spender != uint256(uint160(spender))) revert NotAnAddress(bytes32(spender));
         uint256 tokenAllowance =
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
@@ -87,15 +87,15 @@ library LibOpERC20Allowance {
         uint256 tokenValue = uint256(StackItem.unwrap(inputs[0]));
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (tokenValue != uint256(uint160(tokenValue))) revert NotAnAddress(tokenValue);
+        if (tokenValue != uint256(uint160(tokenValue))) revert NotAnAddress(bytes32(tokenValue));
         uint256 ownerValue = uint256(StackItem.unwrap(inputs[1]));
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (ownerValue != uint256(uint160(ownerValue))) revert NotAnAddress(ownerValue);
+        if (ownerValue != uint256(uint160(ownerValue))) revert NotAnAddress(bytes32(ownerValue));
         uint256 spenderValue = uint256(StackItem.unwrap(inputs[2]));
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (spenderValue != uint256(uint160(spenderValue))) revert NotAnAddress(spenderValue);
+        if (spenderValue != uint256(uint160(spenderValue))) revert NotAnAddress(bytes32(spenderValue));
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
