@@ -25,7 +25,7 @@ library LibOpERC721OwnerOf {
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
     function run(InterpreterState memory, OperandV2, Pointer stackTop) internal view returns (Pointer) {
-        uint256 token;
+        bytes32 token;
         uint256 tokenId;
         assembly ("memory-safe") {
             token := mload(stackTop)
@@ -36,11 +36,11 @@ library LibOpERC721OwnerOf {
         // of token as an address.
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (token != uint256(uint160(token))) revert NotAnAddress(bytes32(token));
+        if (uint256(token) != uint256(uint160(uint256(token)))) revert NotAnAddress(token);
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
-        address tokenOwner = IERC721(address(uint160(token))).ownerOf(tokenId);
+        address tokenOwner = IERC721(address(uint160(uint256(token)))).ownerOf(tokenId);
         assembly ("memory-safe") {
             mstore(stackTop, tokenOwner)
         }
@@ -55,15 +55,15 @@ library LibOpERC721OwnerOf {
         view
         returns (StackItem[] memory)
     {
-        uint256 tokenValue = uint256(StackItem.unwrap(inputs[0]));
+        bytes32 tokenValue = StackItem.unwrap(inputs[0]);
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (tokenValue != uint256(uint160(tokenValue))) revert NotAnAddress(bytes32(tokenValue));
+        if (uint256(tokenValue) != uint256(uint160(uint256(tokenValue)))) revert NotAnAddress(tokenValue);
         uint256 tokenId = uint256(StackItem.unwrap(inputs[1]));
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
-        address tokenOwner = IERC721(address(uint160(tokenValue))).ownerOf(tokenId);
+        address tokenOwner = IERC721(address(uint160(uint256(tokenValue)))).ownerOf(tokenId);
         StackItem[] memory outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(bytes32(uint256(uint160(tokenOwner))));
         return outputs;
