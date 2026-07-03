@@ -1,0 +1,37 @@
+name: Debug RPC estimate
+on:
+  workflow_dispatch: {}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      ARBITRUM_RPC_URL: ${{ secrets.RPC_URL_ARBITRUM_FORK || vars.RPC_URL_ARBITRUM_FORK || '' }}
+      BASE_RPC_URL: ${{ secrets.RPC_URL_BASE_FORK || vars.RPC_URL_BASE_FORK || '' }}
+      BASE_SEPOLIA_RPC_URL: ${{ secrets.RPC_URL_BASE_SEPOLIA_FORK || vars.RPC_URL_BASE_SEPOLIA_FORK || '' }}
+      FLARE_RPC_URL: ${{ secrets.RPC_URL_FLARE_FORK || vars.RPC_URL_FLARE_FORK || '' }}
+      POLYGON_RPC_URL: ${{ secrets.RPC_URL_POLYGON_FORK || vars.RPC_URL_POLYGON_FORK || '' }}
+    steps:
+      - uses: rainlanguage/rainix/.github/actions/nix-cachix-setup@main
+        with:
+          cachix-auth-token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      - run: nix develop github:rainlanguage/rainix/307bf27fcc5a410994f5a6a6a96527a64625c3da#sol-shell -c forge soldeer install
+      - run: nix develop github:rainlanguage/rainix/307bf27fcc5a410994f5a6a6a96527a64625c3da#sol-shell -c forge build --skip test --skip script
+      - name: probe eth_estimateGas per network
+        run: |
+          nix develop github:rainlanguage/rainix/307bf27fcc5a410994f5a6a6a96527a64625c3da#sol-shell -c bash -c '
+          set -u
+          CODE=$(jq -r .bytecode.object out/RainlangInterpreter.sol/RainlangInterpreter.json)
+          FROM=0xF5B3fCB63911313968bE6D29F6b2Daa269c4CCE0
+          TO=0x7A0D94F55792C434d74a40883C6ed8545E406D12
+          probe() {
+            name=$1; rpc=$2
+            if [ -z "$rpc" ]; then echo "PROBE $name: NO RPC CONFIGURED"; return; fi
+            out=$(cast estimate "$TO" "$CODE" --rpc-url "$rpc" --from "$FROM" 2>&1)
+            if [ $? -eq 0 ]; then echo "PROBE $name: OK gas=$out"; else echo "PROBE $name: FAIL ${out:0:200}"; fi
+          }
+          probe arbitrum "$ARBITRUM_RPC_URL"
+          probe base "$BASE_RPC_URL"
+          probe base_sepolia "$BASE_SEPOLIA_RPC_URL"
+          probe flare "$FLARE_RPC_URL"
+          probe polygon "$POLYGON_RPC_URL"
+          '
