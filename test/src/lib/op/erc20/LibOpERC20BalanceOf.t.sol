@@ -145,7 +145,7 @@ contract LibOpERC20BalanceOfTest is OpTest {
         inputs[0] = StackItem.wrap(bytes32(token));
         inputs[1] = StackItem.wrap(bytes32(uint256(uint160(address(0xdeadc0de)))));
         OperandV2 operand = LibOperand.build(2, 1, 0);
-        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, token));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, bytes32(token)));
         this.externalRun(operand, inputs);
     }
 
@@ -158,7 +158,7 @@ contract LibOpERC20BalanceOfTest is OpTest {
         inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(0xdeadbeef)))));
         inputs[1] = StackItem.wrap(bytes32(account));
         OperandV2 operand = LibOperand.build(2, 1, 0);
-        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, account));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, bytes32(account)));
         this.externalRun(operand, inputs);
     }
 

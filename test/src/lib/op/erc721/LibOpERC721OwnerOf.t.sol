@@ -126,7 +126,7 @@ contract LibOpERC721OwnerOfTest is OpTest {
         inputs[0] = StackItem.wrap(bytes32(token));
         inputs[1] = StackItem.wrap(bytes32(uint256(1)));
         OperandV2 operand = LibOperand.build(2, 1, 0);
-        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, token));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, bytes32(token)));
         this.externalRun(operand, inputs);
     }
 

@@ -26,9 +26,9 @@ library LibOpUint256ERC20Allowance {
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
     function run(InterpreterState memory, OperandV2, Pointer stackTop) internal view returns (Pointer) {
-        uint256 token;
-        uint256 owner;
-        uint256 spender;
+        bytes32 token;
+        bytes32 owner;
+        bytes32 spender;
         assembly ("memory-safe") {
             token := mload(stackTop)
             owner := mload(add(stackTop, 0x20))
@@ -39,18 +39,19 @@ library LibOpUint256ERC20Allowance {
         // of token, owner, and spender as addresses.
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (token != uint256(uint160(token))) revert NotAnAddress(token);
+        if (uint256(token) != uint256(uint160(uint256(token)))) revert NotAnAddress(token);
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (owner != uint256(uint160(owner))) revert NotAnAddress(owner);
+        if (uint256(owner) != uint256(uint160(uint256(owner)))) revert NotAnAddress(owner);
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (spender != uint256(uint160(spender))) revert NotAnAddress(spender);
+        if (uint256(spender) != uint256(uint160(uint256(spender)))) revert NotAnAddress(spender);
         uint256 tokenAllowance =
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
-        IERC20(address(uint160(token))).allowance(address(uint160(owner)), address(uint160(spender)));
+        IERC20(address(uint160(uint256(token))))
+            .allowance(address(uint160(uint256(owner))), address(uint160(uint256(spender))));
         assembly ("memory-safe") {
             mstore(stackTop, tokenAllowance)
         }
@@ -65,30 +66,30 @@ library LibOpUint256ERC20Allowance {
         view
         returns (StackItem[] memory)
     {
-        uint256 tokenValue = uint256(StackItem.unwrap(inputs[0]));
+        bytes32 tokenValue = StackItem.unwrap(inputs[0]);
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (tokenValue != uint256(uint160(tokenValue))) revert NotAnAddress(tokenValue);
-        uint256 ownerValue = uint256(StackItem.unwrap(inputs[1]));
+        if (uint256(tokenValue) != uint256(uint160(uint256(tokenValue)))) revert NotAnAddress(tokenValue);
+        bytes32 ownerValue = StackItem.unwrap(inputs[1]);
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (ownerValue != uint256(uint160(ownerValue))) revert NotAnAddress(ownerValue);
-        uint256 spenderValue = uint256(StackItem.unwrap(inputs[2]));
+        if (uint256(ownerValue) != uint256(uint160(uint256(ownerValue)))) revert NotAnAddress(ownerValue);
+        bytes32 spenderValue = StackItem.unwrap(inputs[2]);
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (spenderValue != uint256(uint160(spenderValue))) revert NotAnAddress(spenderValue);
+        if (uint256(spenderValue) != uint256(uint160(uint256(spenderValue)))) revert NotAnAddress(spenderValue);
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
-        address token = address(uint160(tokenValue));
+        address token = address(uint160(uint256(tokenValue)));
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
-        address owner = address(uint160(ownerValue));
+        address owner = address(uint160(uint256(ownerValue)));
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
-        address spender = address(uint160(spenderValue));
+        address spender = address(uint160(uint256(spenderValue)));
         uint256 tokenAllowance = IERC20(token).allowance(owner, spender);
         StackItem[] memory outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(bytes32(tokenAllowance));
