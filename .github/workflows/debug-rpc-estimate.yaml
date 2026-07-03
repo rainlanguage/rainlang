@@ -1,6 +1,8 @@
 name: Debug RPC estimate
 on:
-  workflow_dispatch: {}
+  push:
+    branches:
+      - debug/rpc-estimate-540
 jobs:
   probe:
     runs-on: ubuntu-latest
