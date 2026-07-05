@@ -43,7 +43,7 @@ library LibOpContext {
 
     /// @notice `context` opcode. Reads a value from the context matrix at operand-specified indices.
     /// @param state The interpreter state containing the context matrix.
-    /// @param operand Encodes the row (low byte) and column (second byte) indices.
+    /// @param operand Encodes the column (low byte) and row (second byte) indices.
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
     function run(InterpreterState memory state, OperandV2 operand, Pointer stackTop) internal pure returns (Pointer) {
@@ -63,7 +63,7 @@ library LibOpContext {
 
     /// @notice Reference implementation of `context` for testing.
     /// @param state The interpreter state containing the context matrix.
-    /// @param operand Encodes the row (low byte) and column (second byte) indices.
+    /// @param operand Encodes the column (low byte) and row (second byte) indices.
     /// @return outputs The output values to push onto the stack.
     function referenceFn(InterpreterState memory state, OperandV2 operand, StackItem[] memory)
         internal
