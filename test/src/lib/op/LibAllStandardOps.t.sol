@@ -201,33 +201,35 @@ contract LibAllStandardOpsTest is Test {
         //forge-lint: disable-next-line(unsafe-typecast)
         assertEq(words[58].word, bytes32("mul"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[59].word, bytes32("power"));
+        assertEq(words[59].word, bytes32("pi"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[60].word, bytes32("sqrt"));
+        assertEq(words[60].word, bytes32("power"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[61].word, bytes32("sub"));
+        assertEq(words[61].word, bytes32("sqrt"));
+        //forge-lint: disable-next-line(unsafe-typecast)
+        assertEq(words[62].word, bytes32("sub"));
         // math/growth/
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[62].word, bytes32("exponential-growth"));
+        assertEq(words[63].word, bytes32("exponential-growth"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[63].word, bytes32("linear-growth"));
+        assertEq(words[64].word, bytes32("linear-growth"));
         // math/uint256/
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[64].word, bytes32("uint256-add"));
+        assertEq(words[65].word, bytes32("uint256-add"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[65].word, bytes32("uint256-div"));
+        assertEq(words[66].word, bytes32("uint256-div"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[66].word, bytes32("uint256-max-value"));
+        assertEq(words[67].word, bytes32("uint256-max-value"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[67].word, bytes32("uint256-mul"));
+        assertEq(words[68].word, bytes32("uint256-mul"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[68].word, bytes32("uint256-power"));
+        assertEq(words[69].word, bytes32("uint256-power"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[69].word, bytes32("uint256-sub"));
+        assertEq(words[70].word, bytes32("uint256-sub"));
         // store/
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[70].word, bytes32("get"));
+        assertEq(words[71].word, bytes32("get"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[71].word, bytes32("set"));
+        assertEq(words[72].word, bytes32("set"));
     }
 }
