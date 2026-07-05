@@ -1,6 +1,6 @@
 [package]
 name = "rainlang-eval"
-version = "0.1.5"
+version = "0.1.6"
 description = "Fork-based evaluation and parsing of Rainlang expressions against a live EVM, with Rain stack-trace decoding."
 edition.workspace = true
 license.workspace = true

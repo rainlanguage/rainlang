@@ -124,7 +124,7 @@ contract LibOpERC20TotalSupplyTest is OpTest {
         StackItem[] memory inputs = new StackItem[](1);
         inputs[0] = StackItem.wrap(bytes32(token));
         OperandV2 operand = LibOperand.build(1, 1, 0);
-        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, token));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, bytes32(token)));
         this.externalRun(operand, inputs);
     }
 

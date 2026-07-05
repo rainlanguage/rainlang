@@ -141,7 +141,7 @@ contract LibOpERC20AllowanceTest is OpTest {
         inputs[1] = StackItem.wrap(bytes32(uint256(uint160(address(0xdeadc0de)))));
         inputs[2] = StackItem.wrap(bytes32(uint256(uint160(address(0xdeaddead)))));
         OperandV2 operand = LibOperand.build(3, 1, 0);
-        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, token));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, bytes32(token)));
         this.externalRun(operand, inputs);
     }
 
@@ -155,7 +155,7 @@ contract LibOpERC20AllowanceTest is OpTest {
         inputs[1] = StackItem.wrap(bytes32(owner));
         inputs[2] = StackItem.wrap(bytes32(uint256(uint160(address(0xdeaddead)))));
         OperandV2 operand = LibOperand.build(3, 1, 0);
-        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, owner));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, bytes32(owner)));
         this.externalRun(operand, inputs);
     }
 
@@ -169,7 +169,7 @@ contract LibOpERC20AllowanceTest is OpTest {
         inputs[1] = StackItem.wrap(bytes32(uint256(uint160(address(0xdeadc0de)))));
         inputs[2] = StackItem.wrap(bytes32(spender));
         OperandV2 operand = LibOperand.build(3, 1, 0);
-        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, spender));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, bytes32(spender)));
         this.externalRun(operand, inputs);
     }
 
