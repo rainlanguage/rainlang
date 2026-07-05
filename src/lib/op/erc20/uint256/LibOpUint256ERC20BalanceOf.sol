@@ -26,8 +26,8 @@ library LibOpUint256ERC20BalanceOf {
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
     function run(InterpreterState memory, OperandV2, Pointer stackTop) internal view returns (Pointer) {
-        uint256 token;
-        uint256 account;
+        bytes32 token;
+        bytes32 account;
         assembly ("memory-safe") {
             token := mload(stackTop)
             stackTop := add(stackTop, 0x20)
@@ -37,14 +37,14 @@ library LibOpUint256ERC20BalanceOf {
         // of token and account as addresses.
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (token != uint256(uint160(token))) revert NotAnAddress(token);
+        if (uint256(token) != uint256(uint160(uint256(token)))) revert NotAnAddress(token);
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (account != uint256(uint160(account))) revert NotAnAddress(account);
+        if (uint256(account) != uint256(uint160(uint256(account)))) revert NotAnAddress(account);
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
-        uint256 tokenBalance = IERC20(address(uint160(token))).balanceOf(address(uint160(account)));
+        uint256 tokenBalance = IERC20(address(uint160(uint256(token)))).balanceOf(address(uint160(uint256(account))));
         assembly ("memory-safe") {
             mstore(stackTop, tokenBalance)
         }
@@ -59,22 +59,22 @@ library LibOpUint256ERC20BalanceOf {
         view
         returns (StackItem[] memory)
     {
-        uint256 tokenValue = uint256(StackItem.unwrap(inputs[0]));
+        bytes32 tokenValue = StackItem.unwrap(inputs[0]);
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (tokenValue != uint256(uint160(tokenValue))) revert NotAnAddress(tokenValue);
-        uint256 accountValue = uint256(StackItem.unwrap(inputs[1]));
+        if (uint256(tokenValue) != uint256(uint160(uint256(tokenValue)))) revert NotAnAddress(tokenValue);
+        bytes32 accountValue = StackItem.unwrap(inputs[1]);
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (accountValue != uint256(uint160(accountValue))) revert NotAnAddress(accountValue);
+        if (uint256(accountValue) != uint256(uint160(uint256(accountValue)))) revert NotAnAddress(accountValue);
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
-        address token = address(uint160(tokenValue));
+        address token = address(uint160(uint256(tokenValue)));
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
-        address account = address(uint160(accountValue));
+        address account = address(uint160(uint256(accountValue)));
         uint256 tokenBalance = IERC20(token).balanceOf(account);
         StackItem[] memory outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(bytes32(tokenBalance));
