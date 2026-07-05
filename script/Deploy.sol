@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {Script, console2} from "forge-std-1.16.1/src/Script.sol";
-import {LibRainDeploy} from "rain-deploy-0.1.2/src/lib/LibRainDeploy.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.3/src/lib/LibRainDeploy.sol";
 import {LibInterpreterDeploy} from "../src/lib/deploy/LibInterpreterDeploy.sol";
 import {LibDecimalFloatDeploy} from "rain-math-float-0.1.1/src/lib/deploy/LibDecimalFloatDeploy.sol";
 import {UnknownDeploymentSuite} from "../src/error/ErrDeploy.sol";
