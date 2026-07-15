@@ -17,31 +17,7 @@ import {
 } from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
 import {UnknownWord} from "../../../../src/error/ErrParse.sol";
-
-/// @dev A sub parser that resolves any word by returning a context opcode with
-/// no constants. Used to verify that subParseWords iterates multiple sources.
-contract ContextReturningSubParser is ISubParserV4, IERC165 {
-    function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
-        return interfaceId == type(ISubParserV4).interfaceId || interfaceId == type(IERC165).interfaceId;
-    }
-
-    function subParseLiteral2(bytes calldata) external pure override returns (bool, bytes32) {
-        return (false, 0);
-    }
-
-    /// @notice Returns a context opcode (0,0) with no constants.
-    function subParseWord2(bytes calldata) external pure override returns (bool, bytes memory, bytes32[] memory) {
-        bytes memory bytecode = new bytes(4);
-        // Safe: opcode constant and IO byte are small known values.
-        //forge-lint: disable-next-line(unsafe-typecast)
-        bytecode[0] = bytes1(uint8(OPCODE_CONTEXT));
-        //forge-lint: disable-next-line(unsafe-typecast)
-        bytecode[1] = bytes1(uint8(0x10)); // 0 inputs, 1 output
-        bytecode[2] = bytes1(0); // row 0
-        bytecode[3] = bytes1(0); // column 0
-        return (true, bytecode, new bytes32[](0));
-    }
-}
+import {ContextReturningSubParser} from "./ContextReturningSubParser.sol";
 
 /// @title LibSubParseSubParseWordsTest
 /// @notice Direct unit tests for `LibSubParse.subParseWords`.
