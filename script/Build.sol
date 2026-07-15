@@ -19,14 +19,14 @@ import {LibGenParseMeta} from "rain-interpreter-interface-0.1.0/src/lib/codegen/
 import {LibFs} from "rain-sol-codegen-0.1.0/src/lib/LibFs.sol";
 import {LibRainDeploy} from "rain-deploy-0.1.3/src/lib/LibRainDeploy.sol";
 
-/// @title BuildPointers
+/// @title Build
 /// @notice Forge script that generates Solidity source files containing
 /// precomputed constant values (bytecode hashes, function pointer tables,
 /// parse meta, deterministic deploy addresses) for each concrete contract.
 /// Run via `forge script` during the build step. Each `build*` function
 /// deploys the contract via the Zoltu factory in a local EVM, extracts its
 /// runtime pointers, and writes a `.pointers.sol` file into `src/generated/`.
-contract BuildPointers is Script {
+contract Build is Script {
     /// @notice Generates a Solidity address constant declaration string.
     /// @param addr The address value.
     /// @return A string containing the Solidity code for the address constant.
