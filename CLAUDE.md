@@ -53,8 +53,8 @@ nix develop -c cargo doc                # Rust docs
 
 1. `BuildAuthoringMeta.sol` exports raw ABI-encoded authoring meta to `meta/`
 2. `rainlang-prelude` runs `rain meta build` to CBOR-encode and deflate the meta
-3. `nix develop -c forge script --silent ./script/Build.sol` deploys
-   contracts in local EVM, extracts function pointer tables, and writes
+3. `nix develop -c forge script --silent ./script/Build.sol` deploys contracts
+   in local EVM, extracts function pointer tables, and writes
    `src/generated/*.pointers.sol`
 4. `nix develop -c forge build` compiles everything using the generated pointers
 
