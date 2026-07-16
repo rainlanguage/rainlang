@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
-import {LibIntegrityCheck, IntegrityCheckState} from "../../../../src/lib/integrity/LibIntegrityCheck.sol";
+import {LibIntegrityCheck} from "../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {
     OpcodeOutOfRange,
     StackUnderflow,
@@ -11,11 +11,8 @@ import {
     StackAllocationMismatch,
     StackOutputsMismatch
 } from "../../../../src/error/ErrIntegrity.sol";
-import {BadOpInputsLength, BadOpOutputsLength} from "rain-interpreter-interface-0.1.0/src/error/ErrIntegrity.sol";
 import {INTEGRITY_FUNCTION_POINTERS} from "../../../../src/generated/RainlangExpressionDeployer.pointers.sol";
 import {ALL_STANDARD_OPS_LENGTH} from "../../../../src/lib/op/LibAllStandardOps.sol";
-import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
-import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {IntegritySingleOp} from "./IntegritySingleOp.sol";
 import {IntegrityHighwater} from "./IntegrityHighwater.sol";
 

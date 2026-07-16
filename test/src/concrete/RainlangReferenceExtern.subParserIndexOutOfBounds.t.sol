@@ -3,7 +3,6 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
-import {RainlangReferenceExtern} from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
 import {SubParserIndexOutOfBounds} from "../../../src/error/ErrSubParse.sol";
 import {MockExternBadLiteralIndex} from "./MockExternBadLiteralIndex.sol";
 

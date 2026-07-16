@@ -4,7 +4,6 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
 
-import {RainlangParser} from "../../../src/concrete/RainlangParser.sol";
 import {ParseMemoryOverflow} from "../../../src/error/ErrParse.sol";
 import {ModifierTestParser} from "./ModifierTestParser.sol";
 

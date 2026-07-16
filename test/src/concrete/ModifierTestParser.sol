@@ -2,10 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.1/src/Test.sol";
-
 import {RainlangParser} from "../../../src/concrete/RainlangParser.sol";
-import {ParseMemoryOverflow} from "../../../src/error/ErrParse.sol";
 
 /// Exposes the checkParseMemoryOverflow modifier on a trivial function so it
 /// can be tested in isolation without running the real parser.

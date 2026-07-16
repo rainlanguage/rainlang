@@ -3,7 +3,6 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
-import {BaseRainlangExtern} from "../../../src/abstract/BaseRainlangExtern.sol";
 import {ExternPointersMismatch, ExternOpcodePointersEmpty} from "../../../src/error/ErrExtern.sol";
 import {EmptyPointersExtern} from "./EmptyPointersExtern.sol";
 import {MismatchedExternMoreOpcodes} from "./MismatchedExternMoreOpcodes.sol";

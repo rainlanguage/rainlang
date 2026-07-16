@@ -2,11 +2,8 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {OpTest} from "test/abstract/OpTest.sol";
 import {ISubParserV4} from "rain-interpreter-interface-0.1.0/src/interface/ISubParserV4.sol";
 import {IERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/IERC165.sol";
-import {BadSubParserResult} from "../../../../src/error/ErrParse.sol";
-import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
 
 /// A bad sub parser that claims to know every word but returns bytecode of
 /// the wrong length.
