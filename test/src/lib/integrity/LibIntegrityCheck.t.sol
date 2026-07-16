@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
-import {LibIntegrityCheck, IntegrityCheckState} from "../../../../src/lib/integrity/LibIntegrityCheck.sol";
+import {LibIntegrityCheck} from "../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {
     OpcodeOutOfRange,
     StackUnderflow,
@@ -11,82 +11,10 @@ import {
     StackAllocationMismatch,
     StackOutputsMismatch
 } from "../../../../src/error/ErrIntegrity.sol";
-import {BadOpInputsLength, BadOpOutputsLength} from "rain-interpreter-interface-0.1.0/src/error/ErrIntegrity.sol";
 import {INTEGRITY_FUNCTION_POINTERS} from "../../../../src/generated/RainlangExpressionDeployer.pointers.sol";
 import {ALL_STANDARD_OPS_LENGTH} from "../../../../src/lib/op/LibAllStandardOps.sol";
-import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
-import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
-
-/// @dev Contract whose integrity function pointers are valid for its own
-/// bytecode. Has a single opcode (index 0) that always returns (1, 1).
-contract IntegritySingleOp {
-    function oneInputOneOutput(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256) {
-        return (1, 1);
-    }
-
-    function buildIntegrityPointers() external pure returns (bytes memory) {
-        unchecked {
-            function(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256) lengthPointer;
-            uint256 length = 1;
-            assembly ("memory-safe") {
-                lengthPointer := length
-            }
-            function(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256)[2] memory
-                pointersFixed = [lengthPointer, oneInputOneOutput];
-            uint256[] memory pointersDynamic;
-            assembly ("memory-safe") {
-                pointersDynamic := pointersFixed
-            }
-            return LibConvert.unsafeTo16BitBytes(pointersDynamic);
-        }
-    }
-
-    function runIntegrityCheck(bytes memory fPointers, bytes memory bytecode, bytes32[] memory constants)
-        external
-        view
-        returns (bytes memory)
-    {
-        return LibIntegrityCheck.integrityCheck2(fPointers, bytecode, constants);
-    }
-}
-
-/// @dev Contract with 2 opcodes for testing StackUnderflowHighwater.
-/// Opcode 0: 0 inputs, 2 outputs (advances highwater).
-/// Opcode 1: 2 inputs, 1 output (drops stack below highwater).
-contract IntegrityHighwater {
-    function zeroInputTwoOutput(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256) {
-        return (0, 2);
-    }
-
-    function twoInputOneOutput(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256) {
-        return (2, 1);
-    }
-
-    function buildIntegrityPointers() external pure returns (bytes memory) {
-        unchecked {
-            function(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256) lengthPointer;
-            uint256 length = 2;
-            assembly ("memory-safe") {
-                lengthPointer := length
-            }
-            function(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256)[3] memory
-                pointersFixed = [lengthPointer, zeroInputTwoOutput, twoInputOneOutput];
-            uint256[] memory pointersDynamic;
-            assembly ("memory-safe") {
-                pointersDynamic := pointersFixed
-            }
-            return LibConvert.unsafeTo16BitBytes(pointersDynamic);
-        }
-    }
-
-    function runIntegrityCheck(bytes memory fPointers, bytes memory bytecode, bytes32[] memory constants)
-        external
-        view
-        returns (bytes memory)
-    {
-        return LibIntegrityCheck.integrityCheck2(fPointers, bytecode, constants);
-    }
-}
+import {IntegritySingleOp} from "./IntegritySingleOp.sol";
+import {IntegrityHighwater} from "./IntegrityHighwater.sol";
 
 /// @title LibIntegrityCheckTest
 /// @notice Tests for LibIntegrityCheck.
