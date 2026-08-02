@@ -4,6 +4,7 @@ pragma solidity =0.8.25;
 
 import {RainlangInterpreter} from "../../../src/concrete/RainlangInterpreter.sol";
 
+/// @dev RainlangInterpreter override with empty opcode function pointers.
 contract ZeroFPRainlangInterpreter is RainlangInterpreter {
     function opcodeFunctionPointers() internal pure override returns (bytes memory) {
         return hex"";

@@ -4,11 +4,6 @@ pragma solidity =0.8.25;
 
 import {BaseRainlangSubParser} from "../../../src/abstract/BaseRainlangSubParser.sol";
 
-/// @dev Simple literal parser that returns the dispatch value unchanged.
-function echoLiteralParser(bytes32 dispatchValue, uint256, uint256) pure returns (bytes32) {
-    return dispatchValue;
-}
-
 /// @dev Sub parser where matchSubParseLiteralDispatch always succeeds with
 /// index 1, but subParserLiteralParsers returns only 1 pointer (2 bytes).
 /// This triggers SubParserIndexOutOfBounds(1, 1) in subParseLiteral2.

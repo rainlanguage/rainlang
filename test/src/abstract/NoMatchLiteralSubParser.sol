@@ -4,11 +4,6 @@ pragma solidity =0.8.25;
 
 import {BaseRainlangSubParser} from "../../../src/abstract/BaseRainlangSubParser.sol";
 
-/// @dev Simple literal parser that returns the dispatch value unchanged.
-function echoLiteralParser(bytes32 dispatchValue, uint256, uint256) pure returns (bytes32) {
-    return dispatchValue;
-}
-
 /// @dev Sub parser using default matchSubParseLiteralDispatch (returns false).
 contract NoMatchLiteralSubParser is BaseRainlangSubParser {
     function describedByMetaV1() external pure override returns (bytes32) {

@@ -4,11 +4,6 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {SubParserIndexOutOfBounds} from "../../../src/abstract/BaseRainlangSubParser.sol";
-
-/// @dev Simple literal parser that returns the dispatch value unchanged.
-function echoLiteralParser(bytes32 dispatchValue, uint256, uint256) pure returns (bytes32) {
-    return dispatchValue;
-}
 import {HappyPathLiteralSubParser} from "./HappyPathLiteralSubParser.sol";
 import {NoMatchLiteralSubParser} from "./NoMatchLiteralSubParser.sol";
 import {MismatchedLiteralSubParser} from "./MismatchedLiteralSubParser.sol";
