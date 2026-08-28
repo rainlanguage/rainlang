@@ -7,7 +7,6 @@
 .git
 .github
 .gitignore
-.gitmodules
 .pre-commit-config.yaml
 .prettierignore
 .soldeerignore
@@ -22,9 +21,7 @@ Cargo.toml
 /dependencies
 /flake.lock
 /flake.nix
-/foundry.lock
 /foundry.toml
-/lib
 /out
 /remappings.txt
 /slither.config.json
