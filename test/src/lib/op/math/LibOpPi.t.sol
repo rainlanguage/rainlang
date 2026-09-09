@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
-import {LibOpPi, FLOAT_PI} from "../../../../../src/lib/op/math/LibOpPi.sol";
+import {LibOpPi} from "../../../../../src/lib/op/math/LibOpPi.sol";
 import {LibOperand, OperandV2} from "test/lib/operand/LibOperand.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {
@@ -15,20 +15,11 @@ import {
 } from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
 import {SignedContextV1} from "rainlang-interface-0.2.8/src/interface/IInterpreterCallerV4.sol";
 import {LibContext} from "rainlang-interface-0.2.8/src/lib/caller/LibContext.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpPiTest
 /// @notice Tests for the mathematical constant pi opcode.
 contract LibOpPiTest is OpTest {
-    /// The packed constant is pi rounded to nearest at 66 decimal places:
-    /// the 67-digit coefficient at exponent -66, packed losslessly, must be
-    /// the literal `run` pushes.
-    function testOpPiConstant() external pure {
-        Float expected =
-            LibDecimalFloat.packLossless(3141592653589793238462643383279502884197169399375105820974944592308, -66);
-        assertEq(Float.unwrap(FLOAT_PI), Float.unwrap(expected));
-    }
-
     /// Directly test the integrity logic of LibOpPi.
     function testOpPiIntegrity(IntegrityCheckState memory state, uint8 inputs, uint8 outputs, uint16 operandData)
         external
@@ -68,7 +59,7 @@ contract LibOpPiTest is OpTest {
             })
         );
         assertEq(stack.length, 1);
-        assertEq(StackItem.unwrap(stack[0]), Float.unwrap(FLOAT_PI));
+        assertEq(StackItem.unwrap(stack[0]), Float.unwrap(LibDecimalFloat.FLOAT_PI));
         assertEq(kvs.length, 0);
     }
 

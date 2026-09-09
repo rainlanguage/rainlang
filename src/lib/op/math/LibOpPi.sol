@@ -6,12 +6,7 @@ import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
-
-/// @dev The mathematical constant pi as a `Float`.
-/// 3.141592653589793238462643383279502884197169399375105820974944592308e66, -66
-Float constant FLOAT_PI =
-    Float.wrap(bytes32(uint256(0xffffffbe1dd4c9e873614f593bba9c6007d9a7ac8d03a4b6c700a65cb537a1b4)));
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpPi
 /// @notice Stacks the mathematical constant pi.
@@ -27,7 +22,7 @@ library LibOpPi {
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
     function run(InterpreterState memory, OperandV2, Pointer stackTop) internal pure returns (Pointer) {
-        Float pi = FLOAT_PI;
+        Float pi = LibDecimalFloat.FLOAT_PI;
         assembly ("memory-safe") {
             stackTop := sub(stackTop, 0x20)
             mstore(stackTop, pi)
@@ -43,7 +38,7 @@ library LibOpPi {
         returns (StackItem[] memory)
     {
         StackItem[] memory outputs = new StackItem[](1);
-        outputs[0] = StackItem.wrap(Float.unwrap(FLOAT_PI));
+        outputs[0] = StackItem.wrap(Float.unwrap(LibDecimalFloat.FLOAT_PI));
         return outputs;
     }
 }
