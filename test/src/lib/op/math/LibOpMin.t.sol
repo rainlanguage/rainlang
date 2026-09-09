@@ -6,7 +6,7 @@ import {OpTest, IntegrityCheckState, InterpreterState} from "test/abstract/OpTes
 import {LibOpMin} from "../../../../../src/lib/op/math/LibOpMin.sol";
 import {LibOperand, OperandV2} from "test/lib/operand/LibOperand.sol";
 import {StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 
 contract LibOpMinTest is OpTest {
     /// Directly test the integrity logic of LibOpMin. This tests the happy

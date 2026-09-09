@@ -7,10 +7,10 @@ import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 
-import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 import {
     LibDecimalFloatImplementation
-} from "rain-math-float-0.1.1/src/lib/implementation/LibDecimalFloatImplementation.sol";
+} from "rain-math-float-0.2.1/src/lib/implementation/LibDecimalFloatImplementation.sol";
 
 /// @title LibOpAdd
 /// @notice Opcode to add N numbers. Errors on overflow.

@@ -13,8 +13,8 @@ import {
     ParseDecimalPrecisionLoss,
     MalformedExponentDigits,
     MalformedDecimalPoint
-} from "rain-math-float-0.1.1/src/error/ErrParse.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+} from "rain-math-float-0.2.1/src/error/ErrParse.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralDecimalParseDecimalFloatTest

@@ -6,10 +6,10 @@ import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInte
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 import {
     LibDecimalFloatImplementation
-} from "rain-math-float-0.1.1/src/lib/implementation/LibDecimalFloatImplementation.sol";
+} from "rain-math-float-0.2.1/src/lib/implementation/LibDecimalFloatImplementation.sol";
 
 /// @title LibOpMul
 /// @notice Opcode to multiply N decimal floating point values.
