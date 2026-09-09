@@ -18,7 +18,7 @@ import {SignedContextV1} from "rainlang-interface-0.2.8/src/interface/IInterpret
 import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
-import {LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 import {NotAnAddress} from "../../../../../src/error/ErrRainType.sol";
 import {LibTestCast} from "test/lib/typecast/LibTestCast.sol";
 import {LibBytes32Array} from "rain-solmem-0.1.28/src/lib/LibBytes32Array.sol";

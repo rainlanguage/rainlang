@@ -8,7 +8,7 @@ import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/int
 import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
 import {InterpreterState, LibInterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpMaxNegativeValueTest
 /// @notice Test the runtime and integrity time logic of LibOpMaxNegativeValue.

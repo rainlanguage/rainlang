@@ -7,7 +7,7 @@ import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {LibIntOrAString, IntOrAString} from "rain-intorastring-0.1.0/src/lib/LibIntOrAString.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpConditions
 /// @notice Opcode to evaluate pairwise condition-value slots and return the value

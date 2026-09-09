@@ -15,7 +15,7 @@ import {
 } from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
 import {SignedContextV1} from "rainlang-interface-0.2.8/src/interface/IInterpreterCallerV4.sol";
 import {LibContext} from "rainlang-interface-0.2.8/src/lib/caller/LibContext.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpETest
 /// @notice Tests for the mathematical constant e opcode.

@@ -28,11 +28,11 @@ import {
 import {FullyQualifiedNamespace, StateNamespace} from "rainlang-interface-0.2.8/src/interface/IInterpreterStoreV3.sol";
 import {SignedContextV1} from "rainlang-interface-0.2.8/src/interface/IInterpreterCallerV4.sol";
 import {LibNamespace} from "rainlang-interface-0.2.8/src/lib/ns/LibNamespace.sol";
-import {ExponentOverflow, CoefficientOverflow} from "rain-math-float-0.1.1/src/error/ErrDecimalFloat.sol";
+import {ExponentOverflow, CoefficientOverflow} from "rain-math-float-0.2.1/src/error/ErrDecimalFloat.sol";
 import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.1/src/lib/LibTOFUTokenDecimals.sol";
 
 import {console2} from "forge-std-1.16.2/src/console2.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 
 bytes32 constant PRE = keccak256(abi.encodePacked("pre"));
 bytes32 constant POST = keccak256(abi.encodePacked("post"));

@@ -9,7 +9,7 @@ import {LibParseLiteral, UnsupportedLiteralType} from "../../../../../src/lib/pa
 import {UppercaseHexPrefix} from "../../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {LibAllStandardOps} from "../../../../../src/lib/op/LibAllStandardOps.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 import {ISubParserV4} from "rainlang-interface-0.2.8/src/interface/ISubParserV4.sol";
 import {LibIntOrAString, IntOrAString} from "rain-intorastring-0.1.0/src/lib/LibIntOrAString.sol";
 

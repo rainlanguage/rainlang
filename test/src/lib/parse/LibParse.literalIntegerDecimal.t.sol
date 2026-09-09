@@ -8,7 +8,7 @@ import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {LibParse, UnexpectedRHSChar, UnexpectedRightParen} from "../../../../src/lib/parse/LibParse.sol";
 import {LibBytecode} from "rainlang-interface-0.2.8/src/lib/bytecode/LibBytecode.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 import {ParseDecimalOverflow} from "rain-string-0.2.0/src/error/ErrParse.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
