@@ -11,7 +11,7 @@ import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInte
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibIntOrAString, IntOrAString} from "rain-intorastring-0.1.0/src/lib/LibIntOrAString.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 
 contract LibOpEnsureTest is OpTest {
     using LibDecimalFloat for Float;
