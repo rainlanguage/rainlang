@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {BaseRainlangSubParser} from "../../../src/abstract/BaseRainlangSubParser.sol";
-import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
+import {LibConvert} from "rain-lib-typecast-0.1.4/src/LibConvert.sol";
 
 /// @dev Simple literal parser that returns the dispatch value unchanged.
 function echoLiteralParser(bytes32 dispatchValue, uint256, uint256) pure returns (bytes32) {

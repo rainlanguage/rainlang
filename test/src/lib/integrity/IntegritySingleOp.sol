@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {LibIntegrityCheck, IntegrityCheckState} from "../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
+import {LibConvert} from "rain-lib-typecast-0.1.4/src/LibConvert.sol";
 import {OperandV2} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
 
 /// @dev Contract whose integrity function pointers are valid for its own

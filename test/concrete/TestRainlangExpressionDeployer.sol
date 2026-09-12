@@ -8,7 +8,7 @@ import {LibAllStandardOps} from "../../src/lib/op/LibAllStandardOps.sol";
 import {TEST_PARSER_ADDRESS} from "../lib/deploy/LibTestInterpreterDeploy.sol";
 // Referenced by NatSpec only.
 //forge-lint: disable-next-line(unused-import)
-import {IDescribedByMetaV1} from "rain-metadata-0.1.0/src/interface/IDescribedByMetaV1.sol";
+import {IDescribedByMetaV1} from "rain-metadata-0.1.7/src/interface/IDescribedByMetaV1.sol";
 
 /// @dev Stands in for the meta hash a deployed expression deployer describes
 /// itself by; the test concrete has no meta.

@@ -7,7 +7,7 @@ import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {IParserV2} from "rainlang-interface-0.2.8/src/interface/IParserV2.sol";
 import {IParserPragmaV1, PragmaV1} from "rainlang-interface-0.2.8/src/interface/IParserPragmaV1.sol";
 
-import {IDescribedByMetaV1} from "rain-metadata-0.1.0/src/interface/IDescribedByMetaV1.sol";
+import {IDescribedByMetaV1} from "rain-metadata-0.1.7/src/interface/IDescribedByMetaV1.sol";
 
 import {LibIntegrityCheck} from "../lib/integrity/LibIntegrityCheck.sol";
 import {LibInterpreterStateDataContract} from "../lib/state/LibInterpreterStateDataContract.sol";
