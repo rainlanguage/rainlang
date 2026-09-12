@@ -3,7 +3,7 @@
 pragma solidity ^0.8.25;
 
 import {BadDynamicLength} from "../../error/ErrOpList.sol";
-import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
+import {LibConvert} from "rain-lib-typecast-0.1.4/src/LibConvert.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {OperandV2} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
 import {AuthoringMetaV2} from "rainlang-interface-0.2.8/src/interface/IParserV2.sol";

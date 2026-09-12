@@ -10,7 +10,7 @@ import {LibBytecode} from "rainlang-interface-0.2.8/src/lib/bytecode/LibBytecode
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {OperandV2, LibParseOperand} from "../../../../src/lib/parse/LibParseOperand.sol";
-import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
+import {LibConvert} from "rain-lib-typecast-0.1.4/src/LibConvert.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 import {LibGenParseMeta} from "rainlang-interface-0.2.8/src/lib/codegen/LibGenParseMeta.sol";

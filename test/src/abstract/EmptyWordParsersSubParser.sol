@@ -5,7 +5,7 @@ pragma solidity =0.8.25;
 import {BaseRainlangSubParser, AuthoringMetaV2} from "../../../src/abstract/BaseRainlangSubParser.sol";
 import {LibGenParseMeta} from "rainlang-interface-0.2.8/src/lib/codegen/LibGenParseMeta.sol";
 import {LibParseOperand} from "../../../src/lib/parse/LibParseOperand.sol";
-import {LibConvert} from "rain-lib-typecast-0.1.0/src/LibConvert.sol";
+import {LibConvert} from "rain-lib-typecast-0.1.4/src/LibConvert.sol";
 import {OperandV2} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
 
 /// @dev Sub parser with 1 word in meta but zero word parser pointers.
