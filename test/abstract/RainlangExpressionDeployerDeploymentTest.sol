@@ -7,7 +7,7 @@ import {BaseRainlangStore} from "../../src/abstract/BaseRainlangStore.sol";
 import {BaseRainlangParser} from "../../src/abstract/BaseRainlangParser.sol";
 import {BaseRainlangInterpreter} from "../../src/abstract/BaseRainlangInterpreter.sol";
 import {BaseRainlangExpressionDeployer} from "../../src/abstract/BaseRainlangExpressionDeployer.sol";
-import {LibRainDeploy} from "rain-deploy-0.1.7/src/lib/LibRainDeploy.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.8/src/lib/LibRainDeploy.sol";
 import {
     LibTestInterpreterDeploy,
     TEST_PARSER_ADDRESS,
