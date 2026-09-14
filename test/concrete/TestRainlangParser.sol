@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {BaseRainlangParser, PARSE_META_BUILD_DEPTH} from "../../src/abstract/BaseRainlangParser.sol";
 import {LibAllStandardOps, AuthoringMetaV2} from "../../src/lib/op/LibAllStandardOps.sol";
-import {LibGenParseMeta} from "rainlang-interface-0.2.8/src/lib/codegen/LibGenParseMeta.sol";
+import {LibGenParseMeta} from "rainlang-interface-0.2.9/src/lib/codegen/LibGenParseMeta.sol";
 
 /// @title TestRainlangParser
 /// @notice `BaseRainlangParser` over the current source: the parse meta is

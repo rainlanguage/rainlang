@@ -3,12 +3,12 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.2/src/Test.sol";
-import {OperandV2, OPCODE_EXTERN} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OperandV2, OPCODE_EXTERN} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {
     IInterpreterExternV4,
     ExternDispatchV2,
     EncodedExternDispatchV2
-} from "rainlang-interface-0.2.8/src/interface/IInterpreterExternV4.sol";
+} from "rainlang-interface-0.2.9/src/interface/IInterpreterExternV4.sol";
 import {LibSubParse} from "../../../../src/lib/parse/LibSubParse.sol";
 import {LibExtern} from "../../../../src/lib/extern/LibExtern.sol";
 import {ExternDispatchConstantsHeightOverflow} from "../../../../src/error/ErrSubParse.sol";

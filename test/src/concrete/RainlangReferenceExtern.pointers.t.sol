@@ -14,7 +14,7 @@ import {
     LITERAL_PARSER_FUNCTION_POINTERS,
     OPERAND_HANDLER_FUNCTION_POINTERS
 } from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
-import {LibGenParseMeta} from "rainlang-interface-0.2.8/src/lib/codegen/LibGenParseMeta.sol";
+import {LibGenParseMeta} from "rainlang-interface-0.2.9/src/lib/codegen/LibGenParseMeta.sol";
 
 contract RainlangReferenceExternPointersTest is Test {
     function testOpcodeFunctionPointers() external {

@@ -7,7 +7,7 @@ import {ExcessRHSItems} from "../../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {LibOpEnsure} from "../../../../../src/lib/op/logic/LibOpEnsure.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibIntOrAString, IntOrAString} from "rain-intorastring-0.1.0/src/lib/LibIntOrAString.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";

@@ -2,9 +2,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {ISubParserV4} from "rainlang-interface-0.2.8/src/interface/ISubParserV4.sol";
+import {ISubParserV4} from "rainlang-interface-0.2.9/src/interface/ISubParserV4.sol";
 import {IERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/IERC165.sol";
-import {OPCODE_CONSTANT} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OPCODE_CONSTANT} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 
 /// @dev A sub parser that resolves any word by returning a constant opcode
 /// with a known constant value. Each call returns exactly one constant.

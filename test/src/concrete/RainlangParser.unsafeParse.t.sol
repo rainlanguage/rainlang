@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
-import {LibBytecode} from "rainlang-interface-0.2.8/src/lib/bytecode/LibBytecode.sol";
+import {LibBytecode} from "rainlang-interface-0.2.9/src/lib/bytecode/LibBytecode.sol";
 
 contract RainlangParserUnsafeParseTest is RainlangExpressionDeployerDeploymentTest {
     /// Parsing a simple hex literal expression returns correct bytecode

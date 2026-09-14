@@ -10,8 +10,8 @@ import {MemoryKV} from "rain-lib-memkv-0.1.0/src/lib/LibMemoryKV.sol";
 import {
     IInterpreterStoreV3,
     FullyQualifiedNamespace
-} from "rainlang-interface-0.2.8/src/interface/IInterpreterStoreV3.sol";
-import {StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+} from "rainlang-interface-0.2.9/src/interface/IInterpreterStoreV3.sol";
+import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 
 /// @title LibEvalMaxOutputsTest
 /// @notice Tests that eval4 truncates outputs when maxOutputs < sourceOutputs.

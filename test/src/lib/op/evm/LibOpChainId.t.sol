@@ -8,7 +8,7 @@ import {LibInterpreterState, InterpreterState} from "../../../../../src/lib/stat
 import {IntegrityCheckState, BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibOpChainId} from "../../../../../src/lib/op/evm/LibOpChainId.sol";
 
-import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 
 /// @title LibOpChainIdTest

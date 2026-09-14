@@ -7,8 +7,8 @@ import {MemoryKV} from "rain-lib-memkv-0.1.0/src/lib/LibMemoryKV.sol";
 import {
     FullyQualifiedNamespace,
     IInterpreterStoreV3
-} from "rainlang-interface-0.2.8/src/interface/IInterpreterStoreV3.sol";
-import {StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+} from "rainlang-interface-0.2.9/src/interface/IInterpreterStoreV3.sol";
+import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 
 /// @dev Deterministic address used as the `staticcall` target for stack trace
 /// emissions. Derived from a domain-specific keccak hash so it cannot collide

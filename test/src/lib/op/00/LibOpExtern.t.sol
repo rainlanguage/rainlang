@@ -13,7 +13,7 @@ import {
 import {OutOfBoundsConstantRead} from "../../../../../src/error/ErrIntegrity.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
-import {OperandV2} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OperandV2} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {LibOpExtern} from "../../../../../src/lib/op/00/LibOpExtern.sol";
 import {LibExtern} from "../../../../../src/lib/extern/LibExtern.sol";
@@ -22,7 +22,7 @@ import {
     IInterpreterExternV4,
     ExternDispatchV2,
     StackItem
-} from "rainlang-interface-0.2.8/src/interface/IInterpreterExternV4.sol";
+} from "rainlang-interface-0.2.9/src/interface/IInterpreterExternV4.sol";
 import {IERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/IERC165.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {LibUint256Array} from "rain-solmem-0.1.28/src/lib/LibUint256Array.sol";

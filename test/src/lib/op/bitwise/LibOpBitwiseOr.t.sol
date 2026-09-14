@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {OpTest} from "test/abstract/OpTest.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {LibOpBitwiseOr} from "../../../../../src/lib/op/bitwise/LibOpBitwiseOr.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";

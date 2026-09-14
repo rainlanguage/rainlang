@@ -5,8 +5,8 @@ pragma solidity =0.8.25;
 import {OpTest} from "test/abstract/OpTest.sol";
 import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
 import {RainlangReferenceExtern, StackItem} from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
-import {SignedContextV1} from "rainlang-interface-0.2.8/src/interface/IInterpreterCallerV4.sol";
-import {LibContext} from "rainlang-interface-0.2.8/src/lib/caller/LibContext.sol";
+import {SignedContextV1} from "rainlang-interface-0.2.9/src/interface/IInterpreterCallerV4.sol";
+import {LibContext} from "rainlang-interface-0.2.9/src/lib/caller/LibContext.sol";
 
 contract RainlangReferenceExternContextRainlenTest is OpTest {
     using Strings for address;

@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.18;
 
-import {OperandV2} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OperandV2} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 
 library LibOperand {
     function build(uint8 inputs, uint8 outputs, uint16 operandData) internal pure returns (OperandV2) {

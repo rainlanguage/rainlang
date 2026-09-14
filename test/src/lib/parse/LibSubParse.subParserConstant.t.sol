@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.2/src/Test.sol";
-import {OPCODE_CONSTANT} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OPCODE_CONSTANT} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {LibSubParse} from "../../../../src/lib/parse/LibSubParse.sol";
 import {ConstantOpcodeConstantsHeightOverflow} from "../../../../src/error/ErrSubParse.sol";
 

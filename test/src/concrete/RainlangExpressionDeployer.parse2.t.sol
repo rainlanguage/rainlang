@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {OpTest} from "test/abstract/OpTest.sol";
 import {MissingFinalSemi} from "../../../src/error/ErrParse.sol";
-import {BadOpInputsLength} from "rainlang-interface-0.2.8/src/error/ErrIntegrity.sol";
+import {BadOpInputsLength} from "rainlang-interface-0.2.9/src/error/ErrIntegrity.sol";
 import {LibParseError} from "../../../src/lib/parse/LibParseError.sol";
 
 contract RainlangExpressionDeployerParse2Test is OpTest {

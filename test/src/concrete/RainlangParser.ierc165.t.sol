@@ -6,7 +6,7 @@ import {Test} from "forge-std-1.16.2/src/Test.sol";
 
 import {IERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/IERC165.sol";
 import {TestRainlangParser} from "test/concrete/TestRainlangParser.sol";
-import {IParserToolingV1} from "rain-sol-codegen-0.1.36/src/interface/IParserToolingV1.sol";
+import {IParserToolingV1} from "rain-sol-codegen-0.1.37/src/interface/IParserToolingV1.sol";
 
 contract RainlangParserIERC165Test is Test {
     /// Test that ERC165 is implemented for all interfaces.

@@ -3,7 +3,7 @@
 pragma solidity ^0.8.25;
 
 import {MemoryKVKey, MemoryKVVal, MemoryKV, LibMemoryKV} from "rain-lib-memkv-0.1.0/src/lib/LibMemoryKV.sol";
-import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";

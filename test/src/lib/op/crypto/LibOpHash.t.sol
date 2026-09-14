@@ -5,14 +5,14 @@ pragma solidity =0.8.25;
 import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 
 import {LibOpHash} from "../../../../../src/lib/op/crypto/LibOpHash.sol";
-import {LibContext} from "rainlang-interface-0.2.8/src/lib/caller/LibContext.sol";
+import {LibContext} from "rainlang-interface-0.2.9/src/lib/caller/LibContext.sol";
 
 import {LibPointer, Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {LibUint256Array} from "rain-solmem-0.1.28/src/lib/LibUint256Array.sol";
 
-import {OperandV2, SourceIndexV2, EvalV4, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
-import {FullyQualifiedNamespace} from "rainlang-interface-0.2.8/src/interface/IInterpreterStoreV3.sol";
-import {SignedContextV1} from "rainlang-interface-0.2.8/src/interface/IInterpreterCallerV4.sol";
+import {OperandV2, SourceIndexV2, EvalV4, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {FullyQualifiedNamespace} from "rainlang-interface-0.2.9/src/interface/IInterpreterStoreV3.sol";
+import {SignedContextV1} from "rainlang-interface-0.2.9/src/interface/IInterpreterCallerV4.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {InterpreterState, LibInterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";

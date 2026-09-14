@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {NotAnExternContract} from "rainlang-interface-0.2.8/src/error/ErrExtern.sol";
+import {NotAnExternContract} from "rainlang-interface-0.2.9/src/error/ErrExtern.sol";
 
 /// @dev Workaround for https://github.com/foundry-rs/foundry/issues/6572
 contract ErrExtern {}

@@ -6,7 +6,7 @@ import {ParseTest} from "test/abstract/ParseTest.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 
 import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
-import {LibBytecode} from "rainlang-interface-0.2.8/src/lib/bytecode/LibBytecode.sol";
+import {LibBytecode} from "rainlang-interface-0.2.9/src/lib/bytecode/LibBytecode.sol";
 import {ExcessLHSItems, ExcessRHSItems} from "../../../../src/error/ErrParse.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
