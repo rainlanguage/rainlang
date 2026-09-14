@@ -8,7 +8,7 @@ import {
     LibNamespace,
     FullyQualifiedNamespace,
     StateNamespace
-} from "rainlang-interface-0.2.8/src/lib/ns/LibNamespace.sol";
+} from "rainlang-interface-0.2.9/src/lib/ns/LibNamespace.sol";
 
 /// @title RainlangStoreOverwriteKeyTest
 /// @notice Test that a key appearing twice in a single `kvs` array

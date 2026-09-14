@@ -12,9 +12,9 @@ import {
     OperandV2,
     EvalV4,
     StackItem
-} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
-import {LibContext} from "rainlang-interface-0.2.8/src/lib/caller/LibContext.sol";
-import {SignedContextV1} from "rainlang-interface-0.2.8/src/interface/IInterpreterCallerV4.sol";
+} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {LibContext} from "rainlang-interface-0.2.9/src/lib/caller/LibContext.sol";
+import {SignedContextV1} from "rainlang-interface-0.2.9/src/interface/IInterpreterCallerV4.sol";
 import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 

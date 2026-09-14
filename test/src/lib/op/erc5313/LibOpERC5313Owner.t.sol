@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {OpTest} from "test/abstract/OpTest.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {LibOpERC5313Owner} from "../../../../../src/lib/op/erc5313/LibOpERC5313Owner.sol";
 import {IERC5313} from "@openzeppelin-contracts-5.6.1/interfaces/IERC5313.sol";
 import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";

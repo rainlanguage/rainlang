@@ -6,7 +6,7 @@ import {OpTest} from "test/abstract/OpTest.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibOpBitwiseShiftRight} from "../../../../../src/lib/op/bitwise/LibOpBitwiseShiftRight.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
-import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {UnsupportedBitwiseShiftAmount} from "../../../../../src/error/ErrBitwise.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {OperandOverflow} from "../../../../../src/error/ErrParse.sol";

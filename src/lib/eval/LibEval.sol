@@ -6,9 +6,9 @@ import {LibInterpreterState, InterpreterState} from "../state/LibInterpreterStat
 
 import {LibMemCpy} from "rain-solmem-0.1.28/src/lib/LibMemCpy.sol";
 import {LibMemoryKV, MemoryKV} from "rain-lib-memkv-0.1.0/src/lib/LibMemoryKV.sol";
-import {LibBytecode} from "rainlang-interface-0.2.8/src/lib/bytecode/LibBytecode.sol";
+import {LibBytecode} from "rainlang-interface-0.2.9/src/lib/bytecode/LibBytecode.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
-import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 
 import {InputsLengthMismatch} from "../../error/ErrEval.sol";
 

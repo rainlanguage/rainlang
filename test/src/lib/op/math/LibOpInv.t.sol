@@ -7,7 +7,7 @@ import {LibDecimalFloat, Float} from "rain-math-float-0.2.1/src/lib/LibDecimalFl
 import {DivisionByZero} from "rain-math-float-0.2.1/src/error/ErrDecimalFloat.sol";
 import {LibOpInv} from "../../../../../src/lib/op/math/LibOpInv.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 
 contract LibOpInvTest is OpTest {
     /// Directly test the integrity logic of LibOpInv.

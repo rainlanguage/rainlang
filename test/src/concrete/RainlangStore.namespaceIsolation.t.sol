@@ -8,7 +8,7 @@ import {
     LibNamespace,
     StateNamespace,
     FullyQualifiedNamespace
-} from "rainlang-interface-0.2.8/src/lib/ns/LibNamespace.sol";
+} from "rainlang-interface-0.2.9/src/lib/ns/LibNamespace.sol";
 
 contract RainlangStoreNamespaceIsolationTest is Test {
     using LibNamespace for StateNamespace;

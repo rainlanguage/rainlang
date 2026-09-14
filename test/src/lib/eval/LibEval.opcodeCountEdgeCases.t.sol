@@ -3,9 +3,9 @@
 pragma solidity =0.8.25;
 
 import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
-import {StateNamespace} from "rainlang-interface-0.2.8/src/interface/IInterpreterStoreV3.sol";
-import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
-import {LibNamespace} from "rainlang-interface-0.2.8/src/lib/ns/LibNamespace.sol";
+import {StateNamespace} from "rainlang-interface-0.2.9/src/interface/IInterpreterStoreV3.sol";
+import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {LibNamespace} from "rainlang-interface-0.2.9/src/lib/ns/LibNamespace.sol";
 
 /// evalLoop processes opcodes in batches of 8 via an unrolled loop that reads
 /// one 32-byte word (8 x 4-byte opcodes) per iteration. Leftover opcodes

@@ -10,8 +10,8 @@ import {OpTest} from "test/abstract/OpTest.sol";
 import {LibOpGet} from "../../../../../src/lib/op/store/LibOpGet.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
-import {OperandV2, StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
-import {StateNamespace} from "rainlang-interface-0.2.8/src/interface/IInterpreterStoreV3.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {StateNamespace} from "rainlang-interface-0.2.9/src/interface/IInterpreterStoreV3.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 
 contract LibOpGetTest is OpTest {

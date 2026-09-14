@@ -6,7 +6,7 @@ import {Test} from "forge-std-1.16.2/src/Test.sol";
 
 import {IERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/IERC165.sol";
 import {TestRainlangStore} from "test/concrete/TestRainlangStore.sol";
-import {IInterpreterStoreV3} from "rainlang-interface-0.2.8/src/interface/IInterpreterStoreV3.sol";
+import {IInterpreterStoreV3} from "rainlang-interface-0.2.9/src/interface/IInterpreterStoreV3.sol";
 
 contract RainlangStoreIERC165Test is Test {
     /// Store should introspect support for `IERC165` and `IInterpreterStoreV3`.

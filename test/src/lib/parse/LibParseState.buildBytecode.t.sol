@@ -4,8 +4,8 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.2/src/Test.sol";
 import {LibParseState, ParseState, EMPTY_ACTIVE_SOURCE} from "../../../../src/lib/parse/LibParseState.sol";
-import {LibBytecode} from "rainlang-interface-0.2.8/src/lib/bytecode/LibBytecode.sol";
-import {OperandV2} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {LibBytecode} from "rainlang-interface-0.2.9/src/lib/bytecode/LibBytecode.sol";
+import {OperandV2} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 
 contract LibParseStateBuildBytecodeTest is Test {
     using LibParseState for ParseState;

@@ -5,7 +5,7 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, InterpreterState, OperandV2} from "test/abstract/OpTest.sol";
 import {LibOpDiv} from "../../../../../src/lib/op/math/LibOpDiv.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 import {
     LibDecimalFloatImplementation,

@@ -21,10 +21,10 @@ integrity = "a76ad2f7efc0359f42bf2106cd57eca3f239e1eb08019f771b67802cebb54eb0"
 
 [[dependencies]]
 name = "rain-deploy"
-version = "0.1.8"
-url = "https://soldeer-revisions.s3.amazonaws.com/rain-deploy/0_1_8_10-09-2026_14:32:04_rain.zip"
-checksum = "506d4b9acea5a06bd6d49442caa17075fd40a70c9662d26fbc6e79339e6e1dc4"
-integrity = "44375e425fed5e640711e47c9256aff7643566454870d940f9e831b502d940e5"
+version = "0.1.10"
+url = "https://soldeer-revisions.s3.amazonaws.com/rain-deploy/0_1_10_14-09-2026_11:24:34_rain.zip"
+checksum = "a8706cc19f6a96f69491e9816e0ec4bd7229bc7f7f541f93c5a51af3b95fb6dd"
+integrity = "b3b3fac62525531638135a8d8b731dfe8749e98b28ac5f61a2cd878d30adb047"
 
 [[dependencies]]
 name = "rain-extrospection"
@@ -91,10 +91,10 @@ integrity = "176af355c734ef954434b1fc60907b42bda8b55d5cf540eefb87b574f8148b80"
 
 [[dependencies]]
 name = "rain-sol-codegen"
-version = "0.1.36"
-url = "https://soldeer-revisions.s3.amazonaws.com/rain-sol-codegen/0_1_36_18-08-2026_09:20:33_rain.sol.zip"
-checksum = "b5d101d46941a95fee441224e101004139814ae9afa2793138874bd7e93991ff"
-integrity = "164e2655ac8b66bcf52c799421706d3dfaab987addaaeadd74574e70fd2eb6ed"
+version = "0.1.37"
+url = "https://soldeer-revisions.s3.amazonaws.com/rain-sol-codegen/0_1_37_25-08-2026_17:26:08_rain.sol.zip"
+checksum = "d13ebfc9e769dcd96bf43bd5e0ff9c2894f877949ce5492ae985e70ea10f30b2"
+integrity = "0044af31422ea2e98c480e61c7eba091fbe3bd72c6bc9dcddd3b7457aa6d22f4"
 
 [[dependencies]]
 name = "rain-solmem"
@@ -119,7 +119,7 @@ integrity = "9e1fccf893dd0d90aeb445c78f9eee3904bc50287ff1da30b954508f18412cd2"
 
 [[dependencies]]
 name = "rainlang-interface"
-version = "0.2.8"
-url = "https://soldeer-revisions.s3.amazonaws.com/rainlang-interface/0_2_8_06-09-2026_08:58:04_rainlang.zip"
-checksum = "aae7d5721cdd21240f5dca7b1d6a861101431ead94db6def6a134932b54e7947"
-integrity = "508259e321ecc0ad9b0ff1a8b0ac1e66a8858e599ce7328e06b6a4e7d3ae8889"
+version = "0.2.9"
+url = "https://soldeer-revisions.s3.amazonaws.com/rainlang-interface/0_2_9_13-09-2026_19:05:27_rainlang.zip"
+checksum = "a5f47c60fe86ba2e7183bcb30c4bac4c86e2c9b5bad1544f3bc04c98cf282d95"
+integrity = "f4e56272672f10c3988b1bd354909f4b08f06a62ca46f4a566234020226f7d6b"

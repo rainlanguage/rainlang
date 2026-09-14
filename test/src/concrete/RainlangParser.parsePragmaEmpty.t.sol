@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.2/src/Test.sol";
 import {TestRainlangParser} from "test/concrete/TestRainlangParser.sol";
-import {PragmaV1} from "rainlang-interface-0.2.8/src/interface/IParserPragmaV1.sol";
+import {PragmaV1} from "rainlang-interface-0.2.9/src/interface/IParserPragmaV1.sol";
 
 /// @title RainlangParserParsePragmaEmptyInputTest
 /// @notice Test that `parsePragma1` handles empty input correctly.

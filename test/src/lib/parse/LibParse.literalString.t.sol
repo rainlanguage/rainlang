@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.2/src/Test.sol";
-import {LibBytecode} from "rainlang-interface-0.2.8/src/lib/bytecode/LibBytecode.sol";
+import {LibBytecode} from "rainlang-interface-0.2.9/src/lib/bytecode/LibBytecode.sol";
 import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.0/src/lib/LibIntOrAString.sol";

@@ -5,7 +5,7 @@ pragma solidity =0.8.25;
 import {Test} from "forge-std-1.16.2/src/Test.sol";
 import {LibInterpreterState} from "../../../../src/lib/state/LibInterpreterState.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
-import {StackItem} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 
 /// @title LibInterpreterStateStackBottomsTest
 /// @notice Tests for stackBottoms(), which converts pre-allocated stack arrays

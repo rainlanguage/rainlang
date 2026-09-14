@@ -7,7 +7,7 @@ import {OpTest} from "test/abstract/OpTest.sol";
 import {LibOpUint256Power} from "../../../../../../src/lib/op/math/uint256/LibOpUint256Power.sol";
 import {IntegrityCheckState} from "../../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../../../../../src/lib/state/LibInterpreterState.sol";
-import {StackItem, OperandV2} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
+import {StackItem, OperandV2} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 
 contract LibOpUint256PowerTest is OpTest {

@@ -5,8 +5,8 @@ pragma solidity =0.8.25;
 import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 import {LibIntegrityCheck} from "../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
-import {BadOpInputsLength, BadOpOutputsLength} from "rainlang-interface-0.2.8/src/error/ErrIntegrity.sol";
-import {LibBytecode} from "rainlang-interface-0.2.8/src/lib/bytecode/LibBytecode.sol";
+import {BadOpInputsLength, BadOpOutputsLength} from "rainlang-interface-0.2.9/src/error/ErrIntegrity.sol";
+import {LibBytecode} from "rainlang-interface-0.2.9/src/lib/bytecode/LibBytecode.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 
 /// @title LibIntegrityCheckBadOpIOTest

@@ -6,7 +6,7 @@ import {Test} from "forge-std-1.16.2/src/Test.sol";
 import {LibParseState, ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {UnknownWord} from "../../../../src/error/ErrParse.sol";
-import {ISubParserV4} from "rainlang-interface-0.2.8/src/interface/ISubParserV4.sol";
+import {ISubParserV4} from "rainlang-interface-0.2.9/src/interface/ISubParserV4.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 
 contract LibSubParseUnknownWordTest is Test {

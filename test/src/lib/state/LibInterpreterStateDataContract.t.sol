@@ -6,8 +6,8 @@ import {Test} from "forge-std-1.16.2/src/Test.sol";
 import {LibInterpreterStateDataContract} from "../../../../src/lib/state/LibInterpreterStateDataContract.sol";
 import {InterpreterState} from "../../../../src/lib/state/LibInterpreterState.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
-import {FullyQualifiedNamespace} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
-import {IInterpreterStoreV3} from "rainlang-interface-0.2.8/src/interface/IInterpreterStoreV3.sol";
+import {FullyQualifiedNamespace} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {IInterpreterStoreV3} from "rainlang-interface-0.2.9/src/interface/IInterpreterStoreV3.sol";
 import {MemoryKV} from "rain-lib-memkv-0.1.0/src/lib/LibMemoryKV.sol";
 import {LibInterpreterStateDataContractExtern} from "./LibInterpreterStateDataContractExtern.sol";
 
@@ -294,13 +294,13 @@ contract LibInterpreterStateDataContractTest is Test {
     }
 
     /// A blob too short to hold both length words yields empty bytecode.
-    function testBytecodeTooShortIsEmpty(bytes memory serialized) external view {
+    function testBytecodeTooShortIsEmpty(bytes memory serialized) external pure {
         vm.assume(serialized.length < 0x40);
         assertEq(LibInterpreterStateDataContract.bytecodeOf(serialized).length, 0);
     }
 
     /// A declared constants length that overruns the blob yields empty bytecode.
-    function testBytecodeOverrunConstantsIsEmpty(uint256 constantsLength) external view {
+    function testBytecodeOverrunConstantsIsEmpty(uint256 constantsLength) external pure {
         constantsLength = bound(constantsLength, 1, type(uint256).max);
         bytes memory serialized = new bytes(0x40);
         assembly ("memory-safe") {
