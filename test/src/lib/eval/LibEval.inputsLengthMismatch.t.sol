@@ -7,7 +7,7 @@ import {Test} from "forge-std-1.16.2/src/Test.sol";
 import {LibInterpreterState, InterpreterState} from "../../../../src/lib/state/LibInterpreterState.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 import {LibEval} from "../../../../src/lib/eval/LibEval.sol";
-import {MemoryKV} from "rain-lib-memkv-0.1.0/src/lib/LibMemoryKV.sol";
+import {MemoryKV} from "rain-lib-memkv-0.1.5/src/lib/LibMemoryKV.sol";
 import {
     IInterpreterStoreV3,
     FullyQualifiedNamespace
