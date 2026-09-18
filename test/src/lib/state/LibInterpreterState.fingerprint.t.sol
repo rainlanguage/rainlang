@@ -149,4 +149,15 @@ contract LibInterpreterStateFingerprintTest is Test {
         LibInterpreterStateFingerprint.fingerprint(state);
         assertEq(MemoryKV.unwrap(state.stateKV), MemoryKV.unwrap(handle));
     }
+
+    /// Stores holding the same value under different keys fingerprint
+    /// differently.
+    function testFingerprintDiffersForDifferentKeys(bytes32 keyA, bytes32 keyB, bytes32 value) external pure {
+        vm.assume(keyA != keyB);
+        InterpreterState memory a = emptyState();
+        InterpreterState memory b = emptyState();
+        a.stateKV = a.stateKV.set(MemoryKVKey.wrap(keyA), MemoryKVVal.wrap(value));
+        b.stateKV = b.stateKV.set(MemoryKVKey.wrap(keyB), MemoryKVVal.wrap(value));
+        assertTrue(LibInterpreterStateFingerprint.fingerprint(a) != LibInterpreterStateFingerprint.fingerprint(b));
+    }
 }
