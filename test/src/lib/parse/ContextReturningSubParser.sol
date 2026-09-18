@@ -14,8 +14,6 @@ contract ContextReturningSubParser is ISubParserV4, IERC165 {
     }
 
     function subParseLiteral2(bytes calldata) external pure override returns (bool, bytes32) {
-        // The literal is the bool this function returns, not a condition operand.
-        //forge-lint: disable-next-line(boolean-cst)
         return (false, 0);
     }
 
@@ -29,8 +27,6 @@ contract ContextReturningSubParser is ISubParserV4, IERC165 {
         bytecode[1] = bytes1(uint8(0x10)); // 0 inputs, 1 output
         bytecode[2] = bytes1(0); // row 0
         bytecode[3] = bytes1(0); // column 0
-        // The literal is the bool this function returns, not a condition operand.
-        //forge-lint: disable-next-line(boolean-cst)
         return (true, bytecode, new bytes32[](0));
     }
 }

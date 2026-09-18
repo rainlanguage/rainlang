@@ -270,12 +270,8 @@ contract RainlangReferenceExtern is BaseRainlangSubParser, BaseRainlangExtern {
                     revert InvalidRepeatCount();
                 }
 
-                // The literal is the bool this function returns, not a condition operand.
-                //forge-lint: disable-next-line(boolean-cst)
                 return (true, SUB_PARSER_LITERAL_REPEAT_INDEX, floatBytes);
             } else {
-                // The literal is the bool this function returns, not a condition operand.
-                //forge-lint: disable-next-line(boolean-cst)
                 return (false, 0, 0);
             }
         }

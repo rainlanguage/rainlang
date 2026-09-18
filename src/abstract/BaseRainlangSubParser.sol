@@ -171,12 +171,8 @@ abstract contract BaseRainlangSubParser is
             assembly ("memory-safe") {
                 subParser := and(mload(add(localSubParserLiteralParsers, mul(add(index, 1), 2))), 0xFFFF)
             }
-            // The literal is the bool this function returns, not a condition operand.
-            //forge-lint: disable-next-line(boolean-cst)
             return (true, subParser(dispatchValue, bodyStart, bodyEnd));
         } else {
-            // The literal is the bool this function returns, not a condition operand.
-            //forge-lint: disable-next-line(boolean-cst)
             return (false, 0);
         }
     }
@@ -211,8 +207,6 @@ abstract contract BaseRainlangSubParser is
             }
             return subParser(constantsHeight, ioByte, operand);
         } else {
-            // The literal is the bool this function returns, not a condition operand.
-            //forge-lint: disable-next-line(boolean-cst)
             return (false, "", new bytes32[](0));
         }
     }

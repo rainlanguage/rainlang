@@ -14,8 +14,6 @@ function echoLiteralParser(bytes32 dispatchValue, uint256, uint256) pure returns
 /// This triggers SubParserIndexOutOfBounds(1, 1) in subParseLiteral2.
 contract MismatchedLiteralSubParser is BaseRainlangSubParser {
     function matchSubParseLiteralDispatch(uint256, uint256) internal pure override returns (bool, uint256, bytes32) {
-        // The literal is the bool this function returns, not a condition operand.
-        //forge-lint: disable-next-line(boolean-cst)
         return (true, 1, bytes32(0));
     }
 
