@@ -9,6 +9,8 @@ import {RainlangReferenceExtern} from "../../../src/concrete/extern/RainlangRefe
 contract MockExternBadLiteralIndex is RainlangReferenceExtern {
     /// @notice Override to always return success with an out-of-bounds index.
     function matchSubParseLiteralDispatch(uint256, uint256) internal pure override returns (bool, uint256, bytes32) {
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (true, 999, bytes32(0));
     }
 }

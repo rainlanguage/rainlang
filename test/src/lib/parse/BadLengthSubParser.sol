@@ -19,10 +19,14 @@ contract BadLengthSubParser is ISubParserV4, IERC165 {
     }
 
     function subParseLiteral2(bytes calldata) external pure override returns (bool, bytes32) {
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (false, 0);
     }
 
     function subParseWord2(bytes calldata) external view override returns (bool, bytes memory, bytes32[] memory) {
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (true, badBytecode, new bytes32[](0));
     }
 }

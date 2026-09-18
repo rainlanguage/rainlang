@@ -139,11 +139,15 @@ library LibParseLiteral {
             }
             // We don't know what this is.
             else {
+                // The literal is the bool this function returns, not a condition operand.
+                //forge-lint: disable-next-line(boolean-cst)
                 return (false, cursor, 0);
             }
         }
         bytes32 value;
         (cursor, value) = state.selectLiteralParserByIndex(index)(state, cursor, end);
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (true, cursor, value);
     }
 }

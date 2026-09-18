@@ -84,6 +84,8 @@ library LibSubParse {
             mstore(constants, 0)
         }
 
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (true, bytecode, constants);
     }
 
@@ -139,6 +141,8 @@ library LibSubParse {
             mstore(add(constants, 0x20), value)
         }
 
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (true, bytecode, constants);
     }
 
@@ -205,6 +209,8 @@ library LibSubParse {
             mstore(add(constants, 0x20), externDispatch)
         }
 
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (true, bytecode, constants);
     }
 
