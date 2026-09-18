@@ -8,7 +8,7 @@ import {InterpreterState} from "../../../../src/lib/state/LibInterpreterState.so
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {FullyQualifiedNamespace} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {IInterpreterStoreV3} from "rainlang-interface-0.2.9/src/interface/IInterpreterStoreV3.sol";
-import {MemoryKV} from "rain-lib-memkv-0.1.5/src/lib/LibMemoryKV.sol";
+import {MemoryKV} from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
 import {LibInterpreterStateDataContractExtern} from "./LibInterpreterStateDataContractExtern.sol";
 
 /// @title LibInterpreterStateDataContractTest

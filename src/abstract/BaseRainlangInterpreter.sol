@@ -3,7 +3,7 @@
 pragma solidity ^0.8.25;
 
 import {ERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/ERC165.sol";
-import {LibMemoryKV, MemoryKVKey, MemoryKVVal} from "rain-lib-memkv-0.1.5/src/lib/LibMemoryKV.sol";
+import {LibMemoryKV, MemoryKVKey, MemoryKVVal} from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
 
 import {LibEval} from "../lib/eval/LibEval.sol";
 import {LibInterpreterStateDataContract} from "../lib/state/LibInterpreterStateDataContract.sol";

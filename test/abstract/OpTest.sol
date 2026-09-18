@@ -6,7 +6,7 @@ pragma solidity =0.8.25;
 //forge-lint: disable-next-line(unused-import)
 import {Test, stdError} from "forge-std-1.16.2/src/Test.sol";
 import {LibMemCpy} from "rain-solmem-0.1.28/src/lib/LibMemCpy.sol";
-import {MemoryKV} from "rain-lib-memkv-0.1.5/src/lib/LibMemoryKV.sol";
+import {MemoryKV} from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
 import {LibUint256Array} from "rain-solmem-0.1.28/src/lib/LibUint256Array.sol";
 import {LibPointer, Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 
