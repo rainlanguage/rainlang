@@ -16,6 +16,8 @@ contract MultiConstantSubParser is ISubParserV4, IERC165 {
     }
 
     function subParseLiteral2(bytes calldata) external pure override returns (bool, bytes32) {
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (false, 0);
     }
 
@@ -40,6 +42,8 @@ contract MultiConstantSubParser is ISubParserV4, IERC165 {
         constants[0] = VALUE_A;
         constants[1] = VALUE_B;
 
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (true, bytecode, constants);
     }
 }
