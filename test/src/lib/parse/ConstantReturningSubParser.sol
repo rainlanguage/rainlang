@@ -16,6 +16,8 @@ contract ConstantReturningSubParser is ISubParserV4, IERC165 {
     }
 
     function subParseLiteral2(bytes calldata) external pure override returns (bool, bytes32) {
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (false, 0);
     }
 
@@ -41,6 +43,8 @@ contract ConstantReturningSubParser is ISubParserV4, IERC165 {
         bytes32[] memory constants = new bytes32[](1);
         constants[0] = RETURN_VALUE;
 
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (true, bytecode, constants);
     }
 }
