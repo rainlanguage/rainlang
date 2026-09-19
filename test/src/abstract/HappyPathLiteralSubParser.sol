@@ -15,6 +15,8 @@ function echoLiteralParser(bytes32 dispatchValue, uint256, uint256) pure returns
 /// single valid function pointer to echoLiteralParser.
 contract HappyPathLiteralSubParser is BaseRainlangSubParser {
     function matchSubParseLiteralDispatch(uint256, uint256) internal pure override returns (bool, uint256, bytes32) {
+        // The literal is the bool this function returns, not a condition operand.
+        //forge-lint: disable-next-line(boolean-cst)
         return (true, 0, bytes32(uint256(0x42)));
     }
 
