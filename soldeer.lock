@@ -49,10 +49,10 @@ integrity = "91f5f679a0a27f096fdbc1e41195dd9f42cacfab15735efeb1101cc1b9215b47"
 
 [[dependencies]]
 name = "rain-lib-memkv"
-version = "0.1.5"
-url = "https://soldeer-revisions.s3.amazonaws.com/rain-lib-memkv/0_1_5_15-09-2026_13:51:34_rain.lib.zip"
-checksum = "3820351d5710366790d98727eff897e966054699df2c42221bde40b1114e2918"
-integrity = "46290a43bca3f44f5cf39d1622464e0cb17a450defc7c49198140a66250a6e7c"
+version = "0.2.0"
+url = "https://soldeer-revisions.s3.amazonaws.com/rain-lib-memkv/0_2_0_18-09-2026_21:06:03_rain.lib.zip"
+checksum = "0c00f59f04a2f4c654c8378e66eb1a5acecc33a1cf58052c511b28d0165ce978"
+integrity = "96bc0001f9e06624eb273ab18433846d2a251ed35e26eca5867d08e0b9e343c4"
 
 [[dependencies]]
 name = "rain-lib-typecast"

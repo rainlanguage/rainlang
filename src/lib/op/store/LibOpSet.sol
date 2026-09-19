@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {MemoryKV, MemoryKVKey, MemoryKVVal, LibMemoryKV} from "rain-lib-memkv-0.1.5/src/lib/LibMemoryKV.sol";
+import {MemoryKV, MemoryKVKey, MemoryKVVal, LibMemoryKV} from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
