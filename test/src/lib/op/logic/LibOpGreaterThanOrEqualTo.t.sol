@@ -177,8 +177,16 @@ contract LibOpGreaterThanOrEqualToTest is OpTest {
     }
 
     /// Test the eval of greater than or equal to opcode parsed from a string.
-    /// Tests 3 inputs where only the outer pair is ordered. The chain must
-    /// compare adjacent inputs, not just the first and last.
+    /// Tests 3 inputs where only the outer pair is ordered.
+    ///
+    /// The case that separates the two readings, so the expected value is
+    /// derived rather than observed:
+    ///
+    /// - chained, as Clojure's `(>= 2 0 1)` does, expands to
+    ///   `2 >= 0 && 0 >= 1` = **false**;
+    /// - every input against the first expands to `2 >= 0 && 2 >= 1` = **true**.
+    ///
+    /// A `1` here would mean the second reading had been adopted silently.
     function testOpGreaterThanOrEqualToEval3InputsOnlyOuterOrdered() external view {
         checkHappy("_: greater-than-or-equal-to(2 0 1);", 0, "");
     }

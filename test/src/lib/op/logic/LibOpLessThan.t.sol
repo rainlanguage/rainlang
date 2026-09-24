@@ -149,8 +149,19 @@ contract LibOpLessThanTest is OpTest {
     }
 
     /// Test the eval of less than opcode parsed from a string. Tests 3 inputs
-    /// where only the outer pair ascends. The chain must compare adjacent
-    /// inputs, not just the first and last.
+    /// where only the outer pair ascends.
+    ///
+    /// This is the case that separates the two readings of a variadic
+    /// comparison, so the expected value is derived rather than observed:
+    ///
+    /// - chained adjacent pairs, which is what this implements and what
+    ///   Clojure's `(< 0 2 1)` does, expands to `0 < 2 && 2 < 1` = **false**;
+    /// - comparing every input against the first, the other plausible reading,
+    ///   expands to `0 < 2 && 0 < 1` = **true**.
+    ///
+    /// A `1` here would mean the implementation had silently adopted the
+    /// second reading. Every other 3-input case in this file agrees under both
+    /// readings and so cannot catch that.
     function testOpLessThanEval3InputsOnlyOuterAscending() external view {
         checkHappy("_: less-than(0 2 1);", 0, "");
     }

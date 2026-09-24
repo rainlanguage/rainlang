@@ -245,10 +245,32 @@ contract LibOpLessThanOrEqualToTest is OpTest {
     }
 
     /// Test the eval of less than or equal to opcode parsed from a string.
-    /// Tests 3 inputs where only the outer pair is ordered. The chain must
-    /// compare adjacent inputs, not just the first and last.
+    /// Tests 3 inputs where only the outer pair is ordered.
+    ///
+    /// The case that separates the two readings, so the expected value is
+    /// derived rather than observed:
+    ///
+    /// - chained, as Clojure's `(<= 0 2 1)` does, expands to
+    ///   `0 <= 2 && 2 <= 1` = **false**;
+    /// - every input against the first expands to `0 <= 2 && 0 <= 1` = **true**.
+    ///
+    /// A `1` here would mean the second reading had been adopted silently.
     function testOpLessThanOrEqualToEval3InputsOnlyOuterOrdered() external view {
         checkHappy("_: less-than-or-equal-to(0 2 1);", 0, "");
+    }
+
+    /// The bounds check the variadic form exists for: `min <= x <= max` in one
+    /// call rather than two `ensure` bodies. Every expectation below expands
+    /// from the chained reading and is checkable by eye:
+    /// `1 <= 2 && 2 <= 3` true; at the floor `1 <= 1 && 1 <= 3` true; at the
+    /// ceiling `1 <= 3 && 3 <= 3` true; below it `1 <= 0` false; above it
+    /// `3 <= 3` holds but `1 <= 4 && 4 <= 3` false.
+    function testOpLessThanOrEqualToEvalBoundsCheck() external view {
+        checkHappy("_: less-than-or-equal-to(1 2 3);", bytes32(uint256(1)), "");
+        checkHappy("_: less-than-or-equal-to(1 1 3);", bytes32(uint256(1)), "");
+        checkHappy("_: less-than-or-equal-to(1 3 3);", bytes32(uint256(1)), "");
+        checkHappy("_: less-than-or-equal-to(1 0 3);", 0, "");
+        checkHappy("_: less-than-or-equal-to(1 4 3);", 0, "");
     }
 
     /// Test the eval of less than or equal to opcode parsed from a string.

@@ -155,8 +155,17 @@ contract LibOpGreaterThanTest is OpTest {
     }
 
     /// Test the eval of greater than opcode parsed from a string. Tests 3
-    /// inputs where only the outer pair descends. The chain must compare
-    /// adjacent inputs, not just the first and last.
+    /// inputs where only the outer pair descends.
+    ///
+    /// This is the case that separates the two readings of a variadic
+    /// comparison, so the expected value is derived rather than observed:
+    ///
+    /// - chained adjacent pairs, which is what this implements and what
+    ///   Clojure's `(> 2 0 1)` does, expands to `2 > 0 && 0 > 1` = **false**;
+    /// - comparing every input against the first expands to
+    ///   `2 > 0 && 2 > 1` = **true**.
+    ///
+    /// A `1` here would mean the second reading had been adopted silently.
     function testOpGreaterThanEval3InputsOnlyOuterDescending() external view {
         checkHappy("_: greater-than(2 0 1);", 0, "");
     }

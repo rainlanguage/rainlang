@@ -140,6 +140,13 @@ contract LibOpEqualToTest is OpTest {
     /// Test the eval of equal to opcode parsed from a string. Tests 3 inputs
     /// where the outer two are equal but the middle is not. The comparison
     /// must not be limited to the first and last inputs.
+    ///
+    /// Unlike the ordering comparisons, `equal-to` has NO case that separates
+    /// chained adjacent pairs from comparing every input against the first:
+    /// the two agree for every input whenever equality is transitive, and
+    /// `LibDecimalFloat.eq` routes through `compareRescale`, which saturates
+    /// rather than wraps. So this file pins the behaviour but cannot pin the
+    /// reading, and nothing here would fail if the implementation switched.
     function testOpEqualToEval3InputsMiddleDiffers() external view {
         checkHappy("_: equal-to(1 2 1);", 0, "");
     }
