@@ -16,23 +16,43 @@ import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState
 import {SignedContextV1} from "rainlang-interface-0.2.9/src/interface/IInterpreterCallerV4.sol";
 import {LibContext} from "rainlang-interface-0.2.9/src/lib/caller/LibContext.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
+import {OpcodeIOOverflow} from "../../../../../src/error/ErrParse.sol";
+import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 
 contract LibOpLessThanOrEqualToTest is OpTest {
-    /// Directly test the integrity logic of LibOpLessThanOrEqualTo. No matter the
-    /// operand inputs, the calc inputs must be 2, and the calc outputs must be
-    /// 1.
+    /// Directly test the integrity logic of LibOpLessThanOrEqualTo. The calc
+    /// inputs must match the operand inputs, and the calc outputs must be 1.
     function testOpLessThanOrEqualToIntegrityHappy(
         IntegrityCheckState memory state,
         uint8 inputs,
         uint8 outputs,
         uint16 operandData
     ) external pure {
-        inputs = uint8(bound(inputs, 0, 0x0F));
+        inputs = uint8(bound(inputs, 2, 0x0F));
         outputs = uint8(bound(outputs, 0, 0x0F));
         (uint256 calcInputs, uint256 calcOutputs) =
             LibOpLessThanOrEqualTo.integrity(state, LibOperand.build(inputs, outputs, operandData));
 
-        // The inputs from the operand are ignored. The op is always 2 inputs.
+        assertEq(calcInputs, inputs);
+        assertEq(calcOutputs, 1);
+    }
+
+    /// Directly test the integrity logic of LibOpLessThanOrEqualTo. This tests
+    /// the unhappy path where the operand is invalid due to 0 inputs.
+    function testOpLessThanOrEqualToIntegrityUnhappyZeroInputs(IntegrityCheckState memory state) external pure {
+        (uint256 calcInputs, uint256 calcOutputs) = LibOpLessThanOrEqualTo.integrity(state, OperandV2.wrap(0));
+        // Calc inputs will be minimum 2.
+        assertEq(calcInputs, 2);
+        assertEq(calcOutputs, 1);
+    }
+
+    /// Directly test the integrity logic of LibOpLessThanOrEqualTo. This tests
+    /// the unhappy path where the operand is invalid due to 1 input.
+    function testOpLessThanOrEqualToIntegrityUnhappyOneInput(IntegrityCheckState memory state) external pure {
+        (uint256 calcInputs, uint256 calcOutputs) =
+            LibOpLessThanOrEqualTo.integrity(state, OperandV2.wrap(bytes32(uint256(0x010000))));
+        // Calc inputs will be minimum 2.
         assertEq(calcInputs, 2);
         assertEq(calcOutputs, 1);
     }
@@ -43,6 +63,46 @@ contract LibOpLessThanOrEqualToTest is OpTest {
         StackItem[] memory inputs = new StackItem[](2);
         inputs[0] = input1;
         inputs[1] = input2;
+        OperandV2 operand = LibOperand.build(uint8(inputs.length), 1, 0);
+        opReferenceCheck(
+            state,
+            operand,
+            LibOpLessThanOrEqualTo.referenceFn,
+            LibOpLessThanOrEqualTo.integrity,
+            LibOpLessThanOrEqualTo.run,
+            inputs
+        );
+    }
+
+    /// Directly test the runtime logic of LibOpLessThanOrEqualTo for an
+    /// arbitrary number of inputs.
+    function testOpLessThanOrEqualToRunVariadic(StackItem[] memory inputs) external view {
+        InterpreterState memory state = opTestDefaultInterpreterState();
+        vm.assume(inputs.length >= 2);
+        vm.assume(inputs.length <= 0x0F);
+        OperandV2 operand = LibOperand.build(uint8(inputs.length), 1, 0);
+        opReferenceCheck(
+            state,
+            operand,
+            LibOpLessThanOrEqualTo.referenceFn,
+            LibOpLessThanOrEqualTo.integrity,
+            LibOpLessThanOrEqualTo.run,
+            inputs
+        );
+    }
+
+    /// Directly test the runtime logic of LibOpLessThanOrEqualTo for an
+    /// arbitrary number of ascending inputs. Random inputs almost never
+    /// ascend, so this covers the branch where the whole chain holds.
+    function testOpLessThanOrEqualToRunVariadicAscending(uint8 length) external view {
+        InterpreterState memory state = opTestDefaultInterpreterState();
+        length = uint8(bound(length, 2, 0x0F));
+        StackItem[] memory inputs = new StackItem[](length);
+        for (uint256 i = 0; i < inputs.length; i++) {
+            // Exponent is fixed so the coefficient alone orders the inputs.
+            // forge-lint: disable-next-line(unsafe-typecast)
+            inputs[i] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(i), 0)));
+        }
         OperandV2 operand = LibOperand.build(uint8(inputs.length), 1, 0);
         opReferenceCheck(
             state,
@@ -158,6 +218,51 @@ contract LibOpLessThanOrEqualToTest is OpTest {
         checkHappy("_: less-than-or-equal-to(-1 0);", bytes32(uint256(1)), "");
     }
 
+    /// Test the eval of less than or equal to opcode parsed from a string.
+    /// Tests 3 inputs, which chain as `0 <= 1 <= 2`. This is the bounds check
+    /// form, `less-than-or-equal-to(min x max)`.
+    function testOpLessThanOrEqualToEval3InputsAscending() external view {
+        checkHappy("_: less-than-or-equal-to(0 1 2);", bytes32(uint256(1)), "");
+    }
+
+    /// Test the eval of less than or equal to opcode parsed from a string.
+    /// Tests 3 equal inputs, which satisfy the chain because the comparison is
+    /// not strict.
+    function testOpLessThanOrEqualToEval3InputsAllEqual() external view {
+        checkHappy("_: less-than-or-equal-to(1 1 1);", bytes32(uint256(1)), "");
+    }
+
+    /// Test the eval of less than or equal to opcode parsed from a string. The
+    /// bounds check form where the value sits below the minimum.
+    function testOpLessThanOrEqualToEval3InputsBelowMin() external view {
+        checkHappy("_: less-than-or-equal-to(1 0 2);", 0, "");
+    }
+
+    /// Test the eval of less than or equal to opcode parsed from a string. The
+    /// bounds check form where the value sits above the maximum.
+    function testOpLessThanOrEqualToEval3InputsAboveMax() external view {
+        checkHappy("_: less-than-or-equal-to(0 3 2);", 0, "");
+    }
+
+    /// Test the eval of less than or equal to opcode parsed from a string.
+    /// Tests 3 inputs where only the outer pair is ordered. The chain must
+    /// compare adjacent inputs, not just the first and last.
+    function testOpLessThanOrEqualToEval3InputsOnlyOuterOrdered() external view {
+        checkHappy("_: less-than-or-equal-to(0 2 1);", 0, "");
+    }
+
+    /// Test the eval of less than or equal to opcode parsed from a string.
+    /// Tests the maximum 15 ascending inputs.
+    function testOpLessThanOrEqualToEval15InputsAscending() external view {
+        checkHappy("_: less-than-or-equal-to(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14);", bytes32(uint256(1)), "");
+    }
+
+    /// Test the eval of less than or equal to opcode parsed from a string.
+    /// Tests the maximum 15 inputs where only the final pair breaks the chain.
+    function testOpLessThanOrEqualToEval15InputsLastPairDescends() external view {
+        checkHappy("_: less-than-or-equal-to(0 1 2 3 4 5 6 7 8 9 10 11 12 13 12);", 0, "");
+    }
+
     /// Test that a less than or equal to without inputs fails integrity check.
     function testOpLessThanOrEqualToEvalFail0Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 2, 0));
@@ -172,14 +277,6 @@ contract LibOpLessThanOrEqualToTest is OpTest {
         (bytecode);
     }
 
-    /// Test that a less than or equal to with 3 inputs fails integrity check.
-    function testOpLessThanOrEqualToEvalFail3Inputs() public {
-        vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 3, 2, 3));
-
-        bytes memory bytecode = I_DEPLOYER.parse2("_: less-than-or-equal-to(0x00 0x00 0x00);");
-        (bytecode);
-    }
-
     function testOpLessThanOrEqualToZeroOutputs() external {
         checkBadOutputs(": less-than-or-equal-to(1 2);", 2, 1, 0);
     }
@@ -191,5 +288,13 @@ contract LibOpLessThanOrEqualToTest is OpTest {
     /// Test that operand is disallowed.
     function testOpLessThanOrEqualToEvalOperandDisallowed() external {
         checkUnhappyParse("_: less-than-or-equal-to<0>(1 2);", abi.encodeWithSelector(UnexpectedOperand.selector));
+    }
+
+    /// 16 inputs overflows the 4 bit input nybble of the opcode io byte, so the
+    /// parser rejects it. 15 inputs is the maximum.
+    function testOpLessThanOrEqualToEvalFail16Inputs() external {
+        bytes memory rainlang = bytes("_: less-than-or-equal-to(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1);");
+        vm.expectRevert(abi.encodeWithSelector(OpcodeIOOverflow.selector, LibParseError.tagErrorOffset(57)));
+        I_PARSER.unsafeParse(rainlang);
     }
 }
