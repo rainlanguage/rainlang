@@ -45,6 +45,8 @@ import {LibOpBlockNumber} from "./evm/LibOpBlockNumber.sol";
 import {LibOpBlockTimestamp} from "./evm/LibOpBlockTimestamp.sol";
 import {LibOpChainId} from "./evm/LibOpChainId.sol";
 
+import {LibOpAgree} from "./logic/LibOpAgree.sol";
+import {LibOpAgreeAbsolute} from "./logic/LibOpAgreeAbsolute.sol";
 import {LibOpAny} from "./logic/LibOpAny.sol";
 import {LibOpBinaryEqualTo} from "./logic/LibOpBinaryEqualTo.sol";
 import {LibOpConditions} from "./logic/LibOpConditions.sol";
@@ -54,9 +56,11 @@ import {LibOpEvery} from "./logic/LibOpEvery.sol";
 import {LibOpGreaterThan} from "./logic/LibOpGreaterThan.sol";
 import {LibOpGreaterThanOrEqualTo} from "./logic/LibOpGreaterThanOrEqualTo.sol";
 import {LibOpIf} from "./logic/LibOpIf.sol";
+import {LibOpIn} from "./logic/LibOpIn.sol";
 import {LibOpIsZero} from "./logic/LibOpIsZero.sol";
 import {LibOpLessThan} from "./logic/LibOpLessThan.sol";
 import {LibOpLessThanOrEqualTo} from "./logic/LibOpLessThanOrEqualTo.sol";
+import {LibOpUnique} from "./logic/LibOpUnique.sol";
 
 import {LibOpAbs} from "./math/LibOpAbs.sol";
 import {LibOpAdd} from "./math/LibOpAdd.sol";
@@ -103,7 +107,7 @@ import {LibParseLiteralHex} from "../parse/literal/LibParseLiteralHex.sol";
 import {LibParseLiteralSubParseable} from "../parse/literal/LibParseLiteralSubParseable.sol";
 
 /// @dev Number of ops currently provided by `AllStandardOps`.
-uint256 constant ALL_STANDARD_OPS_LENGTH = 73;
+uint256 constant ALL_STANDARD_OPS_LENGTH = 77;
 
 /// @title LibAllStandardOps
 /// @notice Every opcode available from the core repository laid out as a single
@@ -221,6 +225,14 @@ library LibAllStandardOps {
             AuthoringMetaV2("now", "The current block timestamp."),
             AuthoringMetaV2("chain-id", "The current chain id."),
             // logic/
+            AuthoringMetaV2(
+                "agree",
+                "1 if the highest and lowest of the values are no more than a proportional tolerance apart, 0 otherwise. The first input is the tolerance as a fraction and all subsequent inputs are the values. The proportion is relative to the lower value, so a tolerance of 0.01 means the highest value cannot be more than 1% larger than the lowest. Rounding goes toward rejecting."
+            ),
+            AuthoringMetaV2(
+                "agree-absolute",
+                "1 if the highest and lowest of the values are no more than an absolute tolerance apart, 0 otherwise. The first input is the tolerance in the same units as the values and all subsequent inputs are the values. Rounding goes toward rejecting."
+            ),
             AuthoringMetaV2("any", "The first non-zero value out of all inputs, or 0 if every input is 0."),
             AuthoringMetaV2("binary-equal-to", "1 if all inputs are equal, 0 otherwise. Equality is binary."),
             AuthoringMetaV2(
@@ -245,12 +257,20 @@ library LibAllStandardOps {
                 "If the first input is nonzero, the second input is used. Otherwise, the third input is used. If is eagerly evaluated."
             ),
             AuthoringMetaV2(
+                "in",
+                "1 if every needle is in the set, 0 otherwise. The operand is the number of needles. The first that many inputs are the needles and every subsequent input is a member of the set they must be in. Membership is numerical equality, as per equal-to."
+            ),
+            AuthoringMetaV2(
                 "is-zero",
                 "1 if the input is 0, 0 otherwise. The input is any numerical 0 value, not just binary 0 e.g. 0e20 is considered 0."
             ),
             AuthoringMetaV2("less-than", "true if the first input is less than the second input, false otherwise."),
             AuthoringMetaV2(
                 "less-than-or-equal-to", "1 if the first input is less than or equal to the second input, 0 otherwise."
+            ),
+            AuthoringMetaV2(
+                "unique",
+                "1 if every input is distinct from every other input, 0 otherwise. Distinctness is numerical, as per equal-to, so 1 and 1.0 are not unique with respect to each other."
             ),
             // math/
             AuthoringMetaV2("abs", "The absolute value of a number."),
@@ -440,6 +460,10 @@ library LibAllStandardOps {
                     LibParseOperand.handleOperandDisallowed,
                     // chain-id
                     LibParseOperand.handleOperandDisallowed,
+                    // agree
+                    LibParseOperand.handleOperandDisallowed,
+                    // agree-absolute
+                    LibParseOperand.handleOperandDisallowed,
                     // any
                     LibParseOperand.handleOperandDisallowed,
                     // binary-equal-to
@@ -458,11 +482,15 @@ library LibAllStandardOps {
                     LibParseOperand.handleOperandDisallowed,
                     // if
                     LibParseOperand.handleOperandDisallowed,
+                    // in
+                    LibParseOperand.handleOperandSingleFullNoDefault,
                     // is-zero
                     LibParseOperand.handleOperandDisallowed,
                     // less-than
                     LibParseOperand.handleOperandDisallowed,
                     // less-than-or-equal-to
+                    LibParseOperand.handleOperandDisallowed,
+                    // unique
                     LibParseOperand.handleOperandDisallowed,
                     // abs
                     LibParseOperand.handleOperandDisallowed,
@@ -592,6 +620,8 @@ library LibAllStandardOps {
                     // now
                     LibOpBlockTimestamp.integrity,
                     LibOpChainId.integrity,
+                    LibOpAgree.integrity,
+                    LibOpAgreeAbsolute.integrity,
                     LibOpAny.integrity,
                     LibOpBinaryEqualTo.integrity,
                     LibOpConditions.integrity,
@@ -601,9 +631,11 @@ library LibAllStandardOps {
                     LibOpGreaterThan.integrity,
                     LibOpGreaterThanOrEqualTo.integrity,
                     LibOpIf.integrity,
+                    LibOpIn.integrity,
                     LibOpIsZero.integrity,
                     LibOpLessThan.integrity,
                     LibOpLessThanOrEqualTo.integrity,
+                    LibOpUnique.integrity,
                     LibOpAbs.integrity,
                     LibOpAdd.integrity,
                     LibOpAvg.integrity,
@@ -697,6 +729,8 @@ library LibAllStandardOps {
                     // now
                     LibOpBlockTimestamp.run,
                     LibOpChainId.run,
+                    LibOpAgree.run,
+                    LibOpAgreeAbsolute.run,
                     LibOpAny.run,
                     LibOpBinaryEqualTo.run,
                     LibOpConditions.run,
@@ -706,9 +740,11 @@ library LibAllStandardOps {
                     LibOpGreaterThan.run,
                     LibOpGreaterThanOrEqualTo.run,
                     LibOpIf.run,
+                    LibOpIn.run,
                     LibOpIsZero.run,
                     LibOpLessThan.run,
                     LibOpLessThanOrEqualTo.run,
+                    LibOpUnique.run,
                     LibOpAbs.run,
                     LibOpAdd.run,
                     LibOpAvg.run,
