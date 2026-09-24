@@ -8,26 +8,54 @@ import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 
 /// @title LibOpBitwiseOr
-/// @notice Opcode for computing bitwise OR from the top two items on the stack.
+/// @notice Opcode for computing bitwise OR across every item on the stack up
+/// to the inputs limit. Two inputs is the binary case, `bitwise-or(a b)`, and
+/// more than two is the variadic case, `bitwise-or(a b c)`, which folds to
+/// `a | b | c`. OR is associative and commutative, so the fold order is not
+/// observable.
 library LibOpBitwiseOr {
-    /// @notice The operand does nothing. Always 2 inputs and 1 output.
+    /// @notice `bitwise-or` integrity check. Requires at least 2 inputs and
+    /// produces 1 output.
+    /// @param operand Low 4 bits of the high byte encode the input count.
     /// @return The number of inputs.
     /// @return The number of outputs.
-    function integrity(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256) {
-        // Always 2 inputs and 1 output.
-        return (2, 1);
+    function integrity(IntegrityCheckState memory, OperandV2 operand) internal pure returns (uint256, uint256) {
+        // There must be at least two inputs.
+        uint256 inputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
+        inputs = inputs > 1 ? inputs : 2;
+        return (inputs, 1);
     }
 
-    /// @notice Bitwise OR the top two items on the stack.
+    /// @notice Bitwise OR every item on the stack up to the inputs limit.
+    /// @param operand Low 4 bits of the high byte encode the input count.
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
-    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal pure returns (Pointer) {
-        Pointer stackTopAfter;
-        assembly ("memory-safe") {
-            stackTopAfter := add(stackTop, 0x20)
-            mstore(stackTopAfter, or(mload(stackTop), mload(stackTopAfter)))
+    function run(InterpreterState memory, OperandV2 operand, Pointer stackTop) internal pure returns (Pointer) {
+        unchecked {
+            uint256 length = 0x20 * (uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F);
+            Pointer cursor = stackTop;
+            Pointer end = Pointer.wrap(Pointer.unwrap(stackTop) + length);
+            Pointer stackTopAfter = Pointer.wrap(Pointer.unwrap(end) - 0x20);
+
+            bytes32 acc;
+            assembly ("memory-safe") {
+                acc := mload(cursor)
+            }
+            cursor = Pointer.wrap(Pointer.unwrap(cursor) + 0x20);
+
+            while (Pointer.unwrap(cursor) < Pointer.unwrap(end)) {
+                assembly ("memory-safe") {
+                    acc := or(acc, mload(cursor))
+                }
+                cursor = Pointer.wrap(Pointer.unwrap(cursor) + 0x20);
+            }
+
+            assembly ("memory-safe") {
+                mstore(stackTopAfter, acc)
+            }
+
+            return stackTopAfter;
         }
-        return stackTopAfter;
     }
 
     /// @notice Reference implementation for bitwise OR.
@@ -38,8 +66,13 @@ library LibOpBitwiseOr {
         pure
         returns (StackItem[] memory)
     {
+        bytes32 acc = StackItem.unwrap(inputs[0]);
+        for (uint256 i = 1; i < inputs.length; i++) {
+            acc = acc | StackItem.unwrap(inputs[i]);
+        }
+
         StackItem[] memory outputs = new StackItem[](1);
-        outputs[0] = StackItem.wrap(StackItem.unwrap(inputs[0]) | StackItem.unwrap(inputs[1]));
+        outputs[0] = StackItem.wrap(acc);
         return outputs;
     }
 }

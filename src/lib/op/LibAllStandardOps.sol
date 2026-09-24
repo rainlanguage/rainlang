@@ -233,13 +233,11 @@ library LibAllStandardOps {
             ),
             AuthoringMetaV2("equal-to", "1 if all inputs are equal, 0 otherwise. Equality is numerical."),
             AuthoringMetaV2("every", "The last nonzero value out of all inputs, or 0 if any input is 0."),
+            AuthoringMetaV2("greater-than", "1 if each input is greater than the input after it, 0 otherwise."),
             AuthoringMetaV2(
-                "greater-than", "true if the first input is greater than the second input, false otherwise."
+                "greater-than-or-equal-to",
+                "1 if each input is greater than or equal to the input after it, 0 otherwise."
             ),
-            AuthoringMetaV2(
-                    "greater-than-or-equal-to",
-                    "1 if the first input is greater than or equal to the second input, 0 otherwise."
-                ),
             AuthoringMetaV2(
                 "if",
                 "If the first input is nonzero, the second input is used. Otherwise, the third input is used. If is eagerly evaluated."
@@ -248,9 +246,9 @@ library LibAllStandardOps {
                 "is-zero",
                 "1 if the input is 0, 0 otherwise. The input is any numerical 0 value, not just binary 0 e.g. 0e20 is considered 0."
             ),
-            AuthoringMetaV2("less-than", "true if the first input is less than the second input, false otherwise."),
+            AuthoringMetaV2("less-than", "1 if each input is less than the input after it, 0 otherwise."),
             AuthoringMetaV2(
-                "less-than-or-equal-to", "1 if the first input is less than or equal to the second input, 0 otherwise."
+                "less-than-or-equal-to", "1 if each input is less than or equal to the input after it, 0 otherwise."
             ),
             // math/
             AuthoringMetaV2("abs", "The absolute value of a number."),
