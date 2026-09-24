@@ -46,7 +46,6 @@ import {LibOpBlockTimestamp} from "./evm/LibOpBlockTimestamp.sol";
 import {LibOpChainId} from "./evm/LibOpChainId.sol";
 
 import {LibOpAgree} from "./logic/LibOpAgree.sol";
-import {LibOpAgreeAbsolute} from "./logic/LibOpAgreeAbsolute.sol";
 import {LibOpAny} from "./logic/LibOpAny.sol";
 import {LibOpBinaryEqualTo} from "./logic/LibOpBinaryEqualTo.sol";
 import {LibOpConditions} from "./logic/LibOpConditions.sol";
@@ -107,7 +106,7 @@ import {LibParseLiteralHex} from "../parse/literal/LibParseLiteralHex.sol";
 import {LibParseLiteralSubParseable} from "../parse/literal/LibParseLiteralSubParseable.sol";
 
 /// @dev Number of ops currently provided by `AllStandardOps`.
-uint256 constant ALL_STANDARD_OPS_LENGTH = 77;
+uint256 constant ALL_STANDARD_OPS_LENGTH = 76;
 
 /// @title LibAllStandardOps
 /// @notice Every opcode available from the core repository laid out as a single
@@ -227,11 +226,7 @@ library LibAllStandardOps {
             // logic/
             AuthoringMetaV2(
                 "agree",
-                "1 if the highest and lowest of the values are no more than a proportional tolerance apart, 0 otherwise. The first input is the tolerance as a fraction and all subsequent inputs are the values. The proportion is relative to the lower value, so a tolerance of 0.01 means the highest value cannot be more than 1% larger than the lowest. Rounding goes toward rejecting."
-            ),
-            AuthoringMetaV2(
-                "agree-absolute",
-                "1 if the highest and lowest of the values are no more than an absolute tolerance apart, 0 otherwise. The first input is the tolerance in the same units as the values and all subsequent inputs are the values. Rounding goes toward rejecting."
+                "1 if the highest and lowest of the values are no more than a combined tolerance apart, 0 otherwise. The first input is an absolute tolerance in the same units as the values, the second is a proportional tolerance as a fraction, and all subsequent inputs are the values. The limit is the absolute tolerance plus the proportional tolerance of the largest magnitude among the values, so 0.01 as the proportional tolerance allows 1% of that magnitude. Both tolerances are always given; write one as 0 to use only the other. Rounding goes toward rejecting."
             ),
             AuthoringMetaV2("any", "The first non-zero value out of all inputs, or 0 if every input is 0."),
             AuthoringMetaV2("binary-equal-to", "1 if all inputs are equal, 0 otherwise. Equality is binary."),
@@ -462,8 +457,6 @@ library LibAllStandardOps {
                     LibParseOperand.handleOperandDisallowed,
                     // agree
                     LibParseOperand.handleOperandDisallowed,
-                    // agree-absolute
-                    LibParseOperand.handleOperandDisallowed,
                     // any
                     LibParseOperand.handleOperandDisallowed,
                     // binary-equal-to
@@ -621,7 +614,6 @@ library LibAllStandardOps {
                     LibOpBlockTimestamp.integrity,
                     LibOpChainId.integrity,
                     LibOpAgree.integrity,
-                    LibOpAgreeAbsolute.integrity,
                     LibOpAny.integrity,
                     LibOpBinaryEqualTo.integrity,
                     LibOpConditions.integrity,
@@ -730,7 +722,6 @@ library LibAllStandardOps {
                     LibOpBlockTimestamp.run,
                     LibOpChainId.run,
                     LibOpAgree.run,
-                    LibOpAgreeAbsolute.run,
                     LibOpAny.run,
                     LibOpBinaryEqualTo.run,
                     LibOpConditions.run,

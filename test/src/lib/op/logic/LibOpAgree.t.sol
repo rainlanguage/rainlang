@@ -16,7 +16,7 @@ contract LibOpAgreeTest is OpTest {
         external
         pure
     {
-        inputs = uint8(bound(inputs, 3, 0x0F));
+        inputs = uint8(bound(inputs, 4, 0x0F));
         (uint256 calcInputs, uint256 calcOutputs) =
             LibOpAgree.integrity(state, LibOperand.build(inputs, 1, operandData));
 
@@ -24,21 +24,21 @@ contract LibOpAgreeTest is OpTest {
         assertEq(calcOutputs, 1);
     }
 
-    /// Directly test the integrity logic of LibOpAgree. Fewer than a tolerance
-    /// and two values is reported as the minimum of 3, because one value
-    /// trivially agrees with itself.
+    /// Directly test the integrity logic of LibOpAgree. Fewer than two
+    /// tolerances and two values is reported as the minimum of 4, because one
+    /// value trivially agrees with itself.
     function testOpAgreeIntegrityUnhappyTooFewInputs(IntegrityCheckState memory state, uint8 inputs) external pure {
-        inputs = uint8(bound(inputs, 0, 2));
+        inputs = uint8(bound(inputs, 0, 3));
         (uint256 calcInputs, uint256 calcOutputs) = LibOpAgree.integrity(state, LibOperand.build(inputs, 1, 0));
 
-        assertEq(calcInputs, 3);
+        assertEq(calcInputs, 4);
         assertEq(calcOutputs, 1);
     }
 
     /// Directly test the runtime logic of LibOpAgree.
     function testOpAgreeRun(StackItem[] memory inputs, uint16 operandData) external view {
         InterpreterState memory state = opTestDefaultInterpreterState();
-        vm.assume(inputs.length >= 3);
+        vm.assume(inputs.length >= 4);
         vm.assume(inputs.length <= 0x0F);
         OperandV2 operand = LibOperand.build(uint8(inputs.length), 1, operandData);
         opReferenceCheck(state, operand, LibOpAgree.referenceFn, LibOpAgree.integrity, LibOpAgree.run, inputs);
@@ -49,10 +49,10 @@ contract LibOpAgreeTest is OpTest {
     /// fuzzer to land values near each other.
     function testOpAgreeRunAllValuesEqual(StackItem[] memory inputs) external view {
         InterpreterState memory state = opTestDefaultInterpreterState();
-        vm.assume(inputs.length >= 3);
+        vm.assume(inputs.length >= 4);
         vm.assume(inputs.length <= 0x0F);
-        for (uint256 i = 2; i < inputs.length; i++) {
-            inputs[i] = inputs[1];
+        for (uint256 i = 3; i < inputs.length; i++) {
+            inputs[i] = inputs[2];
         }
         OperandV2 operand = LibOperand.build(uint8(inputs.length), 1, 0);
         opReferenceCheck(state, operand, LibOpAgree.referenceFn, LibOpAgree.integrity, LibOpAgree.run, inputs);
@@ -60,173 +60,247 @@ contract LibOpAgreeTest is OpTest {
 
     /// Zero inputs is a parse time error.
     function testOpAgreeEvalZeroInputs() external {
-        checkBadInputs("_: agree();", 0, 3, 0);
+        checkBadInputs("_: agree();", 0, 4, 0);
     }
 
-    /// A tolerance with no values is a parse time error.
+    /// A single tolerance is a parse time error. Both are always given.
     function testOpAgreeEvalOneInput() external {
-        checkBadInputs("_: agree(0.01);", 1, 3, 1);
+        checkBadInputs("_: agree(0);", 1, 4, 1);
     }
 
-    /// A tolerance and a single value is a parse time error. One value
-    /// trivially agrees with itself.
+    /// Two tolerances and no values is a parse time error.
     function testOpAgreeEvalTwoInputs() external {
-        checkBadInputs("_: agree(0.01 100);", 2, 3, 2);
+        checkBadInputs("_: agree(0 0.01);", 2, 4, 2);
+    }
+
+    /// Two tolerances and a single value is a parse time error. One value
+    /// trivially agrees with itself.
+    function testOpAgreeEvalThreeInputs() external {
+        checkBadInputs("_: agree(0 0.01 100);", 3, 4, 3);
     }
 
     /// Zero outputs is a parse time error.
     function testOpAgreeEvalZeroOutputs() external {
-        checkBadOutputs(": agree(0.01 100 101);", 3, 1, 0);
+        checkBadOutputs(": agree(0 0.01 100 101);", 4, 1, 0);
     }
 
     /// Two outputs is a parse time error.
     function testOpAgreeEvalTwoOutputs() external {
-        checkBadOutputs("_ _: agree(0.01 100 101);", 3, 1, 2);
+        checkBadOutputs("_ _: agree(0 0.01 100 101);", 4, 1, 2);
     }
 
     /// Operands are disallowed. The input count is the only thing that varies.
     function testOpAgreeEvalOperandDisallowed() external {
-        checkDisallowedOperand("_: agree<0>(0.01 100 101);");
-        checkDisallowedOperand("_: agree<1>(0.01 100 101);");
-        checkDisallowedOperand("_: agree<1 2>(0.01 100 101);");
+        checkDisallowedOperand("_: agree<0>(0 0.01 100 101);");
+        checkDisallowedOperand("_: agree<1>(0 0.01 100 101);");
+        checkDisallowedOperand("_: agree<1 2>(0 0.01 100 101);");
     }
 
-    /// The tolerance is a proportion of the lowest value. A spread of exactly
-    /// the tolerance is accepted, because the check is `<=`.
-    function testOpAgreeEvalBoundary() external view {
-        // 101 - 100 == 1 == 0.01 * 100.
-        checkHappy("_: agree(0.01 100 101);", bytes32(uint256(1)), "1% spread against a 1% tolerance");
-        // One unit in the last place over the limit is rejected.
-        checkHappy("_: agree(0.01 100 101.000000000000000001);", 0, "a hair over a 1% tolerance");
-        // One unit in the last place under the limit is accepted.
-        checkHappy("_: agree(0.01 100 100.999999999999999999);", bytes32(uint256(1)), "a hair under a 1% tolerance");
+    /// The proportional tolerance is taken of the LARGEST MAGNITUDE among the
+    /// values, so with positive values it is a proportion of the highest.
+    ///
+    /// 100 - 99 == 1 == 0.01 * 100, so this sits exactly on the limit and is
+    /// accepted, because the check is `<=`. Anchoring on the lowest instead
+    /// would give a limit of 0.01 * 99 == 0.99 and reject it, so these
+    /// assertions distinguish the two anchors rather than merely exercising
+    /// one.
+    function testOpAgreeEvalProportionalBoundary() external view {
+        checkHappy("_: agree(0 0.01 99 100);", bytes32(uint256(1)), "spread exactly a 1% proportional limit");
+        checkHappy("_: agree(0 0.01 98.999999999999999999 100);", 0, "a hair over a 1% proportional limit");
+        checkHappy(
+            "_: agree(0 0.01 99.000000000000000001 100);", bytes32(uint256(1)), "a hair under a 1% proportional limit"
+        );
     }
 
-    /// Identical values agree within any non negative tolerance, including
-    /// zero.
+    /// The absolute tolerance is in the same units as the values and does not
+    /// scale with them.
+    function testOpAgreeEvalAbsoluteBoundary() external view {
+        checkHappy("_: agree(1 0 100 101);", bytes32(uint256(1)), "spread exactly the absolute limit");
+        checkHappy("_: agree(1 0 100 101.000000000000000001);", 0, "a hair over the absolute limit");
+        checkHappy("_: agree(1 0 100 100.999999999999999999);", bytes32(uint256(1)), "a hair under the absolute limit");
+    }
+
+    /// THE LIMIT IS THE SUM of the two tolerances, not either one alone.
+    ///
+    /// With an absolute tolerance of 0.5, a proportional tolerance of 0.01 and
+    /// a highest value of 100, the limit is 0.5 + (0.01 * 100) == 1.5, so a
+    /// lowest of 98.5 sits exactly on it. The same spread is rejected when
+    /// either tolerance is dropped to zero, which is what pins the sum: an
+    /// implementation returning only the absolute term, only the proportional
+    /// term, or the larger of the two fails at least one of these.
+    function testOpAgreeEvalCombined() external view {
+        checkHappy("_: agree(0.5 0.01 98.5 100);", bytes32(uint256(1)), "spread exactly the combined limit");
+        checkHappy("_: agree(0.5 0.01 98.499999999999999999 100);", 0, "a hair over the combined limit");
+        // The same spread against each tolerance alone.
+        checkHappy("_: agree(0 0.01 98.5 100);", 0, "the proportional term alone is not enough");
+        checkHappy("_: agree(0.5 0 98.5 100);", 0, "the absolute term alone is not enough");
+    }
+
+    /// Identical values agree within any non negative tolerance, including two
+    /// zeroes.
     function testOpAgreeEvalZeroSpread() external view {
-        checkHappy("_: agree(0 100 100);", bytes32(uint256(1)), "zero tolerance, zero spread");
-        checkHappy("_: agree(0.01 100 100);", bytes32(uint256(1)), "1% tolerance, zero spread");
+        checkHappy("_: agree(0 0 100 100);", bytes32(uint256(1)), "zero tolerances, zero spread");
+        checkHappy("_: agree(0 0.01 100 100);", bytes32(uint256(1)), "proportional tolerance, zero spread");
+        checkHappy("_: agree(1 0 100 100);", bytes32(uint256(1)), "absolute tolerance, zero spread");
     }
 
-    /// A zero tolerance rejects any spread at all.
-    function testOpAgreeEvalZeroTolerance() external view {
-        checkHappy("_: agree(0 100 101);", 0, "zero tolerance, nonzero spread");
-        checkHappy("_: agree(0 100 100.000000000000000001);", 0, "zero tolerance, tiny spread");
+    /// Two zero tolerances reject any spread at all, which is an exact equality
+    /// check.
+    function testOpAgreeEvalZeroTolerances() external view {
+        checkHappy("_: agree(0 0 100 101);", 0, "zero tolerances, nonzero spread");
+        checkHappy("_: agree(0 0 100 100.000000000000000001);", 0, "zero tolerances, tiny spread");
     }
 
-    /// The spread is never negative, so a negative tolerance rejects
-    /// everything.
+    /// The spread is never negative, so a negative limit rejects everything.
     function testOpAgreeEvalNegativeTolerance() external view {
-        checkHappy("_: agree(-0.01 100 100);", 0, "negative tolerance, zero spread");
-        checkHappy("_: agree(-0.01 100 101);", 0, "negative tolerance, nonzero spread");
+        checkHappy("_: agree(-1 0 100 100);", 0, "negative absolute tolerance, zero spread");
+        checkHappy("_: agree(0 -0.01 100 100);", 0, "negative proportional tolerance, zero spread");
+        // The terms are summed before the comparison, so a negative one can
+        // cancel a positive one rather than being clamped away.
+        checkHappy("_: agree(1 -0.01 100 100.5);", 0, "a negative proportional term cancels the absolute one");
     }
 
     /// Only the highest and the lowest value matter, so the order the values
     /// are passed in does not.
     function testOpAgreeEvalOrderIrrelevant() external view {
-        checkHappy("_: agree(0.01 101 100);", bytes32(uint256(1)), "highest first");
-        checkHappy("_: agree(0.01 100 100.5 101);", bytes32(uint256(1)), "ascending");
-        checkHappy("_: agree(0.01 101 100.5 100);", bytes32(uint256(1)), "descending");
-        checkHappy("_: agree(0.01 100.5 101 100);", bytes32(uint256(1)), "middle first");
+        checkHappy("_: agree(0 0.01 100 99);", bytes32(uint256(1)), "highest last");
+        checkHappy("_: agree(0 0.01 99 99.5 100);", bytes32(uint256(1)), "ascending");
+        checkHappy("_: agree(0 0.01 100 99.5 99);", bytes32(uint256(1)), "descending");
+        checkHappy("_: agree(0 0.01 99.5 100 99);", bytes32(uint256(1)), "middle first");
     }
 
-    /// Every value has to be within the tolerance of every other, so one
-    /// outlier rejects the whole set.
+    /// The spread is the largest pairwise difference, so bounding it bounds
+    /// every pair and one outlier rejects the whole set.
     function testOpAgreeEvalOutlier() external view {
-        checkHappy("_: agree(0.01 100 100.5 102);", 0, "high outlier");
-        checkHappy("_: agree(0.01 100 100.5 98);", 0, "low outlier");
+        checkHappy("_: agree(0 0.01 100 100.5 102);", 0, "high outlier");
+        checkHappy("_: agree(0 0.01 100 100.5 98);", 0, "low outlier");
     }
 
-    /// The tolerance is proportional, so the same spread passes at a large
-    /// magnitude and fails at a small one.
-    function testOpAgreeEvalProportional() external view {
-        checkHappy("_: agree(0.01 1000 1001);", bytes32(uint256(1)), "1 apart at 1000");
-        checkHappy("_: agree(0.01 10 11);", 0, "1 apart at 10");
-        checkHappy("_: agree(0.01 100 101);", bytes32(uint256(1)), "1 apart at 100");
+    /// The proportional tolerance scales with the values, so the same spread
+    /// passes at a large magnitude and fails at a small one. The absolute
+    /// tolerance does the opposite, which is why both are taken.
+    function testOpAgreeEvalScaling() external view {
+        checkHappy("_: agree(0 0.01 1000 1001);", bytes32(uint256(1)), "1 apart at 1000, proportional");
+        checkHappy("_: agree(0 0.01 10 11);", 0, "1 apart at 10, proportional");
+        checkHappy("_: agree(1 0 1000 1001);", bytes32(uint256(1)), "1 apart at 1000, absolute");
+        checkHappy("_: agree(1 0 10 11);", bytes32(uint256(1)), "1 apart at 10, absolute");
     }
 
-    /// The proportion is taken of the magnitude of the lowest value, so
-    /// negative values behave the same way positive ones do rather than
-    /// rejecting values identical to each other.
+    /// The anchor is a MAGNITUDE, so negative values behave the way positive
+    /// ones do. Anchoring on the signed highest instead would give a negative
+    /// limit here and reject values one part in a hundred apart.
+    ///
+    /// -99 - -100 == 1 == 0.01 * abs(-100), which is the same boundary as the
+    /// positive case reflected through zero.
     function testOpAgreeEvalNegativeValues() external view {
-        // -99 - -100 == 1 == 0.01 * abs(-100).
-        checkHappy("_: agree(0.01 -100 -99);", bytes32(uint256(1)), "1% spread on negatives");
-        checkHappy("_: agree(0.01 -100 -98.9);", 0, "1.1% spread on negatives");
-        checkHappy("_: agree(0.01 -100 -100);", bytes32(uint256(1)), "identical negatives");
+        checkHappy("_: agree(0 0.01 -100 -99);", bytes32(uint256(1)), "spread exactly 1% of the largest magnitude");
+        checkHappy("_: agree(0 0.01 -100 -98.999999999999999999);", 0, "a hair over 1% on negatives");
+        checkHappy("_: agree(0 0.01 -100 -100);", bytes32(uint256(1)), "identical negatives");
     }
 
-    /// Values that straddle zero are measured against the magnitude of the
-    /// lowest, which is the most negative value rather than the one closest to
-    /// zero.
+    /// The anchor is the largest magnitude across the whole list, which for
+    /// values straddling zero is whichever end is further from it.
+    ///
+    /// Anchoring on the lowest would take abs(-1) == 1 here and give a limit of
+    /// 1, rejecting the first case.
     function testOpAgreeEvalStraddlingZero() external view {
-        // Spread is 2, limit is 0.01 * abs(-1) == 0.01.
-        checkHappy("_: agree(0.01 -1 1);", 0, "1% tolerance straddling zero");
-        // Spread is 2, limit is 3 * abs(-1) == 3.
-        checkHappy("_: agree(3 -1 1);", bytes32(uint256(1)), "300% tolerance straddling zero");
-        // Spread is 2, limit is 2 * abs(-1) == 2, so the boundary is accepted.
-        checkHappy("_: agree(2 -1 1);", bytes32(uint256(1)), "200% tolerance straddling zero");
+        // Spread is 101, limit is 0 + (1.01 * 100) == 101.
+        checkHappy("_: agree(0 1.01 -1 100);", bytes32(uint256(1)), "anchored on the positive end");
+        checkHappy("_: agree(0 1 -1 100);", 0, "a limit of 100 against a spread of 101");
+        // Reflected: the negative end is now the larger magnitude.
+        checkHappy("_: agree(0 1.01 -100 1);", bytes32(uint256(1)), "anchored on the negative end");
+        checkHappy("_: agree(0 1 -100 1);", 0, "a limit of 100 against a spread of 101, reflected");
     }
 
-    /// A lowest value of zero gives a limit of zero whatever the tolerance is,
-    /// so only an exactly zero spread agrees.
-    function testOpAgreeEvalZeroLowest() external view {
-        checkHappy("_: agree(0.01 0 0);", bytes32(uint256(1)), "all zero");
-        checkHappy("_: agree(0.01 0 1);", 0, "zero lowest, nonzero spread");
-        checkHappy("_: agree(1000 0 0.000000000000000001);", 0, "zero lowest, huge tolerance");
+    /// WHY BOTH TOLERANCES EXIST. A proportional tolerance alone collapses as
+    /// the values approach zero: the anchor shrinks with them, so values that
+    /// agree by any practical measure read as far apart. The absolute
+    /// tolerance is what covers that part of the domain.
+    function testOpAgreeEvalNearZero() external view {
+        // Anchor 0.001, limit 0.00001, spread 0.002.
+        checkHappy("_: agree(0 0.01 -0.001 0.001);", 0, "a 1% proportional tolerance collapses near zero");
+        // The same values against an absolute tolerance of 0.01.
+        checkHappy("_: agree(0.01 0 -0.001 0.001);", bytes32(uint256(1)), "an absolute tolerance covers near zero");
     }
 
-    /// The most negative representable value is a valid lowest value. Taking
-    /// its magnitude with `Float.abs` reverts with `ExponentOverflow`, because
-    /// the magnitude does not fit the packed coefficient at the maximum
-    /// exponent. The magnitude is taken on the unpacked coefficient instead,
-    /// so the word answers rather than reverting.
+    /// A zero anchor collapses the proportional term to zero whatever the
+    /// tolerance, so only the absolute term can accept a spread there.
+    function testOpAgreeEvalZeroValues() external view {
+        checkHappy("_: agree(0 0.01 0 0);", bytes32(uint256(1)), "all zero, zero spread");
+        checkHappy("_: agree(0 1000 0 0);", bytes32(uint256(1)), "all zero, huge proportional tolerance");
+        // Anchor is 1, not 0, because it is the largest magnitude rather than
+        // the lowest value.
+        checkHappy("_: agree(0 1 0 1);", bytes32(uint256(1)), "zero lowest, anchored on the highest");
+        checkHappy("_: agree(0 0.99 0 1);", 0, "zero lowest, limit just under the spread");
+    }
+
+    /// The most negative representable value is a valid value. Taking its
+    /// magnitude with `Float.abs` reverts with `ExponentOverflow`, because the
+    /// magnitude does not fit the packed coefficient at the maximum exponent.
+    /// The magnitude is taken on the unpacked coefficient instead, so the word
+    /// answers rather than reverting.
     function testOpAgreeEvalMinNegativeValue() external view {
         checkHappy(
-            "_: agree(0.01 min-negative-value() min-negative-value());",
+            "_: agree(0 0.01 min-negative-value() min-negative-value());",
             bytes32(uint256(1)),
             "identical most negative values"
         );
-        checkHappy("_: agree(0.01 min-negative-value() 0);", 0, "most negative value against zero");
+        checkHappy("_: agree(0 0.01 min-negative-value() 0);", 0, "most negative value against zero");
     }
 
     /// The other end of the range is not a special case, but it is the other
     /// half of the boundary.
     function testOpAgreeEvalMaxPositiveValue() external view {
         checkHappy(
-            "_: agree(0.01 max-positive-value() max-positive-value());",
+            "_: agree(0 0.01 max-positive-value() max-positive-value());",
             bytes32(uint256(1)),
             "identical most positive values"
         );
-        checkHappy("_: agree(0.01 min-negative-value() max-positive-value());", 0, "opposite extremes");
+        checkHappy("_: agree(0 0.01 min-negative-value() max-positive-value());", 0, "opposite extremes");
     }
 
     /// The comparison is numerical, not binary, so the representation of the
-    /// tolerance and the values does not matter.
+    /// tolerances and the values does not matter.
     function testOpAgreeEvalNumericalEquality() external view {
-        checkHappy("_: agree(1e-2 100 101);", bytes32(uint256(1)), "tolerance as 1e-2");
-        checkHappy("_: agree(0.01 1e2 1.01e2);", bytes32(uint256(1)), "values in exponent form");
-        checkHappy("_: agree(0.010 100.0 101.00);", bytes32(uint256(1)), "trailing zeros");
+        checkHappy("_: agree(0 1e-2 99 100);", bytes32(uint256(1)), "proportional tolerance as 1e-2");
+        checkHappy("_: agree(0e0 0.01 99 100);", bytes32(uint256(1)), "absolute tolerance as 0e0");
+        checkHappy("_: agree(0 0.01 9.9e1 1e2);", bytes32(uint256(1)), "values in exponent form");
+        checkHappy("_: agree(0.0 0.010 99.0 100.00);", bytes32(uint256(1)), "trailing zeros");
     }
 
-    /// The maximum number of inputs is a tolerance and fourteen values.
+    /// The maximum number of inputs is two tolerances and thirteen values.
+    ///
+    /// Anchored on 100.9 the limit is 1.009, so a lowest of 100 agrees and a
+    /// lowest of 99 does not.
     function testOpAgreeEvalMaxInputs() external view {
         checkHappy(
-            "_: agree(0.01 100 100.1 100.2 100.3 100.4 100.5 100.6 100.7 100.8 100.9 101 100.5 100.2 100);",
+            "_: agree(0 0.01 100 100.1 100.2 100.3 100.4 100.5 100.6 100.7 100.8 100.9 100.05 100.25 100.5);",
             bytes32(uint256(1)),
-            "14 values within 1%"
+            "13 values within 1% of the largest"
         );
         checkHappy(
-            "_: agree(0.01 100 100.1 100.2 100.3 100.4 100.5 100.6 100.7 100.8 100.9 101 100.5 100.2 99);",
+            "_: agree(0 0.01 100 100.1 100.2 100.3 100.4 100.5 100.6 100.7 100.8 100.9 100.05 100.25 99);",
             0,
-            "14 values with one outlier"
+            "13 values with one outlier"
         );
     }
 
     /// The price agreement check from the issue. Three independently attested
-    /// prices have to agree within a maximum deviation.
+    /// prices agree within a maximum deviation, with an explicit zero absolute
+    /// tolerance asserting the prices stay away from zero.
     function testOpAgreeEvalAttestedPrices() external view {
-        checkHappy("_: agree(0.001 1000 1000.5 1000.9);", bytes32(uint256(1)), "prices agree within 0.1%");
-        checkHappy("_: agree(0.001 1000 1000.5 1001.5);", 0, "prices disagree beyond 0.1%");
+        checkHappy("_: agree(0 0.001 1000 1000.5 1000.9);", bytes32(uint256(1)), "prices agree within 0.1%");
+        checkHappy("_: agree(0 0.001 1000 1000.5 1001.5);", 0, "prices disagree beyond 0.1%");
+    }
+
+    /// The time agreement check from the issue. A time is an offset from an
+    /// epoch, so a proportion of it means nothing and the proportional
+    /// tolerance is an explicit zero.
+    function testOpAgreeEvalAttestedTimes() external view {
+        checkHappy("_: agree(60 0 1700000000 1700000030 1700000059);", bytes32(uint256(1)), "times within 60 seconds");
+        checkHappy(
+            "_: agree(60 0 1700000000 1700000030 1700000060);", bytes32(uint256(1)), "times exactly 60 seconds apart"
+        );
+        checkHappy("_: agree(60 0 1700000000 1700000030 1700000061);", 0, "times more than 60 seconds apart");
     }
 }
