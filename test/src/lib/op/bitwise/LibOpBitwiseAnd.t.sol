@@ -11,11 +11,20 @@ import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 
 contract LibOpBitwiseAndTest is OpTest {
-    /// Directly test the integrity logic of LibOpBitwiseAnd. All possible
-    /// operands result in the same number of inputs and outputs, (2, 1).
-    function testOpBitwiseAndIntegrity(IntegrityCheckState memory state, OperandV2 operand) external pure {
-        (uint256 calcInputs, uint256 calcOutputs) = LibOpBitwiseAnd.integrity(state, operand);
-        assertEq(calcInputs, 2);
+    /// Directly test the integrity logic of LibOpBitwiseAnd. The operand's input
+    /// count is honoured, floored at 2, and there is always 1 output.
+    function testOpBitwiseAndIntegrity(
+        IntegrityCheckState memory state,
+        uint8 inputs,
+        uint8 outputs,
+        uint16 operandData
+    ) external pure {
+        inputs = uint8(bound(inputs, 2, 0x0F));
+        outputs = uint8(bound(outputs, 0, 0x0F));
+        (uint256 calcInputs, uint256 calcOutputs) =
+            LibOpBitwiseAnd.integrity(state, LibOperand.build(inputs, outputs, operandData));
+
+        assertEq(calcInputs, inputs);
         assertEq(calcOutputs, 1);
     }
 
@@ -52,29 +61,33 @@ contract LibOpBitwiseAndTest is OpTest {
         checkHappy("_: bitwise-and(0x03 0x03);", bytes32(uint256(3)), "3 3");
     }
 
-    /// Test that a bitwise OR with bad inputs fails integrity.
-    function testOpBitwiseOREvalZeroInputs() external {
+    /// Test that a bitwise AND with bad inputs fails integrity.
+    function testOpBitwiseAndEvalZeroInputs() external {
         checkBadInputs("_: bitwise-and();", 0, 2, 0);
     }
 
-    function testOpBitwiseOREvalOneInput() external {
+    function testOpBitwiseAndEvalOneInput() external {
         checkBadInputs("_: bitwise-and(0);", 1, 2, 1);
     }
 
-    function testOpBitwiseOREvalThreeInputs() external {
-        checkBadInputs("_: bitwise-and(0 0 0);", 3, 2, 3);
+    /// Three inputs fold rather than failing integrity. Derived from the
+    /// fold, not observed: bitwise-and is associative and commutative, so
+    /// `bitwise-and(a b c)` is `a & b & c` whatever the order.
+    function testOpBitwiseAndEvalThreeInputs() external view {
+        checkHappy("_: bitwise-and(0x03 0x05 0x09);", bytes32(uint256(0x03 & 0x05 & 0x09)), "");
+        checkHappy("_: bitwise-and(0x0F 0x0F 0x0F);", bytes32(uint256(0x0F)), "");
     }
 
-    function testOpBitwiseOREvalZeroOutputs() external {
+    function testOpBitwiseAndEvalZeroOutputs() external {
         checkBadOutputs(": bitwise-and(0 0);", 2, 1, 0);
     }
 
-    function testOpBitwiseOREvalTwoOutputs() external {
+    function testOpBitwiseAndEvalTwoOutputs() external {
         checkBadOutputs("_ _: bitwise-and(0 0);", 2, 1, 2);
     }
 
     /// Test that operand is disallowed.
-    function testOpBitwiseOREvalBadOperand() external {
+    function testOpBitwiseAndEvalBadOperand() external {
         checkUnhappyParse("_: bitwise-and<0>(0 0);", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }
