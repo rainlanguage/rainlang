@@ -140,7 +140,11 @@ library LibOpAgree {
     function spreadOf(Float lowest, Float highest) internal pure returns (int256, int256) {
         (int256 lowestCoefficient, int256 lowestExponent) = lowest.unpack();
         (int256 highestCoefficient, int256 highestExponent) = highest.unpack();
-        return LibDecimalFloatImplementation.sub(highestCoefficient, highestExponent, lowestCoefficient, lowestExponent);
+        // Destructured rather than returned directly because slither reads
+        // `return f(...)` on a tuple-returning call as an ignored return value.
+        (int256 spreadCoefficient, int256 spreadExponent) =
+            LibDecimalFloatImplementation.sub(highestCoefficient, highestExponent, lowestCoefficient, lowestExponent);
+        return (spreadCoefficient, spreadExponent);
     }
 
     /// @notice The quantity the proportional tolerance is taken of: whichever
@@ -189,9 +193,11 @@ library LibOpAgree {
         (int256 absoluteCoefficient, int256 absoluteExponent) = absolute.unpack();
         // The two terms are summed rather than the larger of them taken, so a
         // negative tolerance subtracts from the other rather than being
-        // clamped away.
-        return
+        // clamped away. Destructured rather than returned directly for the
+        // same slither reason as `spreadOf`.
+        (int256 limitCoefficient, int256 limitExponent) =
             LibDecimalFloatImplementation.add(absoluteCoefficient, absoluteExponent, scaledCoefficient, scaledExponent);
+        return (limitCoefficient, limitExponent);
     }
 
     /// @notice The comparison, shared by `run` and `referenceFn` so the two
