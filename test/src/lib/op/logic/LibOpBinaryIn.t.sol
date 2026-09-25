@@ -6,7 +6,7 @@ import {OpTest} from "test/abstract/OpTest.sol";
 import {LibOpBinaryIn} from "../../../../../src/lib/op/logic/LibOpBinaryIn.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {BinaryInNeedlesZero} from "../../../../../src/error/ErrIntegrity.sol";
-import {UnexpectedOperandValue} from "../../../../../src/error/ErrParse.sol";
+import {UnexpectedOperandValue, OperandOverflow} from "../../../../../src/error/ErrParse.sol";
 import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
@@ -97,8 +97,7 @@ contract LibOpBinaryInTest is OpTest {
         opReferenceCheck(state, operand, LibOpBinaryIn.referenceFn, LibOpBinaryIn.integrity, LibOpBinaryIn.run, inputs);
     }
 
-    /// An operand is required. Without it there is nothing marking where the
-    /// needles end and the set begins.
+    /// The operand defaults to one needle when omitted.
     function testOpBinaryInEvalOperandDefaultsToOneNeedle() external view {
         // Omitting the operand means one needle, so this asks whether 1 is in
         // the set (2 1) rather than failing to parse.
@@ -107,6 +106,15 @@ contract LibOpBinaryInTest is OpTest {
         // Identical to writing the operand out.
         checkHappy("_: binary-in<1>(1 2 1);", bytes32(uint256(1)), "explicit one needle, present");
         checkHappy("_: binary-in<1>(1 2 3);", 0, "explicit one needle, absent");
+    }
+
+    /// A needle count that does not fit the operand's 16 bits is rejected at
+    /// parse time. The parser ORs the handler's result into the source word
+    /// unmasked, and bit 16 is the low bit of the IO byte carrying the input
+    /// count, so without this the operand would corrupt its neighbour instead
+    /// of failing.
+    function testOpBinaryInEvalNeedleCountOverflow() external {
+        checkUnhappyParse("_: binary-in<65536>(1 2 1);", abi.encodeWithSelector(OperandOverflow.selector));
     }
 
     /// An explicit zero is not a way of writing the default. It reaches the
@@ -170,7 +178,9 @@ contract LibOpBinaryInTest is OpTest {
         checkHappy("_: binary-in<2>(1 1 1 2);", bytes32(uint256(1)), "1 1 in (1 2)");
     }
 
-    /// Membership is numerical equality, as per `equal-to`.
+    /// Membership is BINARY equality, as per `binary-equal-to`, so a set
+    /// member that is numerically equal to the needle but written as a
+    /// different word is not a match.
     function testOpBinaryInEvalNumericallyEqualIsNotMember() external view {
         // `0x01` and `10e-1` are the same number written as different words,
         // as `binary-equal-to`'s own tests pin. Membership is binary, so the

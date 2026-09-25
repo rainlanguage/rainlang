@@ -101,8 +101,8 @@ contract LibOpBinaryUniqueTest is OpTest {
         checkHappy("_: binary-unique(-1 -1);", 0, "-1 -1");
     }
 
-    /// Equality is numerical, not binary, so different representations of the
-    /// same number are not unique.
+    /// Equality is BINARY, not numerical, so two words that are the same
+    /// number written differently ARE distinct.
     function testOpBinaryUniqueEval2InputsNumericallyEqualAreDistinct() external view {
         // Distinctness is binary, so two words that are the same number
         // written differently ARE distinct here — the opposite of what a

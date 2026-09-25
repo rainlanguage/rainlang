@@ -126,10 +126,16 @@ library LibOpAgree {
                     value := mload(cursor)
                 }
                 // Strict comparisons keep the first representation seen when
-                // two values are numerically equal, which is what the
-                // reference implementation does. Numerically equal values can
-                // be packed differently and the packing feeds the rounding of
-                // the limit, so the tie break has to be the same in both.
+                // two values are numerically equal, matching `referenceFn`.
+                //
+                // This is consistency, not a correctness requirement. An
+                // earlier revision anchored the limit on the lowest value, so
+                // its packing fed the rounding and the two sides had to agree
+                // on the tie break. Under the current formula they do not:
+                // `mul` is invariant under factor-of-ten repackings and `sub`
+                // maximizes both operands first, so the packing is normalised
+                // away. Relaxing this to `lte` changes no answer the tests can
+                // produce.
                 if (value.lt(lowest)) {
                     lowest = value;
                 }

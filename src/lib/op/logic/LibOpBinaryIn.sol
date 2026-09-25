@@ -44,7 +44,7 @@ import {BinaryInNeedlesZero} from "../../../error/ErrIntegrity.sol";
 /// wanted, since two numerically equal quantities can be packed differently
 /// and will NOT match here.
 library LibOpBinaryIn {
-    /// @notice `in` integrity check. The low 16 bits of the operand are the
+    /// @notice `binary-in` integrity check. The low 16 bits of the operand are the
     /// number of needles, which must be at least 1. There must be at least one
     /// more input than there are needles, so that the set is not empty.
     /// @param operand Low 16 bits encode the needle count, low 4 bits of the

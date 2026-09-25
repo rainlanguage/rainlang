@@ -58,7 +58,7 @@ error CallInputsMismatchSource(uint256 operandInputs, uint256 sourceInputs);
 /// @param fsCount The number of function pointers in the table.
 error OpcodeOutOfRange(uint256 opIndex, uint256 opcodeIndex, uint256 fsCount);
 
-/// @notice Thrown when the `in` operand declares zero needles. Zero needles
+/// @notice Thrown when the `binary-in` operand declares zero needles. Zero needles
 /// would make the membership check vacuously true, which is never what an
 /// `ensure` guard wants, so it is rejected at deploy time.
 error BinaryInNeedlesZero();
