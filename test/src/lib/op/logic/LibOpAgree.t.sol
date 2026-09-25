@@ -474,6 +474,26 @@ contract LibOpAgreeTest is OpTest {
         checkHappy("_: agree(0 1 -100 1);", 0, "a limit of 100 against a spread of 101, reflected");
     }
 
+    /// SYMMETRIC ABOUT ZERO is the worst case for a proportional tolerance,
+    /// and the only case where the two magnitudes are exactly equal so the
+    /// anchor tie break fires.
+    ///
+    /// For `1` and `-1` the spread is 2 while the anchor is 1, so a
+    /// proportional tolerance has to reach 200% before they agree. Values do
+    /// not get further apart relative to their own magnitude than this, which
+    /// is what the absolute tolerance is for.
+    function testOpAgreeEvalSymmetricAboutZero() external view {
+        checkHappy("_: agree(0 2 1 -1);", bytes32(uint256(1)), "200% proportional exactly meets a spread of 2");
+        checkHappy("_: agree(0 1.99 1 -1);", 0, "just under 200% does not");
+        // The absolute tolerance reaches it directly, without needing to be a
+        // proportion of anything.
+        checkHappy("_: agree(2 0 1 -1);", bytes32(uint256(1)), "absolute 2 meets a spread of 2");
+        checkHappy("_: agree(1.99 0 1 -1);", 0, "absolute just under 2 does not");
+        // Equal magnitudes, so the anchor is the same whichever extreme wins
+        // the tie break. Argument order must not change the answer.
+        checkHappy("_: agree(0 2 -1 1);", bytes32(uint256(1)), "reversed argument order");
+    }
+
     /// WHY BOTH TOLERANCES EXIST. A proportional tolerance alone collapses as
     /// the values approach zero: the anchor shrinks with them, so values that
     /// agree by any practical measure read as far apart. The absolute
