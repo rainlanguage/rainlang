@@ -6,7 +6,7 @@ import {OpTest} from "test/abstract/OpTest.sol";
 import {LibOpBinaryIn} from "../../../../../src/lib/op/logic/LibOpBinaryIn.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {BinaryInNeedlesZero} from "../../../../../src/error/ErrIntegrity.sol";
-import {ExpectedOperand, UnexpectedOperandValue} from "../../../../../src/error/ErrParse.sol";
+import {UnexpectedOperandValue} from "../../../../../src/error/ErrParse.sol";
 import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
@@ -99,8 +99,20 @@ contract LibOpBinaryInTest is OpTest {
 
     /// An operand is required. Without it there is nothing marking where the
     /// needles end and the set begins.
-    function testOpBinaryInEvalOperandRequired() external {
-        checkUnhappyParse("_: binary-in(1 1);", abi.encodeWithSelector(ExpectedOperand.selector));
+    function testOpBinaryInEvalOperandDefaultsToOneNeedle() external view {
+        // Omitting the operand means one needle, so this asks whether 1 is in
+        // the set (2 1) rather than failing to parse.
+        checkHappy("_: binary-in(1 2 1);", bytes32(uint256(1)), "default one needle, present");
+        checkHappy("_: binary-in(1 2 3);", 0, "default one needle, absent");
+        // Identical to writing the operand out.
+        checkHappy("_: binary-in<1>(1 2 1);", bytes32(uint256(1)), "explicit one needle, present");
+        checkHappy("_: binary-in<1>(1 2 3);", 0, "explicit one needle, absent");
+    }
+
+    /// An explicit zero is not a way of writing the default. It reaches the
+    /// integrity check and reverts, because zero needles passes on nothing.
+    function testOpBinaryInEvalExplicitZeroIsNotTheDefault() external {
+        checkUnhappyParse2("_: binary-in<0>(1 2 1);", abi.encodeWithSelector(BinaryInNeedlesZero.selector));
     }
 
     /// A second operand value is not meaningful.

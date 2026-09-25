@@ -17,6 +17,11 @@ import {BinaryInNeedlesZero} from "../../../error/ErrIntegrity.sol";
 /// in. There is exactly one set, so a single call answers "are all of these
 /// values in this list".
 ///
+/// THE OPERAND DEFAULTS TO ONE NEEDLE, so `binary-in(x a b c)` asks whether
+/// `x` is in `(a b c)`. An explicit zero is NOT a way of writing one: it
+/// still reaches the integrity check and reverts, because zero needles is a
+/// check that passes on nothing.
+///
 /// MEMBERSHIP IS BINARY EQUALITY, the same equality `binary-equal-to` uses:
 /// the words are compared bit for bit and nothing is interpreted as a number.
 ///

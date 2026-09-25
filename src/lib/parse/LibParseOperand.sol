@@ -200,6 +200,36 @@ library LibParseOperand {
         }
     }
 
+    /// @notice There must be one or zero values. The fallback is 1 if nothing is
+    /// provided, else the provided Float value is converted to a lossless
+    /// integer and MUST fit in a uint16.
+    ///
+    /// For words whose operand is a COUNT, where omitting it sensibly means
+    /// one rather than none. An explicit zero is still passed through as zero,
+    /// so a word that cannot accept zero rejects it in its own integrity check
+    /// and the caller gets an error naming the real problem instead of a
+    /// silently reinterpreted operand.
+    /// @param values The parsed operand values from the source string.
+    /// @return operand The single full operand, defaulting to 1 if not
+    /// provided.
+    function handleOperandSingleFullDefaultOne(bytes32[] memory values) internal pure returns (OperandV2 operand) {
+        if (values.length == 1) {
+            assembly ("memory-safe") {
+                operand := mload(add(values, 0x20))
+            }
+            (int256 signedCoefficient, int256 exponent) = Float.wrap(OperandV2.unwrap(operand)).unpack();
+            uint256 operandUint = LibDecimalFloat.toFixedDecimalLossless(signedCoefficient, exponent, 0);
+            if (operandUint > type(uint16).max) {
+                revert OperandOverflow();
+            }
+            operand = OperandV2.wrap(bytes32(operandUint));
+        } else if (values.length == 0) {
+            operand = OperandV2.wrap(bytes32(uint256(1)));
+        } else {
+            revert UnexpectedOperandValue();
+        }
+    }
+
     /// @notice There must be exactly one value. There is no default fallback. The
     /// provided Float value is converted to a lossless integer and MUST fit
     /// in a uint16.
