@@ -22,8 +22,10 @@ error ZeroFunctionPointers();
 /// tolerance silently carry the check.
 error AgreeToleranceNegative();
 
-/// @notice Thrown when both of `agree`'s tolerances are zero, which would make
-/// it an exact equality check. That is `equal-to`'s job, so this means the
-/// wrong word was written rather than that the expression wanted a tolerance
-/// of nothing. Either tolerance alone may be zero.
-error AgreeTolerancesZero();
+/// @notice Thrown when neither of `agree`'s tolerances is positive. At least
+/// one has to be, or there is no tolerance at all and the word is an exact
+/// equality check — which is `equal-to`'s job, so it means the wrong word was
+/// written rather than that a tolerance of nothing was wanted. Either
+/// tolerance ALONE may be zero; that is how an expression asks for only the
+/// other one.
+error AgreeNoPositiveTolerance();

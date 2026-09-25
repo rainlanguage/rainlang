@@ -10,7 +10,7 @@ import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFl
 import {
     LibDecimalFloatImplementation
 } from "rain-math-float-0.2.1/src/lib/implementation/LibDecimalFloatImplementation.sol";
-import {AgreeToleranceNegative, AgreeTolerancesZero} from "../../../error/ErrEval.sol";
+import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../error/ErrEval.sol";
 
 /// @title LibOpAgree
 /// @notice Opcode to return 1 if the highest and lowest of the values are no
@@ -43,7 +43,7 @@ import {AgreeToleranceNegative, AgreeTolerancesZero} from "../../../error/ErrEva
 /// absolute tolerance of zero is exactly the guard that looks correct and
 /// breaks near zero.
 ///
-/// NEITHER TOLERANCE MAY BE NEGATIVE, and they may not BOTH be zero. See
+/// NEITHER TOLERANCE MAY BE NEGATIVE, and AT LEAST ONE MUST BE POSITIVE. See
 /// `validateTolerances` for why each is rejected rather than given a meaning.
 /// Either one alone may be zero, which is how an expression asks for only the
 /// other.
@@ -239,15 +239,21 @@ library LibOpAgree {
     /// guard that silently succeeds on malformed input is the one outcome a
     /// guard must not have.
     ///
-    /// BOTH ZERO would make the limit zero, i.e. an exact equality check.
-    /// `equal-to` already does that, and it is variadic, so writing
-    /// `agree(0 0 ...)` means the wrong word was reached for rather than that
-    /// a tolerance of nothing was wanted. Either tolerance ALONE may be zero;
-    /// that is how an expression asks for only the other one.
+    /// AT LEAST ONE TOLERANCE MUST BE POSITIVE. If neither is, there is no
+    /// tolerance at all: the limit is zero and the word becomes an exact
+    /// equality check, which is what the variadic `equal-to` is for. So it
+    /// means the wrong word was reached for rather than that a tolerance of
+    /// nothing was wanted. Either tolerance ALONE may be zero; that is how an
+    /// expression asks for only the other one.
+    ///
+    /// The positive test is written against zero rather than against the
+    /// negative check above, i.e. `<= 0` rather than `== 0`, so that it states
+    /// the invariant on its own terms and stays correct if that check is ever
+    /// moved or removed.
     ///
     /// A float's sign and zero-ness are carried entirely by its coefficient,
     /// so the exponent is not read here and every representation of zero —
-    /// `0`, `0e0`, `0.0` — is caught alike.
+    /// `0`, `0e0`, `0.0` — is treated alike.
     /// @param absolute The absolute tolerance.
     /// @param proportional The proportional tolerance.
     function validateTolerances(Float absolute, Float proportional) internal pure {
@@ -256,8 +262,8 @@ library LibOpAgree {
         if (absoluteCoefficient < 0 || proportionalCoefficient < 0) {
             revert AgreeToleranceNegative();
         }
-        if (absoluteCoefficient == 0 && proportionalCoefficient == 0) {
-            revert AgreeTolerancesZero();
+        if (absoluteCoefficient <= 0 && proportionalCoefficient <= 0) {
+            revert AgreeNoPositiveTolerance();
         }
     }
 

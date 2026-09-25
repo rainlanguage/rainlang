@@ -9,12 +9,12 @@ import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInte
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
-import {AgreeToleranceNegative, AgreeTolerancesZero} from "../../../../../src/error/ErrEval.sol";
+import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../../../src/error/ErrEval.sol";
 
 contract LibOpAgreeTest is OpTest {
     /// The fuzzed run tests below overwrite the two tolerance inputs with these
-    /// rather than fuzzing them, because `validateTolerances` rejects negative
-    /// and both-zero tolerances and random floats are negative about half the
+    /// rather than fuzzing them, because `validateTolerances` rejects negative tolerances and requires at least one
+    /// positive one, and random floats are negative about half the
     /// time. Fixing them costs the differential nothing: what it tests is the
     /// min/max walk over the VALUES, pointer arithmetic against array
     /// indexing, and the tolerances take no part in that. The arithmetic is
@@ -166,16 +166,17 @@ contract LibOpAgreeTest is OpTest {
         checkHappy("_: agree(1 0 100 100);", bytes32(uint256(1)), "absolute tolerance, zero spread");
     }
 
-    /// BOTH tolerances zero would be an exact equality check, which is
-    /// `equal-to`'s job, so it reverts rather than quietly becoming one. This
-    /// holds whatever the values are — it is a property of the tolerances
-    /// alone, so it reverts even where the answer would have been 1.
-    function testOpAgreeEvalBothTolerancesZeroReverts() external {
-        checkUnhappy("_: agree(0 0 100 101);", abi.encodeWithSelector(AgreeTolerancesZero.selector));
-        checkUnhappy("_: agree(0 0 100 100);", abi.encodeWithSelector(AgreeTolerancesZero.selector));
+    /// AT LEAST ONE tolerance has to be positive. If neither is there is no
+    /// tolerance at all, which is an exact equality check and so `equal-to`'s
+    /// job, and it reverts rather than quietly becoming one. This holds
+    /// whatever the values are — it is a property of the tolerances alone, so
+    /// it reverts even where the answer would have been 1.
+    function testOpAgreeEvalNoPositiveToleranceReverts() external {
+        checkUnhappy("_: agree(0 0 100 101);", abi.encodeWithSelector(AgreeNoPositiveTolerance.selector));
+        checkUnhappy("_: agree(0 0 100 100);", abi.encodeWithSelector(AgreeNoPositiveTolerance.selector));
         // Every representation of zero is caught, because the sign and
         // zero-ness of a float live entirely in its coefficient.
-        checkUnhappy("_: agree(0e0 0.0 100 100);", abi.encodeWithSelector(AgreeTolerancesZero.selector));
+        checkUnhappy("_: agree(0e0 0.0 100 100);", abi.encodeWithSelector(AgreeNoPositiveTolerance.selector));
     }
 
     /// Either tolerance ALONE may be zero. That is how an expression asks for
