@@ -34,9 +34,9 @@ import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../error/E
 /// use. `numpy.isclose` instead SUMS the two terms, which PEP 485 rejects
 /// because "if the absolute and relative tolerances are of similar magnitude,
 /// then the allowed difference will be about twice as large as expected".
-/// Here the sum is rejected for a second reason on top of that one: it is the
-/// more permissive of the two, and this word is a guard that rounds toward
-/// rejecting.
+/// The sum is also the more permissive of the two, since `max(a, b) <= a + b`
+/// for non-negative terms, so it admits spreads the larger would refuse. For a
+/// guard the stricter reading of two tolerances is the one to take.
 ///
 /// Requiring both means an expression that wants only one writes the other as
 /// zero, asserting that choice rather than inheriting it. A silently defaulted
@@ -63,22 +63,24 @@ import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../error/E
 /// its maximum. `min-negative-value()` is a representable value and an
 /// `ensure` guard reading it should answer 0, not revert.
 ///
-/// ROUNDING. The spread is compared against the limit at full internal
-/// precision, i.e. neither is packed back into a `Float`, so the only places a
-/// value can be lost are the subtraction and the multiplication. Selecting the
-/// larger of two terms is exact, so taking the max rather than the sum removes
-/// a lossy operation rather than adding one.
-/// - The multiplication truncates the product's magnitude toward zero. The
-///   anchor is a magnitude and so non-negative, and the proportional tolerance
-///   is non-negative because `validateTolerances` has rejected anything else,
-///   so the term can only come out smaller: it only ever rounds toward
-///   rejecting. That is a guarantee rather than an assumption about sane use.
-/// - The subtraction truncates the operand with the smaller exponent toward
-///   zero. `highest + (-lowest)` has opposite-signed operands whenever the
-///   values share a sign, so shrinking one can only widen the spread, which
-///   again rounds toward rejecting. Where the values straddle zero the two
-///   operands share a sign and the truncation goes the other way, by at most
-///   one unit in the last of ~76 significant digits.
+/// PRECISION. The spread is compared against the limit at full internal
+/// precision: neither is ever packed back into a `Float`, so the only places a
+/// value can be lost are the subtraction and the multiplication, and selecting
+/// the larger of two terms is exact. The answer is therefore exact except
+/// within about one unit in the last of ~76 significant digits of the
+/// boundary.
+///
+/// NO ROUNDING DIRECTION IS PROMISED, deliberately. A direction matters where
+/// error accumulates — the leaky bucket this feeds is touched by every mint,
+/// so a consistent bias there compounds. Nothing accumulates here: `agree`
+/// answers 0 or 1 into an `ensure`. Biasing that answer would require placing
+/// the spread within an ulp at ~76 digits of the limit, which means
+/// controlling independently signed attestations to that precision, and the
+/// limit is a policy number the mint admin chose with orders of magnitude more
+/// slack than the error. Promising a direction here would buy no safety while
+/// committing the word to a property that does not hold uniformly: the
+/// subtraction truncates away from zero for same-signed values and toward it
+/// for values that straddle zero.
 library LibOpAgree {
     using LibDecimalFloat for Float;
 
@@ -187,12 +189,12 @@ library LibOpAgree {
     /// @notice The tolerance the spread is checked against: whichever of the
     /// two terms is LARGER, `max(absolute, proportional * anchor)`.
     ///
-    /// Taking the larger rather than the sum is what keeps the word rounding
-    /// toward rejecting. For non-negative terms `max(a, b) <= a + b`, with
-    /// equality only when one of them is zero, so the sum accepts everything
-    /// the max accepts and more — up to twice as much where the two terms are
-    /// of similar size. An expression that sets only one tolerance gets the
-    /// same answer either way, because the other term is zero.
+    /// Taking the larger rather than the sum is the stricter of the two
+    /// readings. For non-negative terms `max(a, b) <= a + b`, with equality
+    /// only when one of them is zero, so the sum accepts everything the max
+    /// accepts and more — up to twice as much where the two terms are of
+    /// similar size. An expression that sets only one tolerance gets the same
+    /// answer either way, because the other term is zero.
     ///
     /// Both terms are known non-negative here, and not both zero, because
     /// `validateTolerances` has already rejected anything else. That is what

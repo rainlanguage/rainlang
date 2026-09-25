@@ -226,7 +226,7 @@ library LibAllStandardOps {
             // logic/
             AuthoringMetaV2(
                 "agree",
-                "1 if the highest and lowest of the values are no more than a tolerance apart, 0 otherwise. The first input is an absolute tolerance in the same units as the values, the second is a proportional tolerance as a fraction, and all subsequent inputs are the values. The limit is whichever is larger of the absolute tolerance and the proportional tolerance of the largest magnitude among the values, so 0.01 as the proportional tolerance allows 1% of that magnitude. Both tolerances are always given; write one as 0 to use only the other. Neither may be negative and at least one must be positive, or it reverts. Rounding goes toward rejecting."
+                "1 if the highest and lowest of the values are no more than a tolerance apart, 0 otherwise. The first input is an absolute tolerance in the same units as the values, the second is a proportional tolerance as a fraction, and all subsequent inputs are the values. The limit is whichever is larger of the absolute tolerance and the proportional tolerance of the largest magnitude among the values, so 0.01 as the proportional tolerance allows 1% of that magnitude. Both tolerances are always given; write one as 0 to use only the other. Neither may be negative and at least one must be positive, or it reverts. The comparison runs at full internal precision, so the answer is exact except within about an ulp of the boundary."
             ),
             AuthoringMetaV2("any", "The first non-zero value out of all inputs, or 0 if every input is 0."),
             AuthoringMetaV2("binary-equal-to", "1 if all inputs are equal, 0 otherwise. Equality is binary."),
