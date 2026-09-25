@@ -9,22 +9,105 @@ import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInte
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
+import {
+    LibDecimalFloatImplementation
+} from "rain-math-float-0.2.1/src/lib/implementation/LibDecimalFloatImplementation.sol";
 import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../../../src/error/ErrEval.sol";
 
 contract LibOpAgreeTest is OpTest {
-    /// The fuzzed run tests below overwrite the two tolerance inputs with these
-    /// rather than fuzzing them, because `validateTolerances` rejects negative tolerances and requires at least one
-    /// positive one, and random floats are negative about half the
-    /// time. Fixing them costs the differential nothing: what it tests is the
-    /// min/max walk over the VALUES, pointer arithmetic against array
-    /// indexing, and the tolerances take no part in that. The arithmetic is
-    /// pinned by the eval assertions, which the tolerances do vary across.
-    function fuzzAbsoluteTolerance() internal pure returns (StackItem) {
-        return StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
+    using LibDecimalFloat for Float;
+
+    /// The four numbers that make up a fuzzed pair of tolerances, carried as a
+    /// struct so the fuzz tests stay under the stack limit. Passing them as
+    /// four separate parameters alongside the values and the operand is
+    /// "stack too deep", and a struct in memory costs one slot instead of
+    /// four.
+    struct ToleranceFuzz {
+        int256 absoluteCoefficient;
+        int256 absoluteExponent;
+        int256 proportionalCoefficient;
+        int256 proportionalExponent;
     }
 
-    function fuzzProportionalTolerance() internal pure returns (StackItem) {
-        return StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, -2)));
+    /// Bounds a fuzzed pair into the domain `validateTolerances` accepts, and
+    /// returns them. Rather than discarding runs where both land on zero, the
+    /// absolute tolerance is nudged to a positive value, so every fuzz run is
+    /// spent on a valid call instead of being rejected.
+    function boundTolerances(ToleranceFuzz memory tolerances) internal pure returns (Float, Float) {
+        Float absolute = boundTolerance(tolerances.absoluteCoefficient, tolerances.absoluteExponent);
+        Float proportional = boundTolerance(tolerances.proportionalCoefficient, tolerances.proportionalExponent);
+        if (absolute.isZero() && proportional.isZero()) {
+            absolute = LibDecimalFloat.packLossless(1, 0);
+        }
+        return (absolute, proportional);
+    }
+
+    /// Writes a bounded fuzzed pair of tolerances into the first two inputs.
+    function applyTolerances(StackItem[] memory inputs, ToleranceFuzz memory tolerances) internal pure {
+        (Float absolute, Float proportional) = boundTolerances(tolerances);
+        inputs[0] = StackItem.wrap(Float.unwrap(absolute));
+        inputs[1] = StackItem.wrap(Float.unwrap(proportional));
+    }
+
+    /// Takes between 2 and 8 values from a fixed size fuzzed array.
+    ///
+    /// The count is BOUNDED rather than assumed. Assuming a dynamic array's
+    /// length lands in a narrow range rejects the overwhelming majority of
+    /// runs — enough to exhaust foundry's rejection budget and fail the test
+    /// outright — whereas bounding a separate count spends every run on a
+    /// valid list.
+    function takeValues(bytes32[8] memory rawValues, uint256 count) internal pure returns (bytes32[] memory) {
+        count = bound(count, 2, 8);
+        bytes32[] memory values = new bytes32[](count);
+        for (uint256 i = 0; i < count; i++) {
+            values[i] = rawValues[i];
+        }
+        return values;
+    }
+
+    /// The lowest and highest of a list, found the same way `run` finds them.
+    function extremesOf(bytes32[] memory rawValues) internal pure returns (Float, Float) {
+        Float lowest = Float.wrap(rawValues[0]);
+        Float highest = lowest;
+        for (uint256 i = 1; i < rawValues.length; i++) {
+            Float value = Float.wrap(rawValues[i]);
+            if (value.lt(lowest)) {
+                lowest = value;
+            }
+            if (value.gt(highest)) {
+                highest = value;
+            }
+        }
+        return (lowest, highest);
+    }
+
+    /// Maps a fuzzed coefficient and exponent onto a tolerance that
+    /// `validateTolerances` accepts, WITHOUT collapsing the fuzz to a
+    /// constant.
+    ///
+    /// The coefficient is bounded non-negative rather than having its sign
+    /// flipped, because negating the most negative int224 does not fit back
+    /// into an int224 and `packLossless` would revert `CoefficientOverflow`.
+    /// The exponent is held to a modest range so the fuzz explores tolerance
+    /// MAGNITUDES without wandering into the representable extremes, which
+    /// `testOpAgreeEvalExtremeTolerance` covers deliberately instead.
+    function boundTolerance(int256 coefficient, int256 exponent) internal pure returns (Float) {
+        coefficient = bound(coefficient, 0, int256(type(int224).max));
+        exponent = bound(exponent, -20, 20);
+        return LibDecimalFloat.packLossless(coefficient, exponent);
+    }
+
+    /// True if `a` and `b` are no further apart than the given limit. Used to
+    /// check every pair against the GLOBAL limit in
+    /// `testOpAgreeSpreadBoundsEveryPair`.
+    function withinLimit(Float a, Float b, int256 limitCoefficient, int256 limitExponent) internal pure returns (bool) {
+        Float lower = a.lt(b) ? a : b;
+        Float upper = a.lt(b) ? b : a;
+        (int256 spreadCoefficient, int256 spreadExponent) = LibOpAgree.spreadOf(lower, upper);
+        (int256 rescaledSpread, int256 rescaledLimit) = LibDecimalFloatImplementation.compareRescale(
+            spreadCoefficient, spreadExponent, limitCoefficient, limitExponent
+        );
+        return rescaledSpread <= rescaledLimit;
     }
 
     /// Directly test the integrity logic of LibOpAgree. This tests the happy
@@ -53,30 +136,164 @@ contract LibOpAgreeTest is OpTest {
     }
 
     /// Directly test the runtime logic of LibOpAgree.
-    function testOpAgreeRun(StackItem[] memory inputs, uint16 operandData) external view {
-        InterpreterState memory state = opTestDefaultInterpreterState();
+    ///
+    /// The two tolerances are fuzzed through `boundTolerance` rather than held
+    /// at constants, so the differential explores the tolerance space as well
+    /// as the values. `validateTolerances` rejects negatives and requires at
+    /// least one positive, so the raw fuzz cannot be used directly — random
+    /// floats are negative about half the time.
+    function testOpAgreeRun(StackItem[] memory inputs, ToleranceFuzz memory tolerances, uint16 operandData)
+        external
+        view
+    {
         vm.assume(inputs.length >= 4);
         vm.assume(inputs.length <= 0x0F);
-        inputs[0] = fuzzAbsoluteTolerance();
-        inputs[1] = fuzzProportionalTolerance();
-        OperandV2 operand = LibOperand.build(uint8(inputs.length), 1, operandData);
-        opReferenceCheck(state, operand, LibOpAgree.referenceFn, LibOpAgree.integrity, LibOpAgree.run, inputs);
+        applyTolerances(inputs, tolerances);
+        opReferenceCheck(
+            opTestDefaultInterpreterState(),
+            LibOperand.build(uint8(inputs.length), 1, operandData),
+            LibOpAgree.referenceFn,
+            LibOpAgree.integrity,
+            LibOpAgree.run,
+            inputs
+        );
     }
 
     /// Directly test the runtime logic of LibOpAgree where every value is the
     /// same, so the zero spread path is exercised rather than relying on the
     /// fuzzer to land values near each other.
-    function testOpAgreeRunAllValuesEqual(StackItem[] memory inputs) external view {
-        InterpreterState memory state = opTestDefaultInterpreterState();
+    function testOpAgreeRunAllValuesEqual(StackItem[] memory inputs, ToleranceFuzz memory tolerances) external view {
         vm.assume(inputs.length >= 4);
         vm.assume(inputs.length <= 0x0F);
-        inputs[0] = fuzzAbsoluteTolerance();
-        inputs[1] = fuzzProportionalTolerance();
+        applyTolerances(inputs, tolerances);
         for (uint256 i = 3; i < inputs.length; i++) {
             inputs[i] = inputs[2];
         }
-        OperandV2 operand = LibOperand.build(uint8(inputs.length), 1, 0);
-        opReferenceCheck(state, operand, LibOpAgree.referenceFn, LibOpAgree.integrity, LibOpAgree.run, inputs);
+        opReferenceCheck(
+            opTestDefaultInterpreterState(),
+            LibOperand.build(uint8(inputs.length), 1, 0),
+            LibOpAgree.referenceFn,
+            LibOpAgree.integrity,
+            LibOpAgree.run,
+            inputs
+        );
+    }
+
+    /// THE PROPERTY THAT MAKES THE WORD CORRECT, tested directly.
+    ///
+    /// `agree` checks only the highest against the lowest. It is allowed to do
+    /// that because the spread is the largest pairwise difference, so bounding
+    /// it bounds every pair — which is why the anchor is global rather than
+    /// per pair, since a per-pair anchor would give a different limit for each
+    /// pair and no single spread could summarise them.
+    ///
+    /// That claim is the design, and until now nothing tested it. This asserts
+    /// the highest-to-lowest answer equals an explicit check of EVERY pair
+    /// against the same global limit.
+    ///
+    /// SCOPE. This is not an oracle for the formula. Both sides take the limit
+    /// from the same `limitOf`, so a wrong limit moves both together and this
+    /// test stays green. What it does pin is that the extremes really are the
+    /// extremes and that their spread dominates every pairwise difference,
+    /// which is the specific licence `agree` takes to look at two values
+    /// instead of all of them. `testOpAgreeAgainstPackedFloatOracle` is the
+    /// independent check on the formula itself.
+    function testOpAgreeSpreadBoundsEveryPair(
+        bytes32[8] memory fuzzedValues,
+        uint256 count,
+        ToleranceFuzz memory tolerances
+    ) external pure {
+        // The pairwise walk is quadratic, so the list is kept small.
+        bytes32[] memory rawValues = takeValues(fuzzedValues, count);
+
+        bool viaSpread;
+        int256 limitCoefficient;
+        int256 limitExponent;
+        {
+            (Float absolute, Float proportional) = boundTolerances(tolerances);
+            (Float lowest, Float highest) = extremesOf(rawValues);
+            viaSpread = LibOpAgree.agreedAt(absolute, proportional, lowest, highest);
+            (limitCoefficient, limitExponent) = LibOpAgree.limitOf(absolute, proportional, lowest, highest);
+        }
+
+        bool viaEveryPair = true;
+        for (uint256 i = 0; i < rawValues.length; i++) {
+            for (uint256 j = i + 1; j < rawValues.length; j++) {
+                if (!withinLimit(Float.wrap(rawValues[i]), Float.wrap(rawValues[j]), limitCoefficient, limitExponent)) {
+                    viaEveryPair = false;
+                }
+            }
+        }
+
+        assertEq(viaSpread, viaEveryPair);
+    }
+
+    /// An exact integer value for the packed oracle's restricted domain.
+    function exactValue(int256 seed) internal pure returns (Float) {
+        return LibDecimalFloat.packLossless(bound(seed, -1e12, 1e12), 0);
+    }
+
+    /// The formula, composed INDEPENDENTLY from the packed `Float` API.
+    ///
+    /// `LibOpAgree` works at `LibDecimalFloatImplementation` level on unpacked
+    /// coefficient/exponent pairs. This goes through `LibDecimalFloat` on
+    /// packed floats instead — a different code path, composed here rather
+    /// than in the library — so the two can disagree if either is wrong.
+    function packedOracle(Float absolute, Float proportional, Float lowest, Float highest)
+        internal
+        pure
+        returns (bool)
+    {
+        Float lowestMagnitude = lowest.abs();
+        Float highestMagnitude = highest.abs();
+        Float anchor = lowestMagnitude.gt(highestMagnitude) ? lowestMagnitude : highestMagnitude;
+        Float scaled = proportional.mul(anchor);
+        Float limit = absolute.gt(scaled) ? absolute : scaled;
+        return highest.sub(lowest).lte(limit);
+    }
+
+    /// THE INDEPENDENT ORACLE FOR THE FORMULA.
+    ///
+    /// This is the check that `run` and `referenceFn` cannot provide between
+    /// them, because they share `agreedAt` and so agree with each other
+    /// whatever the formula says. Here the expected answer is built from the
+    /// packed `Float` API instead, so a wrong expression in the library shows
+    /// up as a disagreement rather than as two matching wrong answers.
+    ///
+    /// THE DOMAIN IS RESTRICTED ON PURPOSE. Values are integers up to 1e12,
+    /// the absolute tolerance is an integer, and the proportional tolerance
+    /// has two decimal places. Every operation on both paths is exact there,
+    /// so the two must agree EXACTLY. Widening the domain would make them
+    /// disagree by an ulp at boundaries — a difference in rounding, not in the
+    /// formula — and the test would be measuring the wrong thing. The
+    /// representable extremes are covered by
+    /// `testOpAgreeEvalExtremeTolerance` instead.
+    function testOpAgreeAgainstPackedFloatOracle(int256[4] memory seeds, ToleranceFuzz memory tolerances)
+        external
+        pure
+    {
+        Float absolute = LibDecimalFloat.packLossless(bound(tolerances.absoluteCoefficient, 0, 1e12), 0);
+        Float proportional = LibDecimalFloat.packLossless(bound(tolerances.proportionalCoefficient, 0, 1000), -2);
+        if (absolute.isZero() && proportional.isZero()) {
+            proportional = LibDecimalFloat.packLossless(1, -2);
+        }
+
+        Float lowest = exactValue(seeds[0]);
+        Float highest = lowest;
+        for (uint256 i = 1; i < seeds.length; i++) {
+            Float value = exactValue(seeds[i]);
+            if (value.lt(lowest)) {
+                lowest = value;
+            }
+            if (value.gt(highest)) {
+                highest = value;
+            }
+        }
+
+        assertEq(
+            LibOpAgree.agreedAt(absolute, proportional, lowest, highest),
+            packedOracle(absolute, proportional, lowest, highest)
+        );
     }
 
     /// Zero inputs is a parse time error.
@@ -327,6 +544,67 @@ contract LibOpAgreeTest is OpTest {
             "_: agree(0 0.01 100 100.1 100.2 100.3 100.4 100.5 100.6 100.7 100.8 100.9 100.05 100.25 99);",
             0,
             "13 values with one outlier"
+        );
+    }
+
+    /// TOLERANCES AT THE REPRESENTABLE EXTREMES, which a mint admin can
+    /// plausibly configure and which nothing else here covers.
+    ///
+    /// The expectation is derived rather than observed.
+    /// `LibDecimalFloatImplementation.mul` does not overflow a large product:
+    /// it divides the coefficient down and raises the exponent instead, and
+    /// `limitOf` never packs the result back into a `Float`, so nothing here
+    /// can reach `ExponentOverflow`. A gigantic tolerance therefore has to
+    /// mean "everything agrees" rather than "revert", and the smallest
+    /// positive tolerance has to behave as a tolerance of almost nothing
+    /// rather than as zero.
+    function testOpAgreeEvalExtremeTolerance() external view {
+        checkHappy(
+            "_: agree(0 max-positive-value() 1 2);", bytes32(uint256(1)), "largest proportional tolerance accepts"
+        );
+        checkHappy("_: agree(max-positive-value() 0 1 2);", bytes32(uint256(1)), "largest absolute tolerance accepts");
+        // Against the widest spread the value range allows.
+        checkHappy(
+            "_: agree(0 max-positive-value() min-negative-value() max-positive-value());",
+            bytes32(uint256(1)),
+            "largest proportional tolerance spans the whole range"
+        );
+        // The smallest positive tolerance is a tolerance, not a zero: it
+        // accepts an exactly zero spread and rejects anything wider.
+        checkHappy("_: agree(min-positive-value() 0 1 1);", bytes32(uint256(1)), "smallest tolerance, zero spread");
+        checkHappy("_: agree(min-positive-value() 0 1 2);", 0, "smallest tolerance, nonzero spread");
+    }
+
+    /// The anchor is the largest magnitude wherever it sits in the ARGUMENT
+    /// LIST, not the first value or the last one.
+    ///
+    /// `agree(0 0.01 99 100 99.5)` puts the largest magnitude in the middle.
+    /// Anchored correctly on 100 the limit is 1 and the spread is exactly 1,
+    /// so it is accepted. Anchoring on the first value gives 0.99 and
+    /// anchoring on the last gives 0.995, and both reject — so this
+    /// distinguishes the real anchor from the two positional shortcuts that
+    /// the ordering test alone would not catch.
+    function testOpAgreeEvalAnchorPositionInArgumentList() external view {
+        checkHappy("_: agree(0 0.01 99 100 99.5);", bytes32(uint256(1)), "largest magnitude in the middle");
+        checkHappy("_: agree(0 0.01 -99 -100 -99.5);", bytes32(uint256(1)), "largest magnitude in the middle, negative");
+        // Same three values, largest magnitude moved to each end, to show the
+        // answer does not depend on where it sits.
+        checkHappy("_: agree(0 0.01 100 99 99.5);", bytes32(uint256(1)), "largest magnitude first");
+        checkHappy("_: agree(0 0.01 99 99.5 100);", bytes32(uint256(1)), "largest magnitude last");
+    }
+
+    /// Tolerance validation depends on the tolerances ALONE, so it reverts
+    /// whatever the values are and however many of them there are. Checked at
+    /// the maximum input count, where the walk has the most work to do and the
+    /// most opportunity to produce an answer before the check is reached.
+    function testOpAgreeEvalInvalidToleranceRevertsAtMaxInputs() external {
+        checkUnhappy(
+            "_: agree(-1 0.01 100 100.1 100.2 100.3 100.4 100.5 100.6 100.7 100.8 100.9 99.5 99.2 99);",
+            abi.encodeWithSelector(AgreeToleranceNegative.selector)
+        );
+        checkUnhappy(
+            "_: agree(0 0 100 100.1 100.2 100.3 100.4 100.5 100.6 100.7 100.8 100.9 99.5 99.2 99);",
+            abi.encodeWithSelector(AgreeNoPositiveTolerance.selector)
         );
     }
 
