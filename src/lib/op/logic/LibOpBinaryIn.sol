@@ -6,10 +6,9 @@ import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInte
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
-import {InNeedlesZero} from "../../../error/ErrIntegrity.sol";
+import {BinaryInNeedlesZero} from "../../../error/ErrIntegrity.sol";
 
-/// @title LibOpIn
+/// @title LibOpBinaryIn
 /// @notice Opcode to return 1 if every needle is a member of the set built from
 /// the remaining inputs, else 0.
 ///
@@ -18,12 +17,22 @@ import {InNeedlesZero} from "../../../error/ErrIntegrity.sol";
 /// in. There is exactly one set, so a single call answers "are all of these
 /// values in this list".
 ///
-/// Membership is numerical equality, the same equality `equal-to` uses, so
-/// `1.0` is in `(1)`. Use `binary-equal-to` style comparisons directly if
-/// binary equality is wanted instead.
-library LibOpIn {
-    using LibDecimalFloat for Float;
-
+/// MEMBERSHIP IS BINARY EQUALITY, the same equality `binary-equal-to` uses:
+/// the words are compared bit for bit and nothing is interpreted as a number.
+///
+/// That is what makes this word safe for the job it exists for, which is
+/// asking whether an IDENTITY — a signer, a token symbol — is in an
+/// allowlist. Numerical equality would decode each word as a `Float` and
+/// compare the values, and two distinct identities can decode to the same
+/// value: a coefficient and exponent of `(100, 0)` is numerically equal to
+/// `(10, 1)` while being a different word. An allowlist checked that way can
+/// be satisfied by something that was never on it, so membership of a set of
+/// identities has to be bit for bit.
+///
+/// Use it on quantities only where bitwise identity is genuinely what is
+/// wanted, since two numerically equal quantities can be packed differently
+/// and will NOT match here.
+library LibOpBinaryIn {
     /// @notice `in` integrity check. The low 16 bits of the operand are the
     /// number of needles, which must be at least 1. There must be at least one
     /// more input than there are needles, so that the set is not empty.
@@ -37,7 +46,7 @@ library LibOpIn {
         // an `ensure` guard wants, so it is rejected at deploy time rather than
         // silently passing at runtime.
         if (needles == 0) {
-            revert InNeedlesZero();
+            revert BinaryInNeedlesZero();
         }
         uint256 inputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
         // Every needle plus at least one set member. Reporting the minimum when
@@ -50,8 +59,8 @@ library LibOpIn {
         return (inputs, 1);
     }
 
-    /// @notice IN
-    /// 1 if every needle is numerically equal to at least one set member, else
+    /// @notice BINARY IN
+    /// 1 if every needle is bitwise identical to at least one set member, else
     /// 0.
     /// @param operand Low 16 bits encode the needle count, low 4 bits of the
     /// high byte encode the input count.
@@ -68,7 +77,7 @@ library LibOpIn {
             bool allIn = true;
             Pointer needleCursor = stackTop;
             while (Pointer.unwrap(needleCursor) < Pointer.unwrap(setStart)) {
-                Float needle;
+                bytes32 needle;
                 assembly ("memory-safe") {
                     needle := mload(needleCursor)
                 }
@@ -76,11 +85,11 @@ library LibOpIn {
                 bool found = false;
                 Pointer setCursor = setStart;
                 while (Pointer.unwrap(setCursor) < Pointer.unwrap(end)) {
-                    Float member;
+                    bytes32 member;
                     assembly ("memory-safe") {
                         member := mload(setCursor)
                     }
-                    if (needle.eq(member)) {
+                    if (needle == member) {
                         found = true;
                         break;
                     }
@@ -103,7 +112,8 @@ library LibOpIn {
         return stackTop;
     }
 
-    /// @notice Gas intensive reference implementation of IN for testing.
+    /// @notice Gas intensive reference implementation of BINARY IN for
+    /// testing.
     /// @param operand Low 16 bits encode the needle count.
     /// @param inputs The input values from the stack.
     /// @return outputs The output values to push onto the stack.
@@ -116,10 +126,10 @@ library LibOpIn {
 
         bool allIn = true;
         for (uint256 i = 0; i < needles; i++) {
-            Float needle = Float.wrap(StackItem.unwrap(inputs[i]));
+            bytes32 needle = StackItem.unwrap(inputs[i]);
             bool found = false;
             for (uint256 j = needles; j < inputs.length; j++) {
-                if (needle.eq(Float.wrap(StackItem.unwrap(inputs[j])))) {
+                if (needle == StackItem.unwrap(inputs[j])) {
                     found = true;
                 }
             }

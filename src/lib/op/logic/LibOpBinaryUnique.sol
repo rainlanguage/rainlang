@@ -6,22 +6,32 @@ import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInte
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 
-/// @title LibOpUnique
+/// @title LibOpBinaryUnique
 /// @notice Opcode to return 1 if every input is distinct from every other
 /// input, else 0.
 ///
-/// The matched pair of `equal-to`: `equal-to` asserts every input is the same,
-/// `unique` asserts every input differs. Both are variadic and both are
+/// The matched pair of `binary-equal-to`: that word asserts every input is the
+/// same, this one asserts every input differs. Both are variadic and both are
 /// intended as `ensure` predicates.
 ///
-/// Distinctness is numerical, the same equality `equal-to` uses, so `1` and
-/// `1.0` are NOT unique with respect to each other.
-library LibOpUnique {
-    using LibDecimalFloat for Float;
-
-    /// @notice `unique` integrity check. Requires at least 2 inputs and
+/// DISTINCTNESS IS BINARY, the same equality `binary-equal-to` uses: the words
+/// are compared bit for bit and nothing is interpreted as a number.
+///
+/// That is what makes this word safe for the job it exists for, which is
+/// asserting that a set of IDENTITIES — signers filling distinct seats — has
+/// no repeats. Numerical equality would decode each word as a `Float`, and two
+/// distinct identities can decode to the same value: a coefficient and
+/// exponent of `(100, 0)` is numerically equal to `(10, 1)` while being a
+/// different word. A uniqueness check that way can REJECT two distinct
+/// identities as duplicates, and one that way over a differently packed set
+/// can ACCEPT the same identity twice, so distinctness of identities has to be
+/// bit for bit.
+///
+/// Use it on quantities only where bitwise identity is genuinely what is
+/// wanted, since `1` and `1.0` are numerically equal but distinct here.
+library LibOpBinaryUnique {
+    /// @notice `binary-unique` integrity check. Requires at least 2 inputs and
     /// produces 1 output. A single value is trivially unique, which is a
     /// vacuous guard, so the minimum is 2.
     /// @param operand Low 4 bits of the high byte encode the input count.
@@ -34,8 +44,8 @@ library LibOpUnique {
         return (inputs, 1);
     }
 
-    /// @notice UNIQUE
-    /// 1 if no two inputs are numerically equal, else 0.
+    /// @notice BINARY UNIQUE
+    /// 1 if no two inputs are bitwise identical, else 0.
     /// @param operand Low 4 bits of the high byte encode the input count.
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
@@ -47,18 +57,18 @@ library LibOpUnique {
             bool unique = true;
             Pointer aCursor = stackTop;
             while (Pointer.unwrap(aCursor) < Pointer.unwrap(end)) {
-                Float a;
+                bytes32 a;
                 assembly ("memory-safe") {
                     a := mload(aCursor)
                 }
 
                 Pointer bCursor = Pointer.wrap(Pointer.unwrap(aCursor) + 0x20);
                 while (Pointer.unwrap(bCursor) < Pointer.unwrap(end)) {
-                    Float b;
+                    bytes32 b;
                     assembly ("memory-safe") {
                         b := mload(bCursor)
                     }
-                    if (a.eq(b)) {
+                    if (a == b) {
                         unique = false;
                         break;
                     }
@@ -80,7 +90,8 @@ library LibOpUnique {
         return stackTop;
     }
 
-    /// @notice Gas intensive reference implementation of UNIQUE for testing.
+    /// @notice Gas intensive reference implementation of BINARY UNIQUE for
+    /// testing.
     /// @param inputs The input values from the stack.
     /// @return outputs The output values to push onto the stack.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
@@ -94,7 +105,7 @@ library LibOpUnique {
                 if (i == j) {
                     continue;
                 }
-                if (Float.wrap(StackItem.unwrap(inputs[i])).eq(Float.wrap(StackItem.unwrap(inputs[j])))) {
+                if (StackItem.unwrap(inputs[i]) == StackItem.unwrap(inputs[j])) {
                     unique = false;
                 }
             }

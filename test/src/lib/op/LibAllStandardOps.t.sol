@@ -142,29 +142,29 @@ contract LibAllStandardOpsTest is Test {
         //forge-lint: disable-next-line(unsafe-typecast)
         assertEq(words[29].word, bytes32("binary-equal-to"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[30].word, bytes32("conditions"));
+        assertEq(words[30].word, bytes32("binary-in"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[31].word, bytes32("ensure"));
+        assertEq(words[31].word, bytes32("binary-unique"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[32].word, bytes32("equal-to"));
+        assertEq(words[32].word, bytes32("conditions"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[33].word, bytes32("every"));
+        assertEq(words[33].word, bytes32("ensure"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[34].word, bytes32("greater-than"));
+        assertEq(words[34].word, bytes32("equal-to"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[35].word, bytes32("greater-than-or-equal-to"));
+        assertEq(words[35].word, bytes32("every"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[36].word, bytes32("if"));
+        assertEq(words[36].word, bytes32("greater-than"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[37].word, bytes32("in"));
+        assertEq(words[37].word, bytes32("greater-than-or-equal-to"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[38].word, bytes32("is-zero"));
+        assertEq(words[38].word, bytes32("if"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[39].word, bytes32("less-than"));
+        assertEq(words[39].word, bytes32("is-zero"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[40].word, bytes32("less-than-or-equal-to"));
+        assertEq(words[40].word, bytes32("less-than"));
         //forge-lint: disable-next-line(unsafe-typecast)
-        assertEq(words[41].word, bytes32("unique"));
+        assertEq(words[41].word, bytes32("less-than-or-equal-to"));
         // math/
         //forge-lint: disable-next-line(unsafe-typecast)
         assertEq(words[42].word, bytes32("abs"));

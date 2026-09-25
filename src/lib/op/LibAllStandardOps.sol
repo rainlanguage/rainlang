@@ -48,6 +48,8 @@ import {LibOpChainId} from "./evm/LibOpChainId.sol";
 import {LibOpAgree} from "./logic/LibOpAgree.sol";
 import {LibOpAny} from "./logic/LibOpAny.sol";
 import {LibOpBinaryEqualTo} from "./logic/LibOpBinaryEqualTo.sol";
+import {LibOpBinaryIn} from "./logic/LibOpBinaryIn.sol";
+import {LibOpBinaryUnique} from "./logic/LibOpBinaryUnique.sol";
 import {LibOpConditions} from "./logic/LibOpConditions.sol";
 import {LibOpEnsure} from "./logic/LibOpEnsure.sol";
 import {LibOpEqualTo} from "./logic/LibOpEqualTo.sol";
@@ -55,11 +57,9 @@ import {LibOpEvery} from "./logic/LibOpEvery.sol";
 import {LibOpGreaterThan} from "./logic/LibOpGreaterThan.sol";
 import {LibOpGreaterThanOrEqualTo} from "./logic/LibOpGreaterThanOrEqualTo.sol";
 import {LibOpIf} from "./logic/LibOpIf.sol";
-import {LibOpIn} from "./logic/LibOpIn.sol";
 import {LibOpIsZero} from "./logic/LibOpIsZero.sol";
 import {LibOpLessThan} from "./logic/LibOpLessThan.sol";
 import {LibOpLessThanOrEqualTo} from "./logic/LibOpLessThanOrEqualTo.sol";
-import {LibOpUnique} from "./logic/LibOpUnique.sol";
 
 import {LibOpAbs} from "./math/LibOpAbs.sol";
 import {LibOpAdd} from "./math/LibOpAdd.sol";
@@ -231,6 +231,14 @@ library LibAllStandardOps {
             AuthoringMetaV2("any", "The first non-zero value out of all inputs, or 0 if every input is 0."),
             AuthoringMetaV2("binary-equal-to", "1 if all inputs are equal, 0 otherwise. Equality is binary."),
             AuthoringMetaV2(
+                "binary-in",
+                "1 if every needle is in the set, 0 otherwise. The operand is the number of needles. The first that many inputs are the needles and every subsequent input is a member of the set they must be in. Membership is binary equality, as per binary-equal-to, so identities such as signers and symbols compare bit for bit and are never decoded as numbers."
+            ),
+            AuthoringMetaV2(
+                "binary-unique",
+                "1 if every input is distinct from every other input, 0 otherwise. Distinctness is binary, as per binary-equal-to, so identities compare bit for bit and 1 and 1.0 ARE distinct here."
+            ),
+            AuthoringMetaV2(
                 "conditions",
                 "Treats inputs as pairwise condition/value pairs. The first nonzero condition's value is used. If no conditions are nonzero, the expression reverts. Provide a constant nonzero value to define a fallback case. If the number of inputs is odd, the final value is used as an error string in the case that no conditions match."
             ),
@@ -250,20 +258,12 @@ library LibAllStandardOps {
                 "If the first input is nonzero, the second input is used. Otherwise, the third input is used. If is eagerly evaluated."
             ),
             AuthoringMetaV2(
-                "in",
-                "1 if every needle is in the set, 0 otherwise. The operand is the number of needles. The first that many inputs are the needles and every subsequent input is a member of the set they must be in. Membership is numerical equality, as per equal-to."
-            ),
-            AuthoringMetaV2(
                 "is-zero",
                 "1 if the input is 0, 0 otherwise. The input is any numerical 0 value, not just binary 0 e.g. 0e20 is considered 0."
             ),
             AuthoringMetaV2("less-than", "1 if each input is less than the input after it, 0 otherwise."),
             AuthoringMetaV2(
                 "less-than-or-equal-to", "1 if each input is less than or equal to the input after it, 0 otherwise."
-            ),
-            AuthoringMetaV2(
-                "unique",
-                "1 if every input is distinct from every other input, 0 otherwise. Distinctness is numerical, as per equal-to, so 1 and 1.0 are not unique with respect to each other."
             ),
             // math/
             AuthoringMetaV2("abs", "The absolute value of a number."),
@@ -459,6 +459,10 @@ library LibAllStandardOps {
                     LibParseOperand.handleOperandDisallowed,
                     // binary-equal-to
                     LibParseOperand.handleOperandDisallowed,
+                    // binary-in
+                    LibParseOperand.handleOperandSingleFullNoDefault,
+                    // binary-unique
+                    LibParseOperand.handleOperandDisallowed,
                     // conditions
                     LibParseOperand.handleOperandDisallowed,
                     // ensure
@@ -473,15 +477,11 @@ library LibAllStandardOps {
                     LibParseOperand.handleOperandDisallowed,
                     // if
                     LibParseOperand.handleOperandDisallowed,
-                    // in
-                    LibParseOperand.handleOperandSingleFullNoDefault,
                     // is-zero
                     LibParseOperand.handleOperandDisallowed,
                     // less-than
                     LibParseOperand.handleOperandDisallowed,
                     // less-than-or-equal-to
-                    LibParseOperand.handleOperandDisallowed,
-                    // unique
                     LibParseOperand.handleOperandDisallowed,
                     // abs
                     LibParseOperand.handleOperandDisallowed,
@@ -614,6 +614,8 @@ library LibAllStandardOps {
                     LibOpAgree.integrity,
                     LibOpAny.integrity,
                     LibOpBinaryEqualTo.integrity,
+                    LibOpBinaryIn.integrity,
+                    LibOpBinaryUnique.integrity,
                     LibOpConditions.integrity,
                     LibOpEnsure.integrity,
                     LibOpEqualTo.integrity,
@@ -621,11 +623,9 @@ library LibAllStandardOps {
                     LibOpGreaterThan.integrity,
                     LibOpGreaterThanOrEqualTo.integrity,
                     LibOpIf.integrity,
-                    LibOpIn.integrity,
                     LibOpIsZero.integrity,
                     LibOpLessThan.integrity,
                     LibOpLessThanOrEqualTo.integrity,
-                    LibOpUnique.integrity,
                     LibOpAbs.integrity,
                     LibOpAdd.integrity,
                     LibOpAvg.integrity,
@@ -722,6 +722,8 @@ library LibAllStandardOps {
                     LibOpAgree.run,
                     LibOpAny.run,
                     LibOpBinaryEqualTo.run,
+                    LibOpBinaryIn.run,
+                    LibOpBinaryUnique.run,
                     LibOpConditions.run,
                     LibOpEnsure.run,
                     LibOpEqualTo.run,
@@ -729,11 +731,9 @@ library LibAllStandardOps {
                     LibOpGreaterThan.run,
                     LibOpGreaterThanOrEqualTo.run,
                     LibOpIf.run,
-                    LibOpIn.run,
                     LibOpIsZero.run,
                     LibOpLessThan.run,
                     LibOpLessThanOrEqualTo.run,
-                    LibOpUnique.run,
                     LibOpAbs.run,
                     LibOpAdd.run,
                     LibOpAvg.run,

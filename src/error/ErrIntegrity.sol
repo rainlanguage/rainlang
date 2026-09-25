@@ -61,4 +61,4 @@ error OpcodeOutOfRange(uint256 opIndex, uint256 opcodeIndex, uint256 fsCount);
 /// @notice Thrown when the `in` operand declares zero needles. Zero needles
 /// would make the membership check vacuously true, which is never what an
 /// `ensure` guard wants, so it is rejected at deploy time.
-error InNeedlesZero();
+error BinaryInNeedlesZero();
