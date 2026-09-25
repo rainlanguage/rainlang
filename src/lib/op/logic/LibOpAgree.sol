@@ -246,23 +246,25 @@ library LibOpAgree {
     /// nothing was wanted. Either tolerance ALONE may be zero; that is how an
     /// expression asks for only the other one.
     ///
-    /// The positive test is written against zero rather than against the
-    /// negative check above, i.e. `<= 0` rather than `== 0`, so that it states
-    /// the invariant on its own terms and stays correct if that check is ever
-    /// moved or removed.
+    /// The positive test is `neither is greater than zero` rather than `both
+    /// are zero`, so that it states the invariant on its own terms rather than
+    /// naming one case that violates it, and stays correct if the negative
+    /// check above is ever moved or removed.
     ///
-    /// A float's sign and zero-ness are carried entirely by its coefficient,
-    /// so the exponent is not read here and every representation of zero —
-    /// `0`, `0e0`, `0.0` — is treated alike.
+    /// Both tests compare against a zero `Float` rather than unpacking, so the
+    /// comparisons are numerical and every representation of zero — `0`,
+    /// `0e0`, `0.0` — is treated alike. Unpacking and reading only the
+    /// coefficient would be equivalent, since a float's sign and zero-ness
+    /// live entirely there, but it discards the exponent and slither reads a
+    /// partly ignored tuple return as `unused-return`.
     /// @param absolute The absolute tolerance.
     /// @param proportional The proportional tolerance.
     function validateTolerances(Float absolute, Float proportional) internal pure {
-        (int256 absoluteCoefficient,) = absolute.unpack();
-        (int256 proportionalCoefficient,) = proportional.unpack();
-        if (absoluteCoefficient < 0 || proportionalCoefficient < 0) {
+        Float zero = LibDecimalFloat.packLossless(0, 0);
+        if (absolute.lt(zero) || proportional.lt(zero)) {
             revert AgreeToleranceNegative();
         }
-        if (absoluteCoefficient <= 0 && proportionalCoefficient <= 0) {
+        if (!absolute.gt(zero) && !proportional.gt(zero)) {
             revert AgreeNoPositiveTolerance();
         }
     }
