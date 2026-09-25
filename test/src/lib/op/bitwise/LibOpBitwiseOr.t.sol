@@ -11,17 +11,24 @@ import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 
 contract LibOpBitwiseOrTest is OpTest {
-    /// Directly test the integrity logic of LibOpBitwiseOr. All possible
-    /// operands result in the same number of inputs and outputs, (2, 1).
-    function testOpBitwiseORIntegrity(IntegrityCheckState memory state, OperandV2 operand) external pure {
-        (uint256 calcInputs, uint256 calcOutputs) = LibOpBitwiseOr.integrity(state, operand);
-        assertEq(calcInputs, 2);
+    /// Directly test the integrity logic of LibOpBitwiseOr. The operand's input
+    /// count is honoured, floored at 2, and there is always 1 output.
+    function testOpBitwiseOrIntegrity(IntegrityCheckState memory state, uint8 inputs, uint8 outputs, uint16 operandData)
+        external
+        pure
+    {
+        inputs = uint8(bound(inputs, 2, 0x0F));
+        outputs = uint8(bound(outputs, 0, 0x0F));
+        (uint256 calcInputs, uint256 calcOutputs) =
+            LibOpBitwiseOr.integrity(state, LibOperand.build(inputs, outputs, operandData));
+
+        assertEq(calcInputs, inputs);
         assertEq(calcOutputs, 1);
     }
 
     /// Directly test the runtime logic of LibOpBitwiseOr. This tests that the
     /// opcode correctly pushes the bitwise OR onto the stack.
-    function testOpBitwiseORRun(StackItem x, StackItem y) external view {
+    function testOpBitwiseOrRun(StackItem x, StackItem y) external view {
         InterpreterState memory state = opTestDefaultInterpreterState();
         StackItem[] memory inputs = new StackItem[](2);
         inputs[0] = x;
@@ -33,7 +40,7 @@ contract LibOpBitwiseOrTest is OpTest {
     }
 
     /// Test the eval of bitwise OR parsed from a string.
-    function testOpBitwiseOREval() external view {
+    function testOpBitwiseOrEval() external view {
         checkHappy("_: bitwise-or(0x00 0x00);", 0, "0 0");
         checkHappy("_: bitwise-or(0x00 0x01);", bytes32(uint256(1)), "0 1");
         checkHappy("_: bitwise-or(0x01 0x00);", bytes32(uint256(1)), "1 0");
@@ -53,28 +60,32 @@ contract LibOpBitwiseOrTest is OpTest {
     }
 
     /// Test that a bitwise OR with bad inputs fails integrity.
-    function testOpBitwiseOREvalZeroInputs() external {
+    function testOpBitwiseOrEvalZeroInputs() external {
         checkBadInputs("_: bitwise-or();", 0, 2, 0);
     }
 
-    function testOpBitwiseOREvalOneInput() external {
+    function testOpBitwiseOrEvalOneInput() external {
         checkBadInputs("_: bitwise-or(0);", 1, 2, 1);
     }
 
-    function testOpBitwiseOREvalThreeInputs() external {
-        checkBadInputs("_: bitwise-or(0 0 0);", 3, 2, 3);
+    /// Three inputs fold rather than failing integrity. Derived from the
+    /// fold, not observed: bitwise-or is associative and commutative, so
+    /// `bitwise-or(a b c)` is `a | b | c` whatever the order.
+    function testOpBitwiseOrEvalThreeInputs() external view {
+        checkHappy("_: bitwise-or(0x03 0x05 0x09);", bytes32(uint256(0x03 | 0x05 | 0x09)), "");
+        checkHappy("_: bitwise-or(0x0F 0x0F 0x0F);", bytes32(uint256(0x0F)), "");
     }
 
-    function testOpBitwiseOREvalZeroOutputs() external {
+    function testOpBitwiseOrEvalZeroOutputs() external {
         checkBadOutputs(": bitwise-or(0 0);", 2, 1, 0);
     }
 
-    function testOpBitwiseOREvalTwoOutputs() external {
+    function testOpBitwiseOrEvalTwoOutputs() external {
         checkBadOutputs("_ _: bitwise-or(0 0);", 2, 1, 2);
     }
 
     /// Test that operand is disallowed.
-    function testOpBitwiseOREvalBadOperand() external {
+    function testOpBitwiseOrEvalBadOperand() external {
         checkUnhappyParse("_: bitwise-or<0>(0 0);", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }

@@ -9,35 +9,63 @@ import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpLessThan
-/// @notice Opcode to return 1 if the first item on the stack is less than
-/// the second item on the stack, else 0.
+/// @notice Opcode to return 1 if every item on the stack up to the inputs limit
+/// is less than the item after it, else 0. Comparisons are chained, so two
+/// inputs is the binary case, `less-than(a b)`, and more than two inputs holds
+/// when every adjacent pair holds, e.g. `less-than(a b c)` is `a < b < c`.
 library LibOpLessThan {
     using LibDecimalFloat for Float;
 
-    /// @notice `less-than` integrity check. Requires exactly 2 inputs and produces 1 output.
+    /// @notice `less-than` integrity check. Requires at least 2 inputs and
+    /// produces 1 output.
+    /// @param operand Low 4 bits of the high byte encode the input count.
     /// @return The number of inputs.
     /// @return The number of outputs.
-    function integrity(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256) {
-        return (2, 1);
+    function integrity(IntegrityCheckState memory, OperandV2 operand) internal pure returns (uint256, uint256) {
+        // There must be at least two inputs.
+        uint256 inputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
+        inputs = inputs > 1 ? inputs : 2;
+        return (inputs, 1);
     }
 
     /// @notice LT
-    /// LT is 1 if the first item is less than the second item, else 0.
+    /// LT is 1 if every item is less than the item after it, else 0.
+    /// @param operand Low 4 bits of the high byte encode the input count.
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
-    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal pure returns (Pointer) {
-        Float a;
-        Float b;
-        assembly ("memory-safe") {
-            a := mload(stackTop)
-            stackTop := add(stackTop, 0x20)
-            b := mload(stackTop)
+    function run(InterpreterState memory, OperandV2 operand, Pointer stackTop) internal pure returns (Pointer) {
+        unchecked {
+            uint256 length = 0x20 * (uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F);
+            Pointer cursor = stackTop;
+            Pointer end = Pointer.wrap(Pointer.unwrap(stackTop) + length);
+            stackTop = Pointer.wrap(Pointer.unwrap(end) - 0x20);
+
+            Float a;
+            assembly ("memory-safe") {
+                a := mload(cursor)
+            }
+            cursor = Pointer.wrap(Pointer.unwrap(cursor) + 0x20);
+
+            bool lessThan = true;
+            while (Pointer.unwrap(cursor) < Pointer.unwrap(end)) {
+                Float b;
+                assembly ("memory-safe") {
+                    b := mload(cursor)
+                }
+                lessThan = a.lt(b);
+                if (!lessThan) {
+                    break;
+                }
+                a = b;
+                cursor = Pointer.wrap(Pointer.unwrap(cursor) + 0x20);
+            }
+
+            assembly ("memory-safe") {
+                mstore(stackTop, lessThan)
+            }
+
+            return stackTop;
         }
-        bool lessThan = a.lt(b);
-        assembly ("memory-safe") {
-            mstore(stackTop, lessThan)
-        }
-        return stackTop;
     }
 
     /// @notice Gas intensive reference implementation of LT for testing.
@@ -48,9 +76,16 @@ library LibOpLessThan {
         pure
         returns (StackItem[] memory outputs)
     {
-        Float a = Float.wrap(StackItem.unwrap(inputs[0]));
-        Float b = Float.wrap(StackItem.unwrap(inputs[1]));
-        bool lessThan = a.lt(b);
+        bool lessThan = true;
+        for (uint256 i = 1; i < inputs.length; i++) {
+            Float a = Float.wrap(StackItem.unwrap(inputs[i - 1]));
+            Float b = Float.wrap(StackItem.unwrap(inputs[i]));
+            lessThan = a.lt(b);
+            if (!lessThan) {
+                break;
+            }
+        }
+
         outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(bytes32(uint256(lessThan ? 1 : 0)));
     }
