@@ -22,6 +22,12 @@ import {BinaryInNeedlesZero} from "../../../error/ErrIntegrity.sol";
 /// still reaches the integrity check and reverts, because zero needles is a
 /// check that passes on nothing.
 ///
+/// THE NEEDLE COUNT IS CAPPED AT 14 in practice. The operand field holds a
+/// uint16, but an opcode takes at most 15 inputs, and the set needs at least
+/// one of them. A larger count asks for more inputs than an opcode can carry
+/// and is reported as `BadOpInputsLength` at deploy time, naming the input
+/// count it would have needed.
+///
 /// MEMBERSHIP IS BINARY EQUALITY, the same equality `binary-equal-to` uses:
 /// the words are compared bit for bit and nothing is interpreted as a number.
 ///

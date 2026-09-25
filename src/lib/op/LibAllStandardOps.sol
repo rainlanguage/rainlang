@@ -232,7 +232,7 @@ library LibAllStandardOps {
             AuthoringMetaV2("binary-equal-to", "1 if all inputs are equal, 0 otherwise. Equality is binary."),
             AuthoringMetaV2(
                 "binary-in",
-                "1 if every needle is in the set, 0 otherwise. The operand is the number of needles and defaults to 1 if omitted, so binary-in(x a b c) asks whether x is in (a b c). The first that many inputs are the needles and every subsequent input is a member of the set they must be in. Membership is binary equality, as per binary-equal-to, so identities such as signers and symbols compare bit for bit and are never decoded as numbers."
+                "1 if every needle is in the set, 0 otherwise. The operand is the number of needles and defaults to 1 if omitted, so binary-in(x a b c) asks whether x is in (a b c). At most 14 needles, since an opcode takes at most 15 inputs and the set needs one. The first that many inputs are the needles and every subsequent input is a member of the set they must be in. Membership is binary equality, as per binary-equal-to, so identities such as signers and symbols compare bit for bit and are never decoded as numbers."
             ),
             AuthoringMetaV2(
                 "binary-unique",
