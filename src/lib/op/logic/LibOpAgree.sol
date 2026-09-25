@@ -13,11 +13,11 @@ import {
 
 /// @title LibOpAgree
 /// @notice Opcode to return 1 if the highest and lowest of the values are no
-/// further apart than a combined tolerance, else 0.
+/// further apart than a tolerance drawn from two terms, else 0.
 ///
 /// The first input is an ABSOLUTE tolerance, the second is a PROPORTIONAL one,
 /// and every subsequent input is a value. The check is
-/// `highest - lowest <= absolute + proportional * max(abs(value))`.
+/// `highest - lowest <= max(absolute, proportional * max(abs(value)))`.
 ///
 /// BOTH TOLERANCES ARE ALWAYS GIVEN, neither defaults. A proportional
 /// tolerance alone breaks as the values approach zero, because a proportion of
@@ -25,8 +25,17 @@ import {
 /// as 200% apart while agreeing by any practical measure, and no anchor drawn
 /// from the values themselves avoids it, because every such anchor shrinks
 /// toward zero at the rate that makes the ratio diverge. An absolute tolerance
-/// alone does not scale with the values. The sum of the two covers the whole
-/// domain, and it is the standard form for comparing floats with a tolerance.
+/// alone does not scale with the values. Taking whichever of the two is larger
+/// covers the whole domain: the absolute term carries the region near zero,
+/// the proportional term carries the rest.
+///
+/// This is the form Python's `math.isclose` (PEP 485) and Julia's `isapprox`
+/// use. `numpy.isclose` instead SUMS the two terms, which PEP 485 rejects
+/// because "if the absolute and relative tolerances are of similar magnitude,
+/// then the allowed difference will be about twice as large as expected".
+/// Here the sum is rejected for a second reason on top of that one: it is the
+/// more permissive of the two, and this word is a guard that rounds toward
+/// rejecting.
 ///
 /// Requiring both means an expression that wants only one writes the other as
 /// zero, asserting that choice rather than inheriting it. A silently defaulted
@@ -50,13 +59,13 @@ import {
 ///
 /// ROUNDING. The spread is compared against the limit at full internal
 /// precision, i.e. neither is packed back into a `Float`, so the only places a
-/// value can be lost are the subtraction, the multiplication and the addition.
+/// value can be lost are the subtraction and the multiplication. Selecting the
+/// larger of two terms is exact, so taking the max rather than the sum removes
+/// a lossy operation rather than adding one.
 /// - The multiplication truncates the product's magnitude toward zero. The
 ///   anchor is a magnitude and so non-negative, and the proportional tolerance
 ///   is non-negative in any sane use, so the term can only come out smaller:
 ///   it only ever rounds toward rejecting.
-/// - The addition of two non-negative terms truncates toward zero, so the
-///   limit again only ever comes out smaller.
 /// - The subtraction truncates the operand with the smaller exponent toward
 ///   zero. `highest + (-lowest)` has opposite-signed operands whenever the
 ///   values share a sign, so shrinking one can only widen the spread, which
@@ -81,7 +90,7 @@ library LibOpAgree {
     }
 
     /// @notice AGREE
-    /// 1 if `highest - lowest <= absolute + proportional * max(abs(value))`,
+    /// 1 if `highest - lowest <= max(absolute, proportional * max(abs(value)))`,
     /// else 0.
     /// @param operand Low 4 bits of the high byte encode the input count.
     /// @param stackTop Pointer to the top of the stack.
@@ -168,8 +177,21 @@ library LibOpAgree {
             rescaledLowest >= rescaledHighest ? (lowestMagnitude, lowestExponent) : (highestMagnitude, highestExponent);
     }
 
-    /// @notice The combined tolerance the spread is checked against:
-    /// `absolute + proportional * anchor`.
+    /// @notice The tolerance the spread is checked against: whichever of the
+    /// two terms is LARGER, `max(absolute, proportional * anchor)`.
+    ///
+    /// Taking the larger rather than the sum is what keeps the word rounding
+    /// toward rejecting. For non-negative terms `max(a, b) <= a + b`, with
+    /// equality only when one of them is zero, so the sum accepts everything
+    /// the max accepts and more — up to twice as much where the two terms are
+    /// of similar size. An expression that sets only one tolerance gets the
+    /// same answer either way, because the other term is zero.
+    ///
+    /// A consequence worth stating: the terms do not cancel. A negative
+    /// tolerance is dominated by a non-negative one rather than subtracting
+    /// from it, so one non-negative term floors the limit at itself. Only when
+    /// BOTH terms are negative is the limit negative, and a spread is never
+    /// negative, so that rejects everything.
     /// @param absolute The absolute tolerance.
     /// @param proportional The proportional tolerance.
     /// @param lowest The lowest value.
@@ -191,13 +213,12 @@ library LibOpAgree {
             );
         }
         (int256 absoluteCoefficient, int256 absoluteExponent) = absolute.unpack();
-        // The two terms are summed rather than the larger of them taken, so a
-        // negative tolerance subtracts from the other rather than being
-        // clamped away. Destructured rather than returned directly for the
-        // same slither reason as `spreadOf`.
-        (int256 limitCoefficient, int256 limitExponent) =
-            LibDecimalFloatImplementation.add(absoluteCoefficient, absoluteExponent, scaledCoefficient, scaledExponent);
-        return (limitCoefficient, limitExponent);
+        (int256 rescaledAbsolute, int256 rescaledScaled) = LibDecimalFloatImplementation.compareRescale(
+            absoluteCoefficient, absoluteExponent, scaledCoefficient, scaledExponent
+        );
+        return rescaledAbsolute >= rescaledScaled
+            ? (absoluteCoefficient, absoluteExponent)
+            : (scaledCoefficient, scaledExponent);
     }
 
     /// @notice The comparison, shared by `run` and `referenceFn` so the two
@@ -210,7 +231,7 @@ library LibOpAgree {
     /// @param proportional The proportional tolerance.
     /// @param lowest The lowest value.
     /// @param highest The highest value.
-    /// @return Whether the spread is within the combined tolerance.
+    /// @return Whether the spread is within the tolerance.
     function agreedAt(Float absolute, Float proportional, Float lowest, Float highest) internal pure returns (bool) {
         (int256 spreadCoefficient, int256 spreadExponent) = spreadOf(lowest, highest);
         (int256 limitCoefficient, int256 limitExponent) = limitOf(absolute, proportional, lowest, highest);

@@ -120,20 +120,23 @@ contract LibOpAgreeTest is OpTest {
         checkHappy("_: agree(1 0 100 100.999999999999999999);", bytes32(uint256(1)), "a hair under the absolute limit");
     }
 
-    /// THE LIMIT IS THE SUM of the two tolerances, not either one alone.
+    /// THE LIMIT IS THE LARGER of the two terms, not their sum.
     ///
-    /// With an absolute tolerance of 0.5, a proportional tolerance of 0.01 and
-    /// a highest value of 100, the limit is 0.5 + (0.01 * 100) == 1.5, so a
-    /// lowest of 98.5 sits exactly on it. The same spread is rejected when
-    /// either tolerance is dropped to zero, which is what pins the sum: an
-    /// implementation returning only the absolute term, only the proportional
-    /// term, or the larger of the two fails at least one of these.
-    function testOpAgreeEvalCombined() external view {
-        checkHappy("_: agree(0.5 0.01 98.5 100);", bytes32(uint256(1)), "spread exactly the combined limit");
-        checkHappy("_: agree(0.5 0.01 98.499999999999999999 100);", 0, "a hair over the combined limit");
-        // The same spread against each tolerance alone.
-        checkHappy("_: agree(0 0.01 98.5 100);", 0, "the proportional term alone is not enough");
-        checkHappy("_: agree(0.5 0 98.5 100);", 0, "the absolute term alone is not enough");
+    /// Both cases below are constructed so that the sum and the max disagree,
+    /// because a spread that falls between them is accepted by the sum and
+    /// rejected by the max. Pinning both directions — proportional term
+    /// dominant, then absolute term dominant — also rules out an
+    /// implementation that always picks one side.
+    function testOpAgreeEvalLimitIsTheLarger() external view {
+        // Proportional dominant: max(0.5, 0.01 * 100) == 1, sum would be 1.5.
+        checkHappy("_: agree(0.5 0.01 99 100);", bytes32(uint256(1)), "spread exactly the larger term");
+        checkHappy("_: agree(0.5 0.01 98.999999999999999999 100);", 0, "a hair over the larger term");
+        checkHappy("_: agree(0.5 0.01 98.8 100);", 0, "a spread the sum would have accepted");
+
+        // Absolute dominant: max(5, 0.01 * 100) == 5, sum would be 6.
+        checkHappy("_: agree(5 0.01 95 100);", bytes32(uint256(1)), "spread exactly the larger term, absolute side");
+        checkHappy("_: agree(5 0.01 94.999999999999999999 100);", 0, "a hair over the larger term, absolute side");
+        checkHappy("_: agree(5 0.01 94.5 100);", 0, "a spread the sum would have accepted, absolute side");
     }
 
     /// Identical values agree within any non negative tolerance, including two
@@ -151,13 +154,25 @@ contract LibOpAgreeTest is OpTest {
         checkHappy("_: agree(0 0 100 100.000000000000000001);", 0, "zero tolerances, tiny spread");
     }
 
-    /// The spread is never negative, so a negative limit rejects everything.
+    /// Taking the larger of the two terms means they do not cancel: a negative
+    /// tolerance is dominated by a non-negative one rather than subtracting
+    /// from it, so one non-negative term floors the limit at itself.
+    ///
+    /// Only when BOTH terms are negative is the limit negative, and a spread
+    /// is never negative, so that is the case that rejects everything.
     function testOpAgreeEvalNegativeTolerance() external view {
-        checkHappy("_: agree(-1 0 100 100);", 0, "negative absolute tolerance, zero spread");
-        checkHappy("_: agree(0 -0.01 100 100);", 0, "negative proportional tolerance, zero spread");
-        // The terms are summed before the comparison, so a negative one can
-        // cancel a positive one rather than being clamped away.
-        checkHappy("_: agree(1 -0.01 100 100.5);", 0, "a negative proportional term cancels the absolute one");
+        checkHappy(
+            "_: agree(-1 0 100 100);", bytes32(uint256(1)), "negative absolute floored by a zero proportional term"
+        );
+        checkHappy(
+            "_: agree(0 -0.01 100 100);", bytes32(uint256(1)), "negative proportional floored by a zero absolute term"
+        );
+        // Floored at zero still rejects any spread at all.
+        checkHappy("_: agree(-1 0 100 101);", 0, "a limit floored at zero rejects a nonzero spread");
+        // A positive term dominates a negative one outright.
+        checkHappy("_: agree(1 -0.01 100 100.5);", bytes32(uint256(1)), "positive absolute dominates a negative term");
+        // Both negative is the only way to get a negative limit.
+        checkHappy("_: agree(-1 -0.01 100 100);", 0, "both terms negative rejects even a zero spread");
     }
 
     /// Only the highest and the lowest value matter, so the order the values
