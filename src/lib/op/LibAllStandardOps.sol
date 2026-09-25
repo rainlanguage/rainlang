@@ -236,7 +236,7 @@ library LibAllStandardOps {
             ),
             AuthoringMetaV2(
                 "binary-unique",
-                "1 if every input is distinct from every other input, 0 otherwise. Distinctness is binary, as per binary-equal-to, so identities compare bit for bit and 1 and 1.0 ARE distinct here."
+                "1 if every input is distinct from every other input, 0 otherwise. Distinctness is binary, as per binary-equal-to, so identities compare bit for bit. It compares the parsed word rather than the source text, so 0x01 and 10e-1 ARE distinct here despite being the same number, while 1 and 1.0 are not, because the parser strips trailing fractional zeros and both become the same word."
             ),
             AuthoringMetaV2(
                 "conditions",

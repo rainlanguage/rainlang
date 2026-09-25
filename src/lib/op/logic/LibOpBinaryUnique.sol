@@ -29,7 +29,10 @@ import {InterpreterState} from "../../state/LibInterpreterState.sol";
 /// bit for bit.
 ///
 /// Use it on quantities only where bitwise identity is genuinely what is
-/// wanted, since `1` and `1.0` are numerically equal but distinct here.
+/// wanted, since two words that are the same number can still be distinct
+/// here: `0x01` and `10e-1` are. Note this compares the PARSED WORD, not the
+/// source text — the decimal parser strips trailing fractional zeros, so `1`
+/// and `1.0` become the same word and are NOT distinct.
 library LibOpBinaryUnique {
     /// @notice `binary-unique` integrity check. Requires at least 2 inputs and
     /// produces 1 output. A single value is trivially unique, which is a

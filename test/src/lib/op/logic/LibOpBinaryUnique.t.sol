@@ -101,6 +101,15 @@ contract LibOpBinaryUniqueTest is OpTest {
         checkHappy("_: binary-unique(-1 -1);", 0, "-1 -1");
     }
 
+    /// Binary distinctness is about the PARSED WORD, not the source text. The
+    /// decimal parser strips trailing fractional zeros, so `1` and `1.0` parse
+    /// to the same word and are not distinct — writing a number differently is
+    /// not enough on its own.
+    function testOpBinaryUniqueEvalTrailingZerosAreTheSameWord() external view {
+        checkHappy("_: binary-unique(1 1.0);", 0, "1 and 1.0 parse to the same word");
+        checkHappy("_: binary-unique(1 1.00);", 0, "more trailing zeros, still the same word");
+    }
+
     /// Equality is BINARY, not numerical, so two words that are the same
     /// number written differently ARE distinct.
     function testOpBinaryUniqueEval2InputsNumericallyEqualAreDistinct() external view {
