@@ -10,6 +10,7 @@ import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFl
 import {
     LibDecimalFloatImplementation
 } from "rain-math-float-0.2.1/src/lib/implementation/LibDecimalFloatImplementation.sol";
+import {AgreeToleranceNegative, AgreeTolerancesZero} from "../../../error/ErrEval.sol";
 
 /// @title LibOpAgree
 /// @notice Opcode to return 1 if the highest and lowest of the values are no
@@ -42,6 +43,11 @@ import {
 /// absolute tolerance of zero is exactly the guard that looks correct and
 /// breaks near zero.
 ///
+/// NEITHER TOLERANCE MAY BE NEGATIVE, and they may not BOTH be zero. See
+/// `validateTolerances` for why each is rejected rather than given a meaning.
+/// Either one alone may be zero, which is how an expression asks for only the
+/// other.
+///
 /// THE ANCHOR is the largest magnitude among the values, taken once across the
 /// whole list rather than per pair. That is what makes a single
 /// highest-to-lowest check equivalent to checking every pair: the spread is
@@ -64,8 +70,9 @@ import {
 /// a lossy operation rather than adding one.
 /// - The multiplication truncates the product's magnitude toward zero. The
 ///   anchor is a magnitude and so non-negative, and the proportional tolerance
-///   is non-negative in any sane use, so the term can only come out smaller:
-///   it only ever rounds toward rejecting.
+///   is non-negative because `validateTolerances` has rejected anything else,
+///   so the term can only come out smaller: it only ever rounds toward
+///   rejecting. That is a guarantee rather than an assumption about sane use.
 /// - The subtraction truncates the operand with the smaller exponent toward
 ///   zero. `highest + (-lowest)` has opposite-signed operands whenever the
 ///   values share a sign, so shrinking one can only widen the spread, which
@@ -187,11 +194,11 @@ library LibOpAgree {
     /// of similar size. An expression that sets only one tolerance gets the
     /// same answer either way, because the other term is zero.
     ///
-    /// A consequence worth stating: the terms do not cancel. A negative
-    /// tolerance is dominated by a non-negative one rather than subtracting
-    /// from it, so one non-negative term floors the limit at itself. Only when
-    /// BOTH terms are negative is the limit negative, and a spread is never
-    /// negative, so that rejects everything.
+    /// Both terms are known non-negative here, and not both zero, because
+    /// `validateTolerances` has already rejected anything else. That is what
+    /// makes taking the larger safe: without it, a negative tolerance would be
+    /// silently dominated by the other term and the guard would pass as though
+    /// it were well formed.
     /// @param absolute The absolute tolerance.
     /// @param proportional The proportional tolerance.
     /// @param lowest The lowest value.
@@ -221,6 +228,39 @@ library LibOpAgree {
             : (scaledCoefficient, scaledExponent);
     }
 
+    /// @notice Rejects tolerances that do not describe a tolerance at all.
+    ///
+    /// A NEGATIVE tolerance is meaningless rather than strict: the spread is a
+    /// distance, so it is never negative, and nothing a caller could want is
+    /// expressed by one. It is representable only because floats are signed.
+    /// Accepting it is worse than useless here, because the limit is the
+    /// larger of the two terms, so a negative tolerance is simply dominated by
+    /// the other one and the guard passes as though it were well formed. A
+    /// guard that silently succeeds on malformed input is the one outcome a
+    /// guard must not have.
+    ///
+    /// BOTH ZERO would make the limit zero, i.e. an exact equality check.
+    /// `equal-to` already does that, and it is variadic, so writing
+    /// `agree(0 0 ...)` means the wrong word was reached for rather than that
+    /// a tolerance of nothing was wanted. Either tolerance ALONE may be zero;
+    /// that is how an expression asks for only the other one.
+    ///
+    /// A float's sign and zero-ness are carried entirely by its coefficient,
+    /// so the exponent is not read here and every representation of zero —
+    /// `0`, `0e0`, `0.0` — is caught alike.
+    /// @param absolute The absolute tolerance.
+    /// @param proportional The proportional tolerance.
+    function validateTolerances(Float absolute, Float proportional) internal pure {
+        (int256 absoluteCoefficient,) = absolute.unpack();
+        (int256 proportionalCoefficient,) = proportional.unpack();
+        if (absoluteCoefficient < 0 || proportionalCoefficient < 0) {
+            revert AgreeToleranceNegative();
+        }
+        if (absoluteCoefficient == 0 && proportionalCoefficient == 0) {
+            revert AgreeTolerancesZero();
+        }
+    }
+
     /// @notice The comparison, shared by `run` and `referenceFn` so the two
     /// cannot drift apart on the arithmetic. What differs between them, and so
     /// what the reference check actually exercises, is how the highest and
@@ -233,6 +273,7 @@ library LibOpAgree {
     /// @param highest The highest value.
     /// @return Whether the spread is within the tolerance.
     function agreedAt(Float absolute, Float proportional, Float lowest, Float highest) internal pure returns (bool) {
+        validateTolerances(absolute, proportional);
         (int256 spreadCoefficient, int256 spreadExponent) = spreadOf(lowest, highest);
         (int256 limitCoefficient, int256 limitExponent) = limitOf(absolute, proportional, lowest, highest);
         (int256 rescaledSpread, int256 rescaledLimit) = LibDecimalFloatImplementation.compareRescale(

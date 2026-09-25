@@ -8,8 +8,25 @@ import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrity
 import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
+import {AgreeToleranceNegative, AgreeTolerancesZero} from "../../../../../src/error/ErrEval.sol";
 
 contract LibOpAgreeTest is OpTest {
+    /// The fuzzed run tests below overwrite the two tolerance inputs with these
+    /// rather than fuzzing them, because `validateTolerances` rejects negative
+    /// and both-zero tolerances and random floats are negative about half the
+    /// time. Fixing them costs the differential nothing: what it tests is the
+    /// min/max walk over the VALUES, pointer arithmetic against array
+    /// indexing, and the tolerances take no part in that. The arithmetic is
+    /// pinned by the eval assertions, which the tolerances do vary across.
+    function fuzzAbsoluteTolerance() internal pure returns (StackItem) {
+        return StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
+    }
+
+    function fuzzProportionalTolerance() internal pure returns (StackItem) {
+        return StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, -2)));
+    }
+
     /// Directly test the integrity logic of LibOpAgree. This tests the happy
     /// path where the operand inputs and the calc inputs match.
     function testOpAgreeIntegrityHappy(IntegrityCheckState memory state, uint8 inputs, uint16 operandData)
@@ -40,6 +57,8 @@ contract LibOpAgreeTest is OpTest {
         InterpreterState memory state = opTestDefaultInterpreterState();
         vm.assume(inputs.length >= 4);
         vm.assume(inputs.length <= 0x0F);
+        inputs[0] = fuzzAbsoluteTolerance();
+        inputs[1] = fuzzProportionalTolerance();
         OperandV2 operand = LibOperand.build(uint8(inputs.length), 1, operandData);
         opReferenceCheck(state, operand, LibOpAgree.referenceFn, LibOpAgree.integrity, LibOpAgree.run, inputs);
     }
@@ -51,6 +70,8 @@ contract LibOpAgreeTest is OpTest {
         InterpreterState memory state = opTestDefaultInterpreterState();
         vm.assume(inputs.length >= 4);
         vm.assume(inputs.length <= 0x0F);
+        inputs[0] = fuzzAbsoluteTolerance();
+        inputs[1] = fuzzProportionalTolerance();
         for (uint256 i = 3; i < inputs.length; i++) {
             inputs[i] = inputs[2];
         }
@@ -139,40 +160,48 @@ contract LibOpAgreeTest is OpTest {
         checkHappy("_: agree(5 0.01 94.5 100);", 0, "a spread the sum would have accepted, absolute side");
     }
 
-    /// Identical values agree within any non negative tolerance, including two
-    /// zeroes.
+    /// Identical values agree within any valid tolerance.
     function testOpAgreeEvalZeroSpread() external view {
-        checkHappy("_: agree(0 0 100 100);", bytes32(uint256(1)), "zero tolerances, zero spread");
         checkHappy("_: agree(0 0.01 100 100);", bytes32(uint256(1)), "proportional tolerance, zero spread");
         checkHappy("_: agree(1 0 100 100);", bytes32(uint256(1)), "absolute tolerance, zero spread");
     }
 
-    /// Two zero tolerances reject any spread at all, which is an exact equality
-    /// check.
-    function testOpAgreeEvalZeroTolerances() external view {
-        checkHappy("_: agree(0 0 100 101);", 0, "zero tolerances, nonzero spread");
-        checkHappy("_: agree(0 0 100 100.000000000000000001);", 0, "zero tolerances, tiny spread");
+    /// BOTH tolerances zero would be an exact equality check, which is
+    /// `equal-to`'s job, so it reverts rather than quietly becoming one. This
+    /// holds whatever the values are — it is a property of the tolerances
+    /// alone, so it reverts even where the answer would have been 1.
+    function testOpAgreeEvalBothTolerancesZeroReverts() external {
+        checkUnhappy("_: agree(0 0 100 101);", abi.encodeWithSelector(AgreeTolerancesZero.selector));
+        checkUnhappy("_: agree(0 0 100 100);", abi.encodeWithSelector(AgreeTolerancesZero.selector));
+        // Every representation of zero is caught, because the sign and
+        // zero-ness of a float live entirely in its coefficient.
+        checkUnhappy("_: agree(0e0 0.0 100 100);", abi.encodeWithSelector(AgreeTolerancesZero.selector));
     }
 
-    /// Taking the larger of the two terms means they do not cancel: a negative
-    /// tolerance is dominated by a non-negative one rather than subtracting
-    /// from it, so one non-negative term floors the limit at itself.
+    /// Either tolerance ALONE may be zero. That is how an expression asks for
+    /// only the other one, and it is what both of the spec's example calls do.
+    function testOpAgreeEvalOneToleranceZeroIsFine() external view {
+        checkHappy("_: agree(0 0.01 99 100);", bytes32(uint256(1)), "zero absolute, proportional carries it");
+        checkHappy("_: agree(1 0 100 101);", bytes32(uint256(1)), "zero proportional, absolute carries it");
+    }
+
+    /// A NEGATIVE tolerance reverts. The spread is a distance and so never
+    /// negative, which makes a negative tolerance meaningless rather than
+    /// merely strict.
     ///
-    /// Only when BOTH terms are negative is the limit negative, and a spread
-    /// is never negative, so that is the case that rejects everything.
-    function testOpAgreeEvalNegativeTolerance() external view {
-        checkHappy(
-            "_: agree(-1 0 100 100);", bytes32(uint256(1)), "negative absolute floored by a zero proportional term"
-        );
-        checkHappy(
-            "_: agree(0 -0.01 100 100);", bytes32(uint256(1)), "negative proportional floored by a zero absolute term"
-        );
-        // Floored at zero still rejects any spread at all.
-        checkHappy("_: agree(-1 0 100 101);", 0, "a limit floored at zero rejects a nonzero spread");
-        // A positive term dominates a negative one outright.
-        checkHappy("_: agree(1 -0.01 100 100.5);", bytes32(uint256(1)), "positive absolute dominates a negative term");
-        // Both negative is the only way to get a negative limit.
-        checkHappy("_: agree(-1 -0.01 100 100);", 0, "both terms negative rejects even a zero spread");
+    /// The case that motivates reverting rather than defining it is
+    /// `agree(1 -0.01 100 100.5)`. Because the limit is the LARGER of the two
+    /// terms, a negative tolerance is simply dominated by the other one, so
+    /// without this check that call answers 1 — a guard silently succeeding on
+    /// malformed input, which is the one outcome a guard must not have.
+    function testOpAgreeEvalNegativeToleranceReverts() external {
+        checkUnhappy("_: agree(-1 0.01 99 100);", abi.encodeWithSelector(AgreeToleranceNegative.selector));
+        checkUnhappy("_: agree(0 -0.01 100 100);", abi.encodeWithSelector(AgreeToleranceNegative.selector));
+        checkUnhappy("_: agree(1 -0.01 100 100.5);", abi.encodeWithSelector(AgreeToleranceNegative.selector));
+        checkUnhappy("_: agree(-1 -0.01 100 100);", abi.encodeWithSelector(AgreeToleranceNegative.selector));
+        // Reverts on the tolerances alone, even where the values are identical
+        // and every valid tolerance would have answered 1.
+        checkUnhappy("_: agree(-1 0 100 100);", abi.encodeWithSelector(AgreeToleranceNegative.selector));
     }
 
     /// Only the highest and the lowest value matter, so the order the values
