@@ -30,13 +30,8 @@ import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../error/E
 /// covers the whole domain: the absolute term carries the region near zero,
 /// the proportional term carries the rest.
 ///
-/// This is the form Python's `math.isclose` (PEP 485) and Julia's `isapprox`
-/// use. `numpy.isclose` instead SUMS the two terms, which PEP 485 rejects
-/// because "if the absolute and relative tolerances are of similar magnitude,
-/// then the allowed difference will be about twice as large as expected".
-/// The sum is also the more permissive of the two, since `max(a, b) <= a + b`
-/// for non-negative terms, so it admits spreads the larger would refuse. For a
-/// guard the stricter reading of two tolerances is the one to take.
+/// The same form as `math.isclose` (PEP 485) and Julia's `isapprox`.
+/// `numpy.isclose` sums the two terms instead.
 ///
 /// Requiring both means an expression that wants only one writes the other as
 /// zero, asserting that choice rather than inheriting it. A silently defaulted
