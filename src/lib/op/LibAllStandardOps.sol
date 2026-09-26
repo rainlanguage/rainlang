@@ -45,8 +45,11 @@ import {LibOpBlockNumber} from "./evm/LibOpBlockNumber.sol";
 import {LibOpBlockTimestamp} from "./evm/LibOpBlockTimestamp.sol";
 import {LibOpChainId} from "./evm/LibOpChainId.sol";
 
+import {LibOpAgree} from "./logic/LibOpAgree.sol";
 import {LibOpAny} from "./logic/LibOpAny.sol";
 import {LibOpBinaryEqualTo} from "./logic/LibOpBinaryEqualTo.sol";
+import {LibOpBinaryIn} from "./logic/LibOpBinaryIn.sol";
+import {LibOpBinaryUnique} from "./logic/LibOpBinaryUnique.sol";
 import {LibOpConditions} from "./logic/LibOpConditions.sol";
 import {LibOpEnsure} from "./logic/LibOpEnsure.sol";
 import {LibOpEqualTo} from "./logic/LibOpEqualTo.sol";
@@ -103,7 +106,7 @@ import {LibParseLiteralHex} from "../parse/literal/LibParseLiteralHex.sol";
 import {LibParseLiteralSubParseable} from "../parse/literal/LibParseLiteralSubParseable.sol";
 
 /// @dev Number of ops currently provided by `AllStandardOps`.
-uint256 constant ALL_STANDARD_OPS_LENGTH = 73;
+uint256 constant ALL_STANDARD_OPS_LENGTH = 76;
 
 /// @title LibAllStandardOps
 /// @notice Every opcode available from the core repository laid out as a single
@@ -221,8 +224,20 @@ library LibAllStandardOps {
             AuthoringMetaV2("now", "The current block timestamp."),
             AuthoringMetaV2("chain-id", "The current chain id."),
             // logic/
+            AuthoringMetaV2(
+                "agree",
+                "1 if the highest and lowest of the values are no more than a tolerance apart, 0 otherwise. The first input is an absolute tolerance in the same units as the values, the second is a proportional tolerance as a fraction, and all subsequent inputs are the values. The limit is whichever is larger of the absolute tolerance and the proportional tolerance of the largest magnitude among the values, so 0.01 as the proportional tolerance allows 1% of that magnitude. Both tolerances are always given; write one as 0 to use only the other. Neither may be negative and at least one must be positive, or it reverts. The comparison runs at full internal precision, so the answer is exact except within about an ulp of the boundary."
+            ),
             AuthoringMetaV2("any", "The first non-zero value out of all inputs, or 0 if every input is 0."),
             AuthoringMetaV2("binary-equal-to", "1 if all inputs are equal, 0 otherwise. Equality is binary."),
+            AuthoringMetaV2(
+                "binary-in",
+                "1 if every needle is in the set, 0 otherwise. The operand is the number of needles and defaults to 1 if omitted, so binary-in(x a b c) asks whether x is in (a b c). At most 14 needles, since an opcode takes at most 15 inputs and the set needs one. The first that many inputs are the needles and every subsequent input is a member of the set they must be in. Membership is binary equality, as per binary-equal-to, so identities such as signers and symbols compare bit for bit and are never decoded as numbers."
+            ),
+            AuthoringMetaV2(
+                "binary-unique",
+                "1 if every input is distinct from every other input, 0 otherwise. Distinctness is binary, as per binary-equal-to, so identities compare bit for bit. It compares the parsed word rather than the source text, so 0x01 and 10e-1 ARE distinct here despite being the same number, while 1 and 1.0 are not, because the parser strips trailing fractional zeros and both become the same word."
+            ),
             AuthoringMetaV2(
                 "conditions",
                 "Treats inputs as pairwise condition/value pairs. The first nonzero condition's value is used. If no conditions are nonzero, the expression reverts. Provide a constant nonzero value to define a fallback case. If the number of inputs is odd, the final value is used as an error string in the case that no conditions match."
@@ -438,9 +453,15 @@ library LibAllStandardOps {
                     LibParseOperand.handleOperandDisallowed,
                     // chain-id
                     LibParseOperand.handleOperandDisallowed,
+                    // agree
+                    LibParseOperand.handleOperandDisallowed,
                     // any
                     LibParseOperand.handleOperandDisallowed,
                     // binary-equal-to
+                    LibParseOperand.handleOperandDisallowed,
+                    // binary-in
+                    LibParseOperand.handleOperandSingleFullDefaultOne,
+                    // binary-unique
                     LibParseOperand.handleOperandDisallowed,
                     // conditions
                     LibParseOperand.handleOperandDisallowed,
@@ -590,8 +611,11 @@ library LibAllStandardOps {
                     // now
                     LibOpBlockTimestamp.integrity,
                     LibOpChainId.integrity,
+                    LibOpAgree.integrity,
                     LibOpAny.integrity,
                     LibOpBinaryEqualTo.integrity,
+                    LibOpBinaryIn.integrity,
+                    LibOpBinaryUnique.integrity,
                     LibOpConditions.integrity,
                     LibOpEnsure.integrity,
                     LibOpEqualTo.integrity,
@@ -695,8 +719,11 @@ library LibAllStandardOps {
                     // now
                     LibOpBlockTimestamp.run,
                     LibOpChainId.run,
+                    LibOpAgree.run,
                     LibOpAny.run,
                     LibOpBinaryEqualTo.run,
+                    LibOpBinaryIn.run,
+                    LibOpBinaryUnique.run,
                     LibOpConditions.run,
                     LibOpEnsure.run,
                     LibOpEqualTo.run,
