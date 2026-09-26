@@ -15,7 +15,7 @@ import {
 } from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {SignedContextV1} from "rainlang-interface-0.2.9/src/interface/IInterpreterCallerV4.sol";
 import {LibContext} from "rainlang-interface-0.2.9/src/lib/caller/LibContext.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.3/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpPiTest
 /// @notice Tests for the mathematical constant pi opcode.

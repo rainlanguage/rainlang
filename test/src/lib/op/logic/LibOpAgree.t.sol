@@ -8,10 +8,10 @@ import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrity
 import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.3/src/lib/LibDecimalFloat.sol";
 import {
     LibDecimalFloatImplementation
-} from "rain-math-float-0.2.1/src/lib/implementation/LibDecimalFloatImplementation.sol";
+} from "rain-math-float-0.2.3/src/lib/implementation/LibDecimalFloatImplementation.sol";
 import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../../../src/error/ErrEval.sol";
 
 contract LibOpAgreeTest is OpTest {
@@ -103,11 +103,48 @@ contract LibOpAgreeTest is OpTest {
     function withinLimit(Float a, Float b, int256 limitCoefficient, int256 limitExponent) internal pure returns (bool) {
         Float lower = a.lt(b) ? a : b;
         Float upper = a.lt(b) ? b : a;
-        (int256 spreadCoefficient, int256 spreadExponent) = LibOpAgree.spreadOf(lower, upper);
+        (int256 lowerCoefficient, int256 lowerExponent) = lower.unpack();
+        (int256 upperCoefficient, int256 upperExponent) = upper.unpack();
+        (int256 spreadCoefficient, int256 spreadExponent) =
+            LibDecimalFloatImplementation.sub(upperCoefficient, upperExponent, lowerCoefficient, lowerExponent);
         (int256 rescaledSpread, int256 rescaledLimit) = LibDecimalFloatImplementation.compareRescale(
             spreadCoefficient, spreadExponent, limitCoefficient, limitExponent
         );
         return rescaledSpread <= rescaledLimit;
+    }
+
+    /// The limit `agree` checks the spread against:
+    /// `max(absolute, proportional * max(abs(lowest), abs(highest)))`.
+    ///
+    /// The word no longer computes this — `LibDecimalFloat.agree` does — so the
+    /// pairwise test computes it here instead. Unpacked throughout, because the
+    /// fuzzed values are arbitrary bit patterns and the packed `abs` reverts at
+    /// the extremes of the range.
+    function limitFor(Float absolute, Float proportional, Float lowest, Float highest)
+        internal
+        pure
+        returns (int256, int256)
+    {
+        int256 scaledCoefficient;
+        int256 scaledExponent;
+        {
+            (int256 lowestCoefficient, int256 lowestExponent) = lowest.unpack();
+            (int256 highestCoefficient, int256 highestExponent) = highest.unpack();
+            (int256 anchorCoefficient, int256 anchorExponent) = LibDecimalFloatImplementation.max(
+                LibDecimalFloatImplementation.absCoefficient(lowestCoefficient),
+                lowestExponent,
+                LibDecimalFloatImplementation.absCoefficient(highestCoefficient),
+                highestExponent
+            );
+            (int256 proportionalCoefficient, int256 proportionalExponent) = proportional.unpack();
+            (scaledCoefficient, scaledExponent) = LibDecimalFloatImplementation.mul(
+                proportionalCoefficient, proportionalExponent, anchorCoefficient, anchorExponent
+            );
+        }
+        (int256 absoluteCoefficient, int256 absoluteExponent) = absolute.unpack();
+        (int256 limitCoefficient, int256 limitExponent) =
+            LibDecimalFloatImplementation.max(absoluteCoefficient, absoluteExponent, scaledCoefficient, scaledExponent);
+        return (limitCoefficient, limitExponent);
     }
 
     /// Directly test the integrity logic of LibOpAgree. This tests the happy
@@ -192,7 +229,7 @@ contract LibOpAgreeTest is OpTest {
     /// against the same global limit.
     ///
     /// SCOPE. This is not an oracle for the formula. Both sides take the limit
-    /// from the same `limitOf`, so a wrong limit moves both together and this
+    /// from the same `limitFor`, so a wrong limit moves both together and this
     /// test stays green. What it does pin is that the extremes really are the
     /// extremes and that their spread dominates every pairwise difference,
     /// which is the specific licence `agree` takes to look at two values
@@ -213,7 +250,7 @@ contract LibOpAgreeTest is OpTest {
             (Float absolute, Float proportional) = boundTolerances(tolerances);
             (Float lowest, Float highest) = extremesOf(rawValues);
             viaSpread = LibOpAgree.agreedAt(absolute, proportional, lowest, highest);
-            (limitCoefficient, limitExponent) = LibOpAgree.limitOf(absolute, proportional, lowest, highest);
+            (limitCoefficient, limitExponent) = limitFor(absolute, proportional, lowest, highest);
         }
 
         bool viaEveryPair = true;
@@ -573,7 +610,7 @@ contract LibOpAgreeTest is OpTest {
     /// The expectation is derived rather than observed.
     /// `LibDecimalFloatImplementation.mul` does not overflow a large product:
     /// it divides the coefficient down and raises the exponent instead, and
-    /// `limitOf` never packs the result back into a `Float`, so nothing here
+    /// `LibDecimalFloat.agree` never packs the limit back into a `Float`, so nothing here
     /// can reach `ExponentOverflow`. A gigantic tolerance therefore has to
     /// mean "everything agrees" rather than "revert", and the smallest
     /// positive tolerance has to behave as a tolerance of almost nothing

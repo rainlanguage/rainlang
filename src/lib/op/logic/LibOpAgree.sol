@@ -6,10 +6,7 @@ import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInte
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.1/src/lib/LibDecimalFloat.sol";
-import {
-    LibDecimalFloatImplementation
-} from "rain-math-float-0.2.1/src/lib/implementation/LibDecimalFloatImplementation.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.3/src/lib/LibDecimalFloat.sol";
 import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../error/ErrEval.sol";
 
 /// @title LibOpAgree
@@ -50,20 +47,23 @@ import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../error/E
 /// per-pair anchor would give one limit per pair, which no single spread
 /// summarises.
 ///
-/// Magnitudes are taken on the unpacked coefficient rather than with
-/// `Float.abs`. An unpacked coefficient is an int224 widened to an int256, so
-/// negating it is always exact, where `Float.abs` has to pack the magnitude
-/// back into an int224 and so raises the exponent for the most negative
-/// coefficient, reverting `ExponentOverflow` when the exponent is already at
-/// its maximum. `min-negative-value()` is a representable value and an
-/// `ensure` guard reading it should answer 0, not revert.
+/// THE ARITHMETIC IS `LibDecimalFloat.agree`, not this word. This word finds
+/// the extremes and validates the tolerances; the comparison itself lives in
+/// the float library, which is where its tests, its mutation coverage and its
+/// precision contract live too.
 ///
-/// PRECISION. The spread is compared against the limit at full internal
-/// precision: neither is ever packed back into a `Float`, so the only places a
-/// value can be lost are the subtraction and the multiplication, and selecting
-/// the larger of two terms is exact. The answer is therefore exact except
-/// within about one unit in the last of ~76 significant digits of the
-/// boundary.
+/// It belongs there because it cannot be composed from the float library's
+/// public surface. That surface reverts `ExponentOverflow` rather than
+/// truncating an exponent, and both `abs` and `sub` do so at the extremes of
+/// the range: `min-negative-value()` is a representable value and an `ensure`
+/// guard reading it should answer 0, not revert. `agree` works below that
+/// surface and never packs the spread back, which an opcode cannot do without
+/// reaching into the library's internals.
+///
+/// PRECISION is documented on `LibDecimalFloat.agree`, including the one case
+/// where it answers differently from an exact comparison: a spread landing
+/// exactly on the limit whose low digits were discarded by the subtraction. The
+/// excess admitted there is under `1e-76` of the spread's own magnitude.
 ///
 /// NO ROUNDING DIRECTION IS PROMISED, deliberately. A direction matters where
 /// error accumulates — the leaky bucket this feeds is touched by every mint,
@@ -150,87 +150,6 @@ library LibOpAgree {
         return stackTop;
     }
 
-    /// @notice The distance between the two extremes, as an unpacked
-    /// coefficient and exponent.
-    /// @param lowest The lowest value.
-    /// @param highest The highest value.
-    /// @return The spread's coefficient.
-    /// @return The spread's exponent.
-    function spreadOf(Float lowest, Float highest) internal pure returns (int256, int256) {
-        (int256 lowestCoefficient, int256 lowestExponent) = lowest.unpack();
-        (int256 highestCoefficient, int256 highestExponent) = highest.unpack();
-        // Destructured rather than returned directly because slither reads
-        // `return f(...)` on a tuple-returning call as an ignored return value.
-        (int256 spreadCoefficient, int256 spreadExponent) =
-            LibDecimalFloatImplementation.sub(highestCoefficient, highestExponent, lowestCoefficient, lowestExponent);
-        return (spreadCoefficient, spreadExponent);
-    }
-
-    /// @notice The quantity the proportional tolerance is taken of: whichever
-    /// of the two extremes has the larger magnitude. Every other value lies
-    /// between them, so no value in the list has a magnitude exceeding both,
-    /// which is what makes this the largest magnitude in the whole list
-    /// without walking it again.
-    /// @param lowest The lowest value.
-    /// @param highest The highest value.
-    /// @return The anchor's coefficient, always non-negative.
-    /// @return The anchor's exponent.
-    function anchorOf(Float lowest, Float highest) internal pure returns (int256, int256) {
-        (int256 lowestMagnitude, int256 lowestExponent) = lowest.unpack();
-        (int256 highestMagnitude, int256 highestExponent) = highest.unpack();
-        lowestMagnitude = lowestMagnitude < 0 ? -lowestMagnitude : lowestMagnitude;
-        highestMagnitude = highestMagnitude < 0 ? -highestMagnitude : highestMagnitude;
-        (int256 rescaledLowest, int256 rescaledHighest) = LibDecimalFloatImplementation.compareRescale(
-            lowestMagnitude, lowestExponent, highestMagnitude, highestExponent
-        );
-        return
-            rescaledLowest >= rescaledHighest ? (lowestMagnitude, lowestExponent) : (highestMagnitude, highestExponent);
-    }
-
-    /// @notice The tolerance the spread is checked against: whichever of the
-    /// two terms is LARGER, `max(absolute, proportional * anchor)`.
-    ///
-    /// Taking the larger rather than the sum is the stricter of the two
-    /// readings. For non-negative terms `max(a, b) <= a + b`, with equality
-    /// only when one of them is zero, so the sum accepts everything the max
-    /// accepts and more — up to twice as much where the two terms are of
-    /// similar size. An expression that sets only one tolerance gets the same
-    /// answer either way, because the other term is zero.
-    ///
-    /// Both terms are known non-negative here, and not both zero, because
-    /// `validateTolerances` has already rejected anything else. That is what
-    /// makes taking the larger safe: without it, a negative tolerance would be
-    /// silently dominated by the other term and the guard would pass as though
-    /// it were well formed.
-    /// @param absolute The absolute tolerance.
-    /// @param proportional The proportional tolerance.
-    /// @param lowest The lowest value.
-    /// @param highest The highest value.
-    /// @return The limit's coefficient.
-    /// @return The limit's exponent.
-    function limitOf(Float absolute, Float proportional, Float lowest, Float highest)
-        internal
-        pure
-        returns (int256, int256)
-    {
-        int256 scaledCoefficient;
-        int256 scaledExponent;
-        {
-            (int256 anchorCoefficient, int256 anchorExponent) = anchorOf(lowest, highest);
-            (int256 proportionalCoefficient, int256 proportionalExponent) = proportional.unpack();
-            (scaledCoefficient, scaledExponent) = LibDecimalFloatImplementation.mul(
-                proportionalCoefficient, proportionalExponent, anchorCoefficient, anchorExponent
-            );
-        }
-        (int256 absoluteCoefficient, int256 absoluteExponent) = absolute.unpack();
-        (int256 rescaledAbsolute, int256 rescaledScaled) = LibDecimalFloatImplementation.compareRescale(
-            absoluteCoefficient, absoluteExponent, scaledCoefficient, scaledExponent
-        );
-        return rescaledAbsolute >= rescaledScaled
-            ? (absoluteCoefficient, absoluteExponent)
-            : (scaledCoefficient, scaledExponent);
-    }
-
     /// @notice Rejects tolerances that do not describe a tolerance at all.
     ///
     /// A NEGATIVE tolerance is meaningless rather than strict: the spread is a
@@ -285,12 +204,7 @@ library LibOpAgree {
     /// @return Whether the spread is within the tolerance.
     function agreedAt(Float absolute, Float proportional, Float lowest, Float highest) internal pure returns (bool) {
         validateTolerances(absolute, proportional);
-        (int256 spreadCoefficient, int256 spreadExponent) = spreadOf(lowest, highest);
-        (int256 limitCoefficient, int256 limitExponent) = limitOf(absolute, proportional, lowest, highest);
-        (int256 rescaledSpread, int256 rescaledLimit) = LibDecimalFloatImplementation.compareRescale(
-            spreadCoefficient, spreadExponent, limitCoefficient, limitExponent
-        );
-        return rescaledSpread <= rescaledLimit;
+        return LibDecimalFloat.agree(absolute, proportional, lowest, highest);
     }
 
     /// @notice Gas intensive reference implementation of AGREE for testing.
