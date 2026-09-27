@@ -6,8 +6,7 @@ import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInte
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.3/src/lib/LibDecimalFloat.sol";
-import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../error/ErrEval.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpAgree
 /// @notice Opcode to return 1 if the highest and lowest of the values are no
@@ -35,9 +34,12 @@ import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../error/E
 /// absolute tolerance of zero is exactly the guard that looks correct and
 /// breaks near zero.
 ///
-/// NEITHER TOLERANCE MAY BE NEGATIVE, and AT LEAST ONE MUST BE POSITIVE. See
-/// `validateTolerances` for why each is rejected rather than given a meaning.
-/// Either one alone may be zero, which is how an expression asks for only the
+/// NEITHER TOLERANCE MAY BE NEGATIVE, and AT LEAST ONE MUST BE POSITIVE.
+/// `LibDecimalFloat.agree` rejects both, reverting `AgreeToleranceNegative` and
+/// `AgreeNoPositiveTolerance`; see those for why each is rejected rather than
+/// given a meaning. The guard is there rather than here because a guard a caller
+/// can skip is not a guard, and this word is one caller among others. Either
+/// tolerance alone may be zero, which is how an expression asks for only the
 /// other.
 ///
 /// THE ANCHOR is the largest magnitude among the values, taken once across the
@@ -140,7 +142,7 @@ library LibOpAgree {
                 cursor = Pointer.wrap(Pointer.unwrap(cursor) + 0x20);
             }
 
-            bool agreed = agreedAt(absolute, proportional, lowest, highest);
+            bool agreed = LibDecimalFloat.agree(absolute, proportional, lowest, highest);
 
             stackTop = Pointer.wrap(Pointer.unwrap(end) - 0x20);
             assembly ("memory-safe") {
@@ -148,63 +150,6 @@ library LibOpAgree {
             }
         }
         return stackTop;
-    }
-
-    /// @notice Rejects tolerances that do not describe a tolerance at all.
-    ///
-    /// A NEGATIVE tolerance is meaningless rather than strict: the spread is a
-    /// distance, so it is never negative, and nothing a caller could want is
-    /// expressed by one. It is representable only because floats are signed.
-    /// Accepting it is worse than useless here, because the limit is the
-    /// larger of the two terms, so a negative tolerance is simply dominated by
-    /// the other one and the guard passes as though it were well formed. A
-    /// guard that silently succeeds on malformed input is the one outcome a
-    /// guard must not have.
-    ///
-    /// AT LEAST ONE TOLERANCE MUST BE POSITIVE. If neither is, there is no
-    /// tolerance at all: the limit is zero and the word becomes an exact
-    /// equality check, which is what the variadic `equal-to` is for. So it
-    /// means the wrong word was reached for rather than that a tolerance of
-    /// nothing was wanted. Either tolerance ALONE may be zero; that is how an
-    /// expression asks for only the other one.
-    ///
-    /// The positive test is `neither is greater than zero` rather than `both
-    /// are zero`, so that it states the invariant on its own terms rather than
-    /// naming one case that violates it, and stays correct if the negative
-    /// check above is ever moved or removed.
-    ///
-    /// Both tests compare against a zero `Float` rather than unpacking, so the
-    /// comparisons are numerical and every representation of zero — `0`,
-    /// `0e0`, `0.0` — is treated alike. Unpacking and reading only the
-    /// coefficient would be equivalent, since a float's sign and zero-ness
-    /// live entirely there, but it discards the exponent and slither reads a
-    /// partly ignored tuple return as `unused-return`.
-    /// @param absolute The absolute tolerance.
-    /// @param proportional The proportional tolerance.
-    function validateTolerances(Float absolute, Float proportional) internal pure {
-        Float zero = LibDecimalFloat.packLossless(0, 0);
-        if (absolute.lt(zero) || proportional.lt(zero)) {
-            revert AgreeToleranceNegative();
-        }
-        if (!absolute.gt(zero) && !proportional.gt(zero)) {
-            revert AgreeNoPositiveTolerance();
-        }
-    }
-
-    /// @notice The comparison, shared by `run` and `referenceFn` so the two
-    /// cannot drift apart on the arithmetic. What differs between them, and so
-    /// what the reference check actually exercises, is how the highest and
-    /// lowest are found: a pointer walk against an array walk. The arithmetic
-    /// is pinned by the eval assertions instead, which derive their boundaries
-    /// rather than observing them.
-    /// @param absolute The absolute tolerance.
-    /// @param proportional The proportional tolerance.
-    /// @param lowest The lowest value.
-    /// @param highest The highest value.
-    /// @return Whether the spread is within the tolerance.
-    function agreedAt(Float absolute, Float proportional, Float lowest, Float highest) internal pure returns (bool) {
-        validateTolerances(absolute, proportional);
-        return LibDecimalFloat.agree(absolute, proportional, lowest, highest);
     }
 
     /// @notice Gas intensive reference implementation of AGREE for testing.
@@ -227,8 +172,9 @@ library LibOpAgree {
             }
         }
 
-        bool agreed =
-            agreedAt(Float.wrap(StackItem.unwrap(inputs[0])), Float.wrap(StackItem.unwrap(inputs[1])), lowest, highest);
+        bool agreed = LibDecimalFloat.agree(
+            Float.wrap(StackItem.unwrap(inputs[0])), Float.wrap(StackItem.unwrap(inputs[1])), lowest, highest
+        );
 
         outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(bytes32(uint256(agreed ? 1 : 0)));

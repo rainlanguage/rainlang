@@ -70,10 +70,10 @@ integrity = "857d22060d058ec173e88448c2d44f0cb884b2381669d0dbe1d3bebb168715ea"
 
 [[dependencies]]
 name = "rain-math-float"
-version = "0.2.3"
-url = "https://soldeer-revisions.s3.amazonaws.com/rain-math-float/0_2_3_26-09-2026_19:53:25_rain.math.zip"
-checksum = "78a13a7e62ae5e991e78dfd2966a0a25994b1fcf5f0fa6b4741d7f4caf97fac6"
-integrity = "396a54b69c6647c972203426868e21cce30b87d923a8d1b3f72ba6d7115209df"
+version = "0.2.4"
+url = "https://soldeer-revisions.s3.amazonaws.com/rain-math-float/0_2_4_27-09-2026_15:02:57_rain.math.zip"
+checksum = "a13f6e73e32324a38a2da2826484c2a03dd1ed1514851c557d90ec8f3323b940"
+integrity = "70b5b63f234f24b7719bf6a296caafb9120ce185d7a3dced231a660aca7adf83"
 
 [[dependencies]]
 name = "rain-math-float-deploy"

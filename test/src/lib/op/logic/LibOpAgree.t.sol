@@ -8,11 +8,11 @@ import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrity
 import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.3/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
 import {
     LibDecimalFloatImplementation
-} from "rain-math-float-0.2.3/src/lib/implementation/LibDecimalFloatImplementation.sol";
-import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "../../../../../src/error/ErrEval.sol";
+} from "rain-math-float-0.2.4/src/lib/implementation/LibDecimalFloatImplementation.sol";
+import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "rain-math-float-0.2.4/src/error/ErrDecimalFloat.sol";
 
 contract LibOpAgreeTest is OpTest {
     using LibDecimalFloat for Float;
@@ -29,7 +29,7 @@ contract LibOpAgreeTest is OpTest {
         int256 proportionalExponent;
     }
 
-    /// Bounds a fuzzed pair into the domain `validateTolerances` accepts, and
+    /// Bounds a fuzzed pair into the domain `LibDecimalFloat.agree` accepts, and
     /// returns them. Rather than discarding runs where both land on zero, the
     /// absolute tolerance is nudged to a positive value, so every fuzz run is
     /// spent on a valid call instead of being rejected.
@@ -82,7 +82,7 @@ contract LibOpAgreeTest is OpTest {
     }
 
     /// Maps a fuzzed coefficient and exponent onto a tolerance that
-    /// `validateTolerances` accepts, WITHOUT collapsing the fuzz to a
+    /// `LibDecimalFloat.agree` accepts, WITHOUT collapsing the fuzz to a
     /// constant.
     ///
     /// The coefficient is bounded non-negative rather than having its sign
@@ -176,7 +176,7 @@ contract LibOpAgreeTest is OpTest {
     ///
     /// The two tolerances are fuzzed through `boundTolerance` rather than held
     /// at constants, so the differential explores the tolerance space as well
-    /// as the values. `validateTolerances` rejects negatives and requires at
+    /// as the values. `LibDecimalFloat.agree` rejects negatives and requires at
     /// least one positive, so the raw fuzz cannot be used directly — random
     /// floats are negative about half the time.
     function testOpAgreeRun(StackItem[] memory inputs, ToleranceFuzz memory tolerances, uint16 operandData)
@@ -249,7 +249,7 @@ contract LibOpAgreeTest is OpTest {
         {
             (Float absolute, Float proportional) = boundTolerances(tolerances);
             (Float lowest, Float highest) = extremesOf(rawValues);
-            viaSpread = LibOpAgree.agreedAt(absolute, proportional, lowest, highest);
+            viaSpread = LibDecimalFloat.agree(absolute, proportional, lowest, highest);
             (limitCoefficient, limitExponent) = limitFor(absolute, proportional, lowest, highest);
         }
 
@@ -292,7 +292,7 @@ contract LibOpAgreeTest is OpTest {
     /// THE INDEPENDENT ORACLE FOR THE FORMULA.
     ///
     /// This is the check that `run` and `referenceFn` cannot provide between
-    /// them, because they share `agreedAt` and so agree with each other
+    /// them, because they share `LibDecimalFloat.agree` and so agree with each other
     /// whatever the formula says. Here the expected answer is built from the
     /// packed `Float` API instead, so a wrong expression in the library shows
     /// up as a disagreement rather than as two matching wrong answers.
@@ -328,7 +328,7 @@ contract LibOpAgreeTest is OpTest {
         }
 
         assertEq(
-            LibOpAgree.agreedAt(absolute, proportional, lowest, highest),
+            LibDecimalFloat.agree(absolute, proportional, lowest, highest),
             packedOracle(absolute, proportional, lowest, highest)
         );
     }
@@ -426,11 +426,32 @@ contract LibOpAgreeTest is OpTest {
     /// whatever the values are — it is a property of the tolerances alone, so
     /// it reverts even where the answer would have been 1.
     function testOpAgreeEvalNoPositiveToleranceReverts() external {
-        checkUnhappy("_: agree(0 0 100 101);", abi.encodeWithSelector(AgreeNoPositiveTolerance.selector));
-        checkUnhappy("_: agree(0 0 100 100);", abi.encodeWithSelector(AgreeNoPositiveTolerance.selector));
+        checkUnhappy(
+            "_: agree(0 0 100 101);",
+            abi.encodeWithSelector(
+                AgreeNoPositiveTolerance.selector,
+                LibDecimalFloat.packLossless(0, 0),
+                LibDecimalFloat.packLossless(0, 0)
+            )
+        );
+        checkUnhappy(
+            "_: agree(0 0 100 100);",
+            abi.encodeWithSelector(
+                AgreeNoPositiveTolerance.selector,
+                LibDecimalFloat.packLossless(0, 0),
+                LibDecimalFloat.packLossless(0, 0)
+            )
+        );
         // Every representation of zero is caught, because the sign and
         // zero-ness of a float live entirely in its coefficient.
-        checkUnhappy("_: agree(0e0 0.0 100 100);", abi.encodeWithSelector(AgreeNoPositiveTolerance.selector));
+        checkUnhappy(
+            "_: agree(0e0 0.0 100 100);",
+            abi.encodeWithSelector(
+                AgreeNoPositiveTolerance.selector,
+                LibDecimalFloat.packLossless(0, 0),
+                LibDecimalFloat.packLossless(0, 0)
+            )
+        );
     }
 
     /// Either tolerance ALONE may be zero. That is how an expression asks for
@@ -450,13 +471,46 @@ contract LibOpAgreeTest is OpTest {
     /// without this check that call answers 1 — a guard silently succeeding on
     /// malformed input, which is the one outcome a guard must not have.
     function testOpAgreeEvalNegativeToleranceReverts() external {
-        checkUnhappy("_: agree(-1 0.01 99 100);", abi.encodeWithSelector(AgreeToleranceNegative.selector));
-        checkUnhappy("_: agree(0 -0.01 100 100);", abi.encodeWithSelector(AgreeToleranceNegative.selector));
-        checkUnhappy("_: agree(1 -0.01 100 100.5);", abi.encodeWithSelector(AgreeToleranceNegative.selector));
-        checkUnhappy("_: agree(-1 -0.01 100 100);", abi.encodeWithSelector(AgreeToleranceNegative.selector));
+        checkUnhappy(
+            "_: agree(-1 0.01 99 100);",
+            abi.encodeWithSelector(
+                AgreeToleranceNegative.selector,
+                LibDecimalFloat.packLossless(-1, 0),
+                LibDecimalFloat.packLossless(1, -2)
+            )
+        );
+        checkUnhappy(
+            "_: agree(0 -0.01 100 100);",
+            abi.encodeWithSelector(
+                AgreeToleranceNegative.selector,
+                LibDecimalFloat.packLossless(0, 0),
+                LibDecimalFloat.packLossless(-1, -2)
+            )
+        );
+        checkUnhappy(
+            "_: agree(1 -0.01 100 100.5);",
+            abi.encodeWithSelector(
+                AgreeToleranceNegative.selector,
+                LibDecimalFloat.packLossless(1, 0),
+                LibDecimalFloat.packLossless(-1, -2)
+            )
+        );
+        checkUnhappy(
+            "_: agree(-1 -0.01 100 100);",
+            abi.encodeWithSelector(
+                AgreeToleranceNegative.selector,
+                LibDecimalFloat.packLossless(-1, 0),
+                LibDecimalFloat.packLossless(-1, -2)
+            )
+        );
         // Reverts on the tolerances alone, even where the values are identical
         // and every valid tolerance would have answered 1.
-        checkUnhappy("_: agree(-1 0 100 100);", abi.encodeWithSelector(AgreeToleranceNegative.selector));
+        checkUnhappy(
+            "_: agree(-1 0 100 100);",
+            abi.encodeWithSelector(
+                AgreeToleranceNegative.selector, LibDecimalFloat.packLossless(-1, 0), LibDecimalFloat.packLossless(0, 0)
+            )
+        );
     }
 
     /// Only the highest and the lowest value matter, so the order the values
@@ -657,11 +711,19 @@ contract LibOpAgreeTest is OpTest {
     function testOpAgreeEvalInvalidToleranceRevertsAtMaxInputs() external {
         checkUnhappy(
             "_: agree(-1 0.01 100 100.1 100.2 100.3 100.4 100.5 100.6 100.7 100.8 100.9 99.5 99.2 99);",
-            abi.encodeWithSelector(AgreeToleranceNegative.selector)
+            abi.encodeWithSelector(
+                AgreeToleranceNegative.selector,
+                LibDecimalFloat.packLossless(-1, 0),
+                LibDecimalFloat.packLossless(1, -2)
+            )
         );
         checkUnhappy(
             "_: agree(0 0 100 100.1 100.2 100.3 100.4 100.5 100.6 100.7 100.8 100.9 99.5 99.2 99);",
-            abi.encodeWithSelector(AgreeNoPositiveTolerance.selector)
+            abi.encodeWithSelector(
+                AgreeNoPositiveTolerance.selector,
+                LibDecimalFloat.packLossless(0, 0),
+                LibDecimalFloat.packLossless(0, 0)
+            )
         );
     }
 
