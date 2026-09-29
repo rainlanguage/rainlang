@@ -7,7 +7,7 @@ import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../../integrity/LibIntegrityCheck.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.2/src/lib/deploy/LibDecimalFloatDeploy.sol";
+import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.3/src/lib/deploy/LibDecimalFloatDeploy.sol";
 
 /// @title LibOpExponentialGrowth
 /// @notice Exponential growth is base(1 + rate)^t where base is the initial
