@@ -13,3 +13,4 @@ error InputsLengthMismatch(uint256 expected, uint256 actual);
 /// @notice Thrown when the function pointer table is empty, which would cause
 /// mod-by-zero in the eval loop opcode dispatch.
 error ZeroFunctionPointers();
+
