@@ -49,45 +49,65 @@ contract LibOpGmTest is OpTest {
         checkHappy("_: gm(0 0);", 0, "0 0");
         checkHappy("_: gm(0 1);", 0, "0 1");
         checkHappy("_: gm(1 0);", 0, "1 0");
-        checkHappy("_: gm(1 1);", Float.unwrap(LibDecimalFloat.packLossless(1e3, -3)), "1 1");
-        checkHappy("_: gm(1 2);", Float.unwrap(LibDecimalFloat.packLossless(1415, -3)), "1 2");
-        checkHappy("_: gm(2 2);", Float.unwrap(LibDecimalFloat.packLossless(2e3, -3)), "2 2");
-        checkHappy("_: gm(2 3);", Float.unwrap(LibDecimalFloat.packLossless(2450, -3)), "2 3");
-        checkHappy("_: gm(2 4);", Float.unwrap(LibDecimalFloat.packLossless(2.8285e66, -66)), "2 4");
-        checkHappy("_: gm(4 0.5);", Float.unwrap(LibDecimalFloat.packLossless(1415, -3)), "4 0.5");
+        checkHappy("_: gm(1 1);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "1 1");
+        checkHappy(
+            "_: gm(1 2);",
+            Float.unwrap(LibDecimalFloat.packLossless(14142135623730950488016887242096980785697, -40)),
+            "1 2"
+        );
+        checkHappy("_: gm(2 2);", Float.unwrap(LibDecimalFloat.packLossless(2e40, -40)), "2 2");
+        checkHappy(
+            "_: gm(2 3);",
+            Float.unwrap(LibDecimalFloat.packLossless(24494897427831780981972840747058913919659, -40)),
+            "2 3"
+        );
+        checkHappy(
+            "_: gm(2 4);",
+            Float.unwrap(LibDecimalFloat.packLossless(28284271247461900976033774484193961571393, -40)),
+            "2 4"
+        );
+        checkHappy(
+            "_: gm(4 0.5);",
+            Float.unwrap(LibDecimalFloat.packLossless(14142135623730950488016887242096980785697, -40)),
+            "4 0.5"
+        );
     }
 
     /// Test that gm with mixed signs returns a negative result.
     /// gm(-1, 1) = -sqrt(|-1| * |1|) = -1.
     function testOpGmEvalMixedSignsNegativeFirst() external view {
-        (Float expected,) = LibDecimalFloat.packLossy(-1e3, -3);
+        (Float expected,) = LibDecimalFloat.packLossy(-1, 0);
         checkHappy("_: gm(-1 1);", Float.unwrap(expected), "-1 1");
     }
 
     /// Test that gm with mixed signs returns a negative result regardless of
     /// argument order. gm(1, -1) = -sqrt(|1| * |-1|) = -1.
     function testOpGmEvalMixedSignsNegativeSecond() external view {
-        (Float expected,) = LibDecimalFloat.packLossy(-1e3, -3);
+        (Float expected,) = LibDecimalFloat.packLossy(-1, 0);
         checkHappy("_: gm(1 -1);", Float.unwrap(expected), "1 -1");
     }
 
     /// Test that gm with mixed signs and non-unit magnitudes returns a negative
-    /// result. gm(-2, 3) = -sqrt(|-2| * |3|) = -sqrt(6) ≈ -2.450.
+    /// result. gm(-2, 3) = -sqrt(|-2| * |3|) = -sqrt(6) ≈ -2.4494897427831780981972840747058913919659.
     function testOpGmEvalMixedSignsNonUnit() external view {
-        (Float expected,) = LibDecimalFloat.packLossy(-2450, -3);
+        (Float expected,) = LibDecimalFloat.packLossy(-24494897427831780981972840747058913919659, -40);
         checkHappy("_: gm(-2 3);", Float.unwrap(expected), "-2 3");
     }
 
     /// Test that gm with both inputs negative returns a positive result.
     /// gm(-1, -1) = sqrt(|-1| * |-1|) = 1.
     function testOpGmEvalBothNegativeEqual() external view {
-        checkHappy("_: gm(-1 -1);", Float.unwrap(LibDecimalFloat.packLossless(1e3, -3)), "-1 -1");
+        checkHappy("_: gm(-1 -1);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "-1 -1");
     }
 
     /// Test that gm with both inputs negative and unequal returns a positive
-    /// result. gm(-2, -3) = sqrt(|-2| * |-3|) = sqrt(6) ≈ 2.450.
+    /// result. gm(-2, -3) = sqrt(|-2| * |-3|) = sqrt(6) ≈ 2.4494897427831780981972840747058913919659.
     function testOpGmEvalBothNegativeUnequal() external view {
-        checkHappy("_: gm(-2 -3);", Float.unwrap(LibDecimalFloat.packLossless(2450, -3)), "-2 -3");
+        checkHappy(
+            "_: gm(-2 -3);",
+            Float.unwrap(LibDecimalFloat.packLossless(24494897427831780981972840747058913919659, -40)),
+            "-2 -3"
+        );
     }
 
     /// Test that gm with zero and a negative input returns zero.

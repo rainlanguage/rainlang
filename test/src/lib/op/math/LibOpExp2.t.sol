@@ -35,15 +35,18 @@ contract LibOpExp2Test is OpTest {
     function testOpExp2EvalExample() external view {
         checkHappy("_: exp2(0);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "2^0");
         checkHappy("_: exp2(1);", Float.unwrap(LibDecimalFloat.packLossless(2, 0)), "2^1");
-        checkHappy("_: exp2(0.5);", Float.unwrap(LibDecimalFloat.packLossless(1415, -3)), "2^0.5");
-        checkHappy("_: exp2(2);", Float.unwrap(LibDecimalFloat.packLossless(4000, -3)), "2^2");
-        checkHappy("_: exp2(3);", Float.unwrap(LibDecimalFloat.packLossless(8000, -3)), "2^3");
+        checkHappy(
+            "_: exp2(0.5);",
+            Float.unwrap(LibDecimalFloat.packLossless(14142135623730950488016887242096980785697, -40)),
+            "2^0.5"
+        );
+        checkHappy("_: exp2(2);", Float.unwrap(LibDecimalFloat.packLossless(4, 0)), "2^2");
+        checkHappy("_: exp2(3);", Float.unwrap(LibDecimalFloat.packLossless(8, 0)), "2^3");
     }
 
     /// Test exp2 with negative input. exp2(-1) = 0.5.
     function testOpExp2EvalNegativeInput() external view {
-        (Float expected,) =
-            LibDecimalFloat.packLossy(5000000000000000000000000000000000000000000000000000000000000000000, -67);
+        (Float expected,) = LibDecimalFloat.packLossy(50000000000000000000000000000000000000000, -41);
         checkHappy("_: exp2(-1);", Float.unwrap(expected), "2^(-1)");
     }
 

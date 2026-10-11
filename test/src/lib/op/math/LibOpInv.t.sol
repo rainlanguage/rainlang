@@ -57,9 +57,9 @@ contract LibOpInvTest is OpTest {
         checkHappy("_: inv(-2);", Float.unwrap(expected), "-2");
     }
 
-    /// Test that inv(0) reverts with division by zero.
+    /// Test that inv(0) reverts with division by zero, reporting the zero input.
     function testOpInvEvalDivisionByZero() external {
-        checkUnhappy("_: inv(0);", abi.encodeWithSelector(DivisionByZero.selector, 1e76, -76));
+        checkUnhappy("_: inv(0);", abi.encodeWithSelector(DivisionByZero.selector, 0, 0));
     }
 
     /// Test the eval of `inv` for bad inputs.

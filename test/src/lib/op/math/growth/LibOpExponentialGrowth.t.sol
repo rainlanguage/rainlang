@@ -64,39 +64,37 @@ contract LibOpExponentialGrowthTest is OpTest {
         checkHappy("_: exponential-growth(0 0.1 1);", 0, "0 0.1 1");
         checkHappy("_: exponential-growth(1 0.1 0);", Float.unwrap(LibDecimalFloat.FLOAT_ONE), "1 0.1 0");
         checkHappy(
-            "_: exponential-growth(1 0.1 1);", Float.unwrap(LibDecimalFloat.packLossless(1.1e67, -67)), "1 0.1 1"
+            "_: exponential-growth(1 0.1 1);", Float.unwrap(LibDecimalFloat.packLossless(1.1e40, -40)), "1 0.1 1"
         );
         // Exactly 1.21
         checkHappy(
-            "_: exponential-growth(1 0.1 2);", Float.unwrap(LibDecimalFloat.packLossless(1.21e67, -67)), "1 0.1 2"
+            "_: exponential-growth(1 0.1 2);", Float.unwrap(LibDecimalFloat.packLossless(1.21e40, -40)), "1 0.1 2"
         );
-        // Not exactly 1.26905870629
+        // 1.1^2.5 = 1.21 sqrt(1.1), rounded to 41 significant digits.
         checkHappy(
             "_: exponential-growth(1 0.1 2.5);",
-            Float.unwrap(LibDecimalFloat.packLossless(1.26929e67, -67)),
+            Float.unwrap(LibDecimalFloat.packLossless(12690587062858833718596587515527244941551, -40)),
             "1 0.1 2.5"
         );
-        checkHappy("_: exponential-growth(1 0 2);", Float.unwrap(LibDecimalFloat.packLossless(1e3, -3)), "1 0 2");
-        // Not exactly 1.0488088482
+        checkHappy("_: exponential-growth(1 0 2);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "1 0 2");
+        // sqrt(1.1), rounded to 41 significant digits.
         checkHappy(
-            "_: exponential-growth(1 0.1 0.5);", Float.unwrap(LibDecimalFloat.packLossless(1049, -3)), "1 0.1 0.5"
+            "_: exponential-growth(1 0.1 0.5);",
+            Float.unwrap(LibDecimalFloat.packLossless(10488088481701515469914535136799375984753, -40)),
+            "1 0.1 0.5"
         );
         checkHappy("_: exponential-growth(2 0.1 0);", Float.unwrap(LibDecimalFloat.packLossless(2, 0)), "2 0.1 0");
         checkHappy(
-            "_: exponential-growth(2 0.1 1);", Float.unwrap(LibDecimalFloat.packLossless(2.2e66, -66)), "2 0.1 1"
+            "_: exponential-growth(2 0.1 1);", Float.unwrap(LibDecimalFloat.packLossless(2.2e40, -40)), "2 0.1 1"
         );
         checkHappy(
-            "_: exponential-growth(2 0.1 2);", Float.unwrap(LibDecimalFloat.packLossless(2.42e66, -66)), "2 0.1 2"
+            "_: exponential-growth(2 0.1 2);", Float.unwrap(LibDecimalFloat.packLossless(2.42e40, -40)), "2 0.1 2"
         );
 
-        /// 1.8181..
+        /// 2 times 1/1.1 rounded to 41 significant digits; the product by 2 is exact.
         checkHappy(
             "_: exponential-growth(2 0.1 -1);",
-            Float.unwrap(
-                LibDecimalFloat.packLossless(
-                    1.818181818181818181818181818181818181818181818181818181818181818181e66, -66
-                )
-            ),
+            Float.unwrap(LibDecimalFloat.packLossless(181818181818181818181818181818181818181818, -41)),
             "2 0.1 -1"
         );
     }
