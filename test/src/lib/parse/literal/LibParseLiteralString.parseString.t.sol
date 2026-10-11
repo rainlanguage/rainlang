@@ -2,13 +2,13 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.2/src/Test.sol";
+import {Test} from "forge-std-1.17.0/src/Test.sol";
 import {LibParseLiteralString} from "../../../../../src/lib/parse/literal/LibParseLiteralString.sol";
 import {LibBytes, Pointer} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
 import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.0/src/lib/LibIntOrAString.sol";
 import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseState.sol";
-import {CMASK_STRING_LITERAL_TAIL} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
-import {LibConformString} from "rain-string-0.2.0/src/lib/mut/LibConformString.sol";
+import {CMASK_STRING_LITERAL_TAIL} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
+import {LibConformString} from "rain-string-0.3.9/src/lib/mut/LibConformString.sol";
 import {UnclosedStringLiteral} from "../../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 
@@ -35,7 +35,7 @@ contract LibParseLiteralStringTest is Test {
 
     /// The parser will only accept strings that are valid according to the mask.
     function testParseStringLiteralAny(bytes memory data) external pure {
-        LibConformString.conformStringToMask(string(data), CMASK_STRING_LITERAL_TAIL, 0x80);
+        LibConformString.conformStringToMask(string(data), CMASK_STRING_LITERAL_TAIL);
         vm.assume(data.length < 32);
         ParseState memory state = LibParseState.newState(bytes(string.concat("\"", string(data), "\"")), "", "", "");
 
@@ -52,7 +52,7 @@ contract LibParseLiteralStringTest is Test {
     /// intact after parsing by checking that a second parse of the same
     /// data produces the same result.
     function testParseStringMemoryRestoration(bytes memory data) external pure {
-        LibConformString.conformStringToMask(string(data), CMASK_STRING_LITERAL_TAIL, 0x80);
+        LibConformString.conformStringToMask(string(data), CMASK_STRING_LITERAL_TAIL);
         vm.assume(data.length > 0 && data.length < 32);
         bytes memory wrapped = bytes(string.concat("\"", string(data), "\""));
         ParseState memory state = LibParseState.newState(wrapped, "", "", "");
@@ -71,7 +71,7 @@ contract LibParseLiteralStringTest is Test {
     /// If any character in the string is not in the mask, the parser will error.
     function testParseStringLiteralCorrupt(bytes memory data, uint256 corruptIndex) external {
         vm.assume(data.length > 0);
-        LibConformString.conformStringToMask(string(data), CMASK_STRING_LITERAL_TAIL, 0x80);
+        LibConformString.conformStringToMask(string(data), CMASK_STRING_LITERAL_TAIL);
         vm.assume(data.length < 32);
         corruptIndex = bound(corruptIndex, 0, data.length - 1);
         LibConformString.corruptSingleChar(string(data), corruptIndex);

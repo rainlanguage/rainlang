@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.2/src/Test.sol";
+import {Test} from "forge-std-1.17.0/src/Test.sol";
 
 import {LibParseState, ParseState, SUB_PARSER_POINTER_SHIFT} from "../../../../src/lib/parse/LibParseState.sol";
 import {
@@ -13,14 +13,14 @@ import {
 import {LibBytes, Pointer} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
 import {
     CMASK_WHITESPACE,
-    CMASK_LITERAL_HEX_DISPATCH_START,
+    LITERAL_HEX_DISPATCH_START_SEQUENCE,
     CMASK_INTERSTITIAL_HEAD,
     CMASK_HEX
-} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
-import {LibConformString} from "rain-string-0.2.0/src/lib/mut/LibConformString.sol";
+} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
+import {LibConformString} from "rain-string-0.3.9/src/lib/mut/LibConformString.sol";
 import {NoWhitespaceAfterUsingWordsFrom} from "../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
-import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
+import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 
 /// @title LibParsePragmaKeywordTest
@@ -125,10 +125,10 @@ contract LibParsePragmaKeywordTest is Test {
         if (bytes(calldataStr).length > 2) {
             vm.assume(
                 keccak256(bytes(calldataStr[0:2]))
-                    // CMASK_LITERAL_HEX_DISPATCH_START is a constant that is
+                    // LITERAL_HEX_DISPATCH_START_SEQUENCE is a constant that is
                     // definitely a uint16 so this is safe.
                     //forge-lint: disable-next-line(unsafe-typecast)
-                    != keccak256(abi.encodePacked(uint16(CMASK_LITERAL_HEX_DISPATCH_START)))
+                    != keccak256(abi.encodePacked(uint16(LITERAL_HEX_DISPATCH_START_SEQUENCE)))
             );
         }
         string memory str = string.concat(
@@ -154,7 +154,7 @@ contract LibParsePragmaKeywordTest is Test {
     ) external view {
         vm.assume(bytes(whitespace).length > 0);
         bytes1 notHexData = LibConformString.charFromMask(seed, ~CMASK_HEX);
-        LibConformString.conformStringToMask(whitespace, CMASK_WHITESPACE, 0x80);
+        LibConformString.conformStringToMask(whitespace, CMASK_WHITESPACE);
         string memory str = string.concat(
             string(PRAGMA_KEYWORD_BYTES),
             whitespace,
@@ -196,8 +196,8 @@ contract LibParsePragmaKeywordTest is Test {
 
         bytes1 notHexData = LibConformString.charFromMask(seed, ~CMASK_HEX);
 
-        LibConformString.conformStringToMask(whitespace0, CMASK_WHITESPACE, 0x80);
-        LibConformString.conformStringToMask(whitespace1, CMASK_WHITESPACE, 0x80);
+        LibConformString.conformStringToMask(whitespace0, CMASK_WHITESPACE);
+        LibConformString.conformStringToMask(whitespace1, CMASK_WHITESPACE);
 
         string memory str = string.concat(
             string.concat(

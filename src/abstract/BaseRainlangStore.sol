@@ -2,14 +2,14 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {ERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/ERC165.sol";
+import {ERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/ERC165.sol";
 
-import {IInterpreterStoreV3} from "rainlang-interface-0.2.9/src/interface/IInterpreterStoreV3.sol";
+import {IInterpreterStoreV3} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
 import {
     LibNamespace,
     FullyQualifiedNamespace,
     StateNamespace
-} from "rainlang-interface-0.2.9/src/lib/ns/LibNamespace.sol";
+} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
 import {OddSetLength} from "../error/ErrStore.sol";
 
 /// @title BaseRainlangStore

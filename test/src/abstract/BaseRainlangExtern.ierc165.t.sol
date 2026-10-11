@@ -2,11 +2,11 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.2/src/Test.sol";
-import {IERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/IERC165.sol";
-import {IInterpreterExternV4} from "rainlang-interface-0.2.9/src/interface/IInterpreterExternV4.sol";
-import {IIntegrityToolingV1} from "rain-sol-codegen-0.1.37/src/interface/IIntegrityToolingV1.sol";
-import {IOpcodeToolingV1} from "rain-sol-codegen-0.1.37/src/interface/IOpcodeToolingV1.sol";
+import {Test} from "forge-std-1.17.0/src/Test.sol";
+import {IERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/IERC165.sol";
+import {IInterpreterExternV4} from "rainlang-interface-0.2.13/src/interface/IInterpreterExternV4.sol";
+import {IIntegrityToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IIntegrityToolingV1.sol";
+import {IOpcodeToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IOpcodeToolingV1.sol";
 import {ChildRainlangExtern} from "./ChildRainlangExtern.sol";
 
 /// @title BaseRainlangExternTest

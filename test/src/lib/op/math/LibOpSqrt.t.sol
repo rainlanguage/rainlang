@@ -3,11 +3,11 @@
 pragma solidity =0.8.25;
 
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
-import {PowNegativeBase} from "rain-math-float-0.2.4/src/error/ErrDecimalFloat.sol";
+import {PowNegativeBase} from "rain-math-float-0.2.22/src/error/ErrDecimalFloat.sol";
 import {LibOpSqrt} from "../../../../../src/lib/op/math/LibOpSqrt.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.22/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 
 contract LibOpSqrtTest is OpTest {
     using LibDecimalFloat for Float;

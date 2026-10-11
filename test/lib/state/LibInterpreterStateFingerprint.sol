@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {InterpreterState} from "../../../src/lib/state/LibInterpreterState.sol";
 import {LibMemoryKV, MemoryKV, MEMORY_KV_EMPTY} from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
-import {Arrays} from "@openzeppelin-contracts-5.6.1/utils/Arrays.sol";
+import {Arrays} from "@openzeppelin-contracts-5.7.0/utils/Arrays.sol";
 
 /// @title LibInterpreterStateFingerprint
 /// @notice Test-only library for computing a keccak256 fingerprint of interpreter

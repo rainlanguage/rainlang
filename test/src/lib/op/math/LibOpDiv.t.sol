@@ -5,12 +5,12 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, InterpreterState, OperandV2} from "test/abstract/OpTest.sol";
 import {LibOpDiv} from "../../../../../src/lib/op/math/LibOpDiv.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.22/src/lib/LibDecimalFloat.sol";
 import {
     LibDecimalFloatImplementation,
     DivisionByZero
-} from "rain-math-float-0.2.4/src/lib/implementation/LibDecimalFloatImplementation.sol";
+} from "rain-math-float-0.2.22/src/lib/implementation/LibDecimalFloatImplementation.sol";
 
 contract LibOpDivTest is OpTest {
     using LibDecimalFloat for Float;

@@ -3,8 +3,8 @@
 pragma solidity =0.8.25;
 
 import {ParseLiteralTest} from "test/abstract/ParseLiteralTest.sol";
-import {LibConformString} from "rain-string-0.2.0/src/lib/mut/LibConformString.sol";
-import {CMASK_HEX} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
+import {LibConformString} from "rain-string-0.3.9/src/lib/mut/LibConformString.sol";
+import {CMASK_HEX} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {LibParseLiteralHex} from "../../../../../src/lib/parse/literal/LibParseLiteralHex.sol";
 
 /// @title LibParseLiteralBoundLiteralHexTest
@@ -35,7 +35,7 @@ contract LibParseLiteralBoundLiteralHexTest is ParseLiteralTest {
     {
         LibConformString.conformStringToHexDigits(str);
         string memory delimString = string(abi.encodePacked(delimByte));
-        LibConformString.conformStringToMask(delimString, ~CMASK_HEX, 0x100);
+        LibConformString.conformStringToMask(delimString, ~CMASK_HEX);
         checkHexBounds(
             bytes(string.concat("0x", str, delimString, anyOtherString)),
             2,

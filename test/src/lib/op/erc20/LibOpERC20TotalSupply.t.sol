@@ -4,13 +4,13 @@ pragma solidity =0.8.25;
 
 import {OpTest} from "test/abstract/OpTest.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibOpERC20TotalSupply} from "../../../../../src/lib/op/erc20/LibOpERC20TotalSupply.sol";
-import {IERC20} from "@openzeppelin-contracts-5.6.1/interfaces/IERC20.sol";
+import {IERC20} from "@openzeppelin-contracts-5.7.0/interfaces/IERC20.sol";
 import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {IERC20Metadata} from "@openzeppelin-contracts-5.6.1/interfaces/IERC20Metadata.sol";
-import {LibDecimalFloat, Float, LossyConversionToFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
+import {IERC20Metadata} from "@openzeppelin-contracts-5.7.0/interfaces/IERC20Metadata.sol";
+import {LibDecimalFloat, Float, LossyConversionToFloat} from "rain-math-float-0.2.22/src/lib/LibDecimalFloat.sol";
 import {TOFUOutcome, ITOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.1/src/interface/ITOFUTokenDecimals.sol";
 import {NotAnAddress} from "../../../../../src/error/ErrRainType.sol";
 import {LibTestCast} from "test/lib/typecast/LibTestCast.sol";

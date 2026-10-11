@@ -2,11 +2,11 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.2/src/Test.sol";
+import {Test} from "forge-std-1.17.0/src/Test.sol";
 import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {Pointer, LibBytes} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
 import {LibParseSlow} from "./LibParseSlow.sol";
-import {CMASK_NUMERIC_0_9} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
+import {CMASK_NUMERIC_0_9} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {WordSize} from "../../../../src/error/ErrParse.sol";
 
 /// @title LibParseParseWordTest

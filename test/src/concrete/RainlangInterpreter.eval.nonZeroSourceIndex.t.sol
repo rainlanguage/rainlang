@@ -3,10 +3,10 @@
 pragma solidity =0.8.25;
 
 import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
-import {StateNamespace} from "rainlang-interface-0.2.9/src/interface/IInterpreterStoreV3.sol";
-import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
-import {LibNamespace} from "rainlang-interface-0.2.9/src/lib/ns/LibNamespace.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
+import {StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
+import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.22/src/lib/LibDecimalFloat.sol";
 
 /// @title RainlangInterpreterEvalNonZeroSourceIndexTest
 /// @notice Tests that `eval4` correctly selects non-zero source indices.
