@@ -10,10 +10,6 @@ import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.
 import {PowNegativeBase} from "rain-math-float-0.2.45/src/error/ErrDecimalFloat.sol";
 
 contract LibOpPowerTest is OpTest {
-    function beforeOpTestConstructor() internal virtual override {
-        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
-    }
-
     /// Directly test the integrity logic of LibOpPower.
     /// Inputs are always 2, outputs are always 1.
     function testOpPowIntegrity(IntegrityCheckState memory state, OperandV2 operand) external pure {

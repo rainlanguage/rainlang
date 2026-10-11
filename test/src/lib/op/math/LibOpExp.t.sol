@@ -9,10 +9,6 @@ import {LibDecimalFloat, Float} from "rain-math-float-0.2.45/src/lib/LibDecimalF
 import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 
 contract LibOpExpTest is OpTest {
-    function beforeOpTestConstructor() internal virtual override {
-        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
-    }
-
     /// Directly test the integrity logic of LibOpExp.
     /// Inputs are always 1, outputs are always 1.
     function testOpExpIntegrity(IntegrityCheckState memory state, OperandV2 operand) external pure {

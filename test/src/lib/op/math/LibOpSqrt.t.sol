@@ -12,10 +12,6 @@ import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.
 contract LibOpSqrtTest is OpTest {
     using LibDecimalFloat for Float;
 
-    function beforeOpTestConstructor() internal virtual override {
-        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
-    }
-
     /// Directly test the integrity logic of LibOpSqrt.
     /// Inputs are always 1, outputs are always 1.
     function testOpSqrtIntegrity(IntegrityCheckState memory state, OperandV2 operand) external pure {
