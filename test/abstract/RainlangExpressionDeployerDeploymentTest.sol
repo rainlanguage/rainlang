@@ -15,7 +15,7 @@ import {
     TEST_INTERPRETER_ADDRESS,
     TEST_EXPRESSION_DEPLOYER_ADDRESS
 } from "../lib/deploy/LibTestInterpreterDeploy.sol";
-import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.1/src/lib/LibTOFUTokenDecimals.sol";
+import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.4/src/lib/LibTOFUTokenDecimals.sol";
 
 /// @title RainlangExpressionDeployerDeploymentTest
 /// @notice Binds a parser, store, interpreter and expression deployer for the

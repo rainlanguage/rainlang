@@ -8,7 +8,7 @@ import {IERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/IERC165
 import {IInterpreterExternV4} from "rainlang-interface-0.2.13/src/interface/IInterpreterExternV4.sol";
 import {ISubParserV4} from "rainlang-interface-0.2.13/src/interface/ISubParserV4.sol";
 import {RainlangReferenceExtern} from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
-import {IDescribedByMetaV1} from "rain-metadata-0.1.7/src/interface/IDescribedByMetaV1.sol";
+import {IDescribedByMetaV1} from "rain-metadata-0.1.43/src/interface/IDescribedByMetaV1.sol";
 import {ISubParserToolingV1} from "rain-sol-codegen-0.1.39/src/interface/ISubParserToolingV1.sol";
 import {IParserToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IParserToolingV1.sol";
 import {IIntegrityToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IIntegrityToolingV1.sol";

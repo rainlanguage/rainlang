@@ -6,8 +6,7 @@ import {OperandV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInt
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../../integrity/LibIntegrityCheck.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.22/src/lib/LibDecimalFloat.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.4/src/lib/deploy/LibDecimalFloatDeploy.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpExponentialGrowth
 /// @notice Exponential growth is base(1 + rate)^t where base is the initial
@@ -26,7 +25,7 @@ library LibOpExponentialGrowth {
     /// @notice exponential-growth
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
-    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal view returns (Pointer) {
+    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal pure returns (Pointer) {
         Float base;
         Float rate;
         Float t;
@@ -36,9 +35,7 @@ library LibOpExponentialGrowth {
             stackTop := add(stackTop, 0x40)
             t := mload(stackTop)
         }
-        base = base.mul(
-            rate.add(LibDecimalFloat.FLOAT_ONE).pow(t, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS)
-        );
+        base = base.mul(rate.add(LibDecimalFloat.FLOAT_ONE).pow(t));
 
         assembly ("memory-safe") {
             mstore(stackTop, base)
@@ -51,15 +48,13 @@ library LibOpExponentialGrowth {
     /// @return The output values to push onto the stack.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
         internal
-        view
+        pure
         returns (StackItem[] memory)
     {
         Float base = Float.wrap(StackItem.unwrap(inputs[0]));
         Float rate = Float.wrap(StackItem.unwrap(inputs[1]));
         Float t = Float.wrap(StackItem.unwrap(inputs[2]));
-        base = base.mul(
-            rate.add(LibDecimalFloat.FLOAT_ONE).pow(t, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS)
-        );
+        base = base.mul(rate.add(LibDecimalFloat.FLOAT_ONE).pow(t));
         StackItem[] memory outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(Float.unwrap(base));
         return outputs;

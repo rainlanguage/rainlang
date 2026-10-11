@@ -6,7 +6,7 @@ import {Test} from "forge-std-1.17.0/src/Test.sol";
 import {LibBytecode} from "rainlang-interface-0.2.13/src/lib/bytecode/LibBytecode.sol";
 import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
-import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.0/src/lib/LibIntOrAString.sol";
+import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
 import {StringTooLong, UnclosedStringLiteral} from "../../../../src/error/ErrParse.sol";
 import {LibConformString} from "rain-string-0.3.9/src/lib/mut/LibConformString.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";

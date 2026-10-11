@@ -26,7 +26,7 @@ import {
 import {IERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/IERC165.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {LibUint256Array} from "rain-solmem-0.1.28/src/lib/LibUint256Array.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.22/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpExternTest
 /// @notice Test the runtime and integrity time logic of LibOpExtern.

@@ -6,8 +6,7 @@ import {OperandV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInt
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.22/src/lib/LibDecimalFloat.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.4/src/lib/deploy/LibDecimalFloatDeploy.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpGm
 /// @notice Opcode for the signed geometric mean of two decimal floating point
@@ -29,7 +28,7 @@ library LibOpGm {
     /// one input is negative, positive otherwise.
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
-    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal view returns (Pointer) {
+    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal pure returns (Pointer) {
         Float a;
         Float b;
         assembly ("memory-safe") {
@@ -39,8 +38,7 @@ library LibOpGm {
         }
         bool aNeg = a.lt(LibDecimalFloat.FLOAT_ZERO);
         bool bNeg = b.lt(LibDecimalFloat.FLOAT_ZERO);
-        Float result = a.abs().mul(b.abs())
-            .pow(LibDecimalFloat.FLOAT_HALF, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
+        Float result = a.abs().mul(b.abs()).pow(LibDecimalFloat.FLOAT_HALF);
         if (aNeg != bNeg) {
             result = result.minus();
         }
@@ -56,7 +54,7 @@ library LibOpGm {
     /// @return The output values to push onto the stack.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
         internal
-        view
+        pure
         returns (StackItem[] memory)
     {
         // The geometric mean is sign * sqrt(|a| * |b|), where sign is
@@ -65,8 +63,7 @@ library LibOpGm {
         Float b = Float.wrap(StackItem.unwrap(inputs[1]));
         bool aNeg = a.lt(LibDecimalFloat.FLOAT_ZERO);
         bool bNeg = b.lt(LibDecimalFloat.FLOAT_ZERO);
-        Float result = a.abs().mul(b.abs())
-            .pow(LibDecimalFloat.FLOAT_HALF, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
+        Float result = a.abs().mul(b.abs()).pow(LibDecimalFloat.FLOAT_HALF);
         if (aNeg != bNeg) {
             result = result.minus();
         }

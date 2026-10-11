@@ -6,8 +6,7 @@ import {OperandV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInt
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.22/src/lib/LibDecimalFloat.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.4/src/lib/deploy/LibDecimalFloatDeploy.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpExp2
 /// @notice Opcode for the binary exponential 2^x as decimal floating point.
@@ -26,13 +25,13 @@ library LibOpExp2 {
     /// decimal floating point binary exponent of a number.
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
-    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal view returns (Pointer) {
+    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal pure returns (Pointer) {
         Float a;
         assembly ("memory-safe") {
             a := mload(stackTop)
         }
 
-        a = LibDecimalFloat.FLOAT_TWO.pow(a, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
+        a = LibDecimalFloat.FLOAT_TWO.pow(a);
 
         assembly ("memory-safe") {
             mstore(stackTop, a)
@@ -45,11 +44,11 @@ library LibOpExp2 {
     /// @return The output values to push onto the stack.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
         internal
-        view
+        pure
         returns (StackItem[] memory)
     {
         Float a = Float.wrap(StackItem.unwrap(inputs[0]));
-        a = LibDecimalFloat.FLOAT_TWO.pow(a, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
+        a = LibDecimalFloat.FLOAT_TWO.pow(a);
 
         StackItem[] memory outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(Float.unwrap(a));

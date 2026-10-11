@@ -8,7 +8,7 @@ import {IERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/IERC165
 import {TestRainlangExpressionDeployer} from "test/concrete/TestRainlangExpressionDeployer.sol";
 import {IParserPragmaV1} from "rainlang-interface-0.2.13/src/interface/IParserPragmaV1.sol";
 import {IParserV2} from "rainlang-interface-0.2.13/src/interface/IParserV2.sol";
-import {IDescribedByMetaV1} from "rain-metadata-0.1.7/src/interface/IDescribedByMetaV1.sol";
+import {IDescribedByMetaV1} from "rain-metadata-0.1.43/src/interface/IDescribedByMetaV1.sol";
 import {IIntegrityToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IIntegrityToolingV1.sol";
 
 contract RainlangExpressionDeployerIERC165Test is Test {

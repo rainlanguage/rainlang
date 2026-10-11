@@ -16,7 +16,7 @@ import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState
 import {SignedContextV1} from "rainlang-interface-0.2.13/src/interface/IInterpreterCallerV4.sol";
 import {LibContext} from "rainlang-interface-0.2.13/src/lib/caller/LibContext.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.22/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
 import {OpcodeIOOverflow} from "../../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 
