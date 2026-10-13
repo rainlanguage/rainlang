@@ -2,12 +2,11 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.3/src/lib/deploy/LibDecimalFloatDeploy.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpPower
 /// @notice Opcode to raise a decimal floating point value to a float decimal power.
@@ -26,7 +25,7 @@ library LibOpPower {
     /// the stack and pushes base^exponent.
     /// @param stackTop Pointer to the top of the stack.
     /// @return The updated stack top with the result written.
-    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal view returns (Pointer) {
+    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal pure returns (Pointer) {
         Float a;
         Float b;
         assembly ("memory-safe") {
@@ -34,7 +33,7 @@ library LibOpPower {
             stackTop := add(stackTop, 0x20)
             b := mload(stackTop)
         }
-        a = a.pow(b, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
+        a = a.pow(b);
 
         assembly ("memory-safe") {
             mstore(stackTop, a)
@@ -47,12 +46,12 @@ library LibOpPower {
     /// @return Single-element array containing base^exponent.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
         internal
-        view
+        pure
         returns (StackItem[] memory)
     {
         Float a = Float.wrap(StackItem.unwrap(inputs[0]));
         Float b = Float.wrap(StackItem.unwrap(inputs[1]));
-        a = a.pow(b, LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
+        a = a.pow(b);
 
         StackItem[] memory outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(Float.unwrap(a));

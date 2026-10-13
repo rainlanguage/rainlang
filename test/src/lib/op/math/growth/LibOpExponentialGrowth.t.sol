@@ -5,14 +5,10 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpExponentialGrowth} from "../../../../../../src/lib/op/math/growth/LibOpExponentialGrowth.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 
 contract LibOpExponentialGrowthTest is OpTest {
-    function beforeOpTestConstructor() internal virtual override {
-        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
-    }
-
     /// Directly test the integrity logic of LibOpExponentialGrowth.
     /// Inputs are always 3, outputs are always 1.
     function testOpExponentialGrowthIntegrity(IntegrityCheckState memory state, OperandV2 operand) external pure {
@@ -68,39 +64,37 @@ contract LibOpExponentialGrowthTest is OpTest {
         checkHappy("_: exponential-growth(0 0.1 1);", 0, "0 0.1 1");
         checkHappy("_: exponential-growth(1 0.1 0);", Float.unwrap(LibDecimalFloat.FLOAT_ONE), "1 0.1 0");
         checkHappy(
-            "_: exponential-growth(1 0.1 1);", Float.unwrap(LibDecimalFloat.packLossless(1.1e67, -67)), "1 0.1 1"
+            "_: exponential-growth(1 0.1 1);", Float.unwrap(LibDecimalFloat.packLossless(1.1e40, -40)), "1 0.1 1"
         );
         // Exactly 1.21
         checkHappy(
-            "_: exponential-growth(1 0.1 2);", Float.unwrap(LibDecimalFloat.packLossless(1.21e67, -67)), "1 0.1 2"
+            "_: exponential-growth(1 0.1 2);", Float.unwrap(LibDecimalFloat.packLossless(1.21e40, -40)), "1 0.1 2"
         );
-        // Not exactly 1.26905870629
+        // 1.1^2.5 = 1.21 sqrt(1.1), rounded to 41 significant digits.
         checkHappy(
             "_: exponential-growth(1 0.1 2.5);",
-            Float.unwrap(LibDecimalFloat.packLossless(1.26929e67, -67)),
+            Float.unwrap(LibDecimalFloat.packLossless(12690587062858833718596587515527244941551, -40)),
             "1 0.1 2.5"
         );
-        checkHappy("_: exponential-growth(1 0 2);", Float.unwrap(LibDecimalFloat.packLossless(1e3, -3)), "1 0 2");
-        // Not exactly 1.0488088482
+        checkHappy("_: exponential-growth(1 0 2);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "1 0 2");
+        // sqrt(1.1), rounded to 41 significant digits.
         checkHappy(
-            "_: exponential-growth(1 0.1 0.5);", Float.unwrap(LibDecimalFloat.packLossless(1049, -3)), "1 0.1 0.5"
+            "_: exponential-growth(1 0.1 0.5);",
+            Float.unwrap(LibDecimalFloat.packLossless(10488088481701515469914535136799375984753, -40)),
+            "1 0.1 0.5"
         );
         checkHappy("_: exponential-growth(2 0.1 0);", Float.unwrap(LibDecimalFloat.packLossless(2, 0)), "2 0.1 0");
         checkHappy(
-            "_: exponential-growth(2 0.1 1);", Float.unwrap(LibDecimalFloat.packLossless(2.2e66, -66)), "2 0.1 1"
+            "_: exponential-growth(2 0.1 1);", Float.unwrap(LibDecimalFloat.packLossless(2.2e40, -40)), "2 0.1 1"
         );
         checkHappy(
-            "_: exponential-growth(2 0.1 2);", Float.unwrap(LibDecimalFloat.packLossless(2.42e66, -66)), "2 0.1 2"
+            "_: exponential-growth(2 0.1 2);", Float.unwrap(LibDecimalFloat.packLossless(2.42e40, -40)), "2 0.1 2"
         );
 
-        /// 1.8181..
+        /// 2 times 1/1.1 rounded to 41 significant digits; the product by 2 is exact.
         checkHappy(
             "_: exponential-growth(2 0.1 -1);",
-            Float.unwrap(
-                LibDecimalFloat.packLossless(
-                    1.818181818181818181818181818181818181818181818181818181818181818181e66, -66
-                )
-            ),
+            Float.unwrap(LibDecimalFloat.packLossless(181818181818181818181818181818181818181818, -41)),
             "2 0.1 -1"
         );
     }

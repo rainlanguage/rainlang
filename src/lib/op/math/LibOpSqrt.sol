@@ -2,12 +2,11 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.3/src/lib/deploy/LibDecimalFloatDeploy.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpSqrt
 /// @notice Opcode for the square root of a decimal floating point number.
@@ -26,12 +25,12 @@ library LibOpSqrt {
     /// and pushes its square root.
     /// @param stackTop Pointer to the top of the stack.
     /// @return The updated stack top with the result written.
-    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal view returns (Pointer) {
+    function run(InterpreterState memory, OperandV2, Pointer stackTop) internal pure returns (Pointer) {
         Float a;
         assembly ("memory-safe") {
             a := mload(stackTop)
         }
-        a = a.sqrt(LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
+        a = a.sqrt();
 
         assembly ("memory-safe") {
             mstore(stackTop, a)
@@ -44,11 +43,11 @@ library LibOpSqrt {
     /// @return Single-element array containing the square root.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
         internal
-        view
+        pure
         returns (StackItem[] memory)
     {
         Float a = Float.wrap(StackItem.unwrap(inputs[0]));
-        a = a.sqrt(LibDecimalFloatDeploy.ZOLTU_DEPLOYED_LOG_TABLES_ADDRESS);
+        a = a.sqrt();
 
         StackItem[] memory outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(Float.unwrap(a));

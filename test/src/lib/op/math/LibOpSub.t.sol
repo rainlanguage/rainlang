@@ -6,8 +6,8 @@ import {OpTest, IntegrityCheckState, OperandV2} from "test/abstract/OpTest.sol";
 import {UnexpectedOperandValue, UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
 import {LibOpSub} from "../../../../../src/lib/op/math/LibOpSub.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
 
 contract LibOpSubTest is OpTest {
     /// Directly test the integrity logic of LibOpSub. This tests the happy

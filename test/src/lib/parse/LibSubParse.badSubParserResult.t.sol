@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {OpTest} from "test/abstract/OpTest.sol";
 import {BadSubParserResult} from "../../../../src/error/ErrParse.sol";
-import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
+import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";
 import {BadLengthSubParser} from "./BadLengthSubParser.sol";
 
 /// @title LibSubParseBadSubParserResultTest

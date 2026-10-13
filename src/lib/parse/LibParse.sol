@@ -18,11 +18,11 @@ import {
     CMASK_LHS_STACK_TAIL,
     CMASK_LHS_STACK_HEAD,
     CMASK_IDENTIFIER_HEAD
-} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
-import {LibParseChar} from "rain-string-0.2.0/src/lib/parse/LibParseChar.sol";
-import {LibParseMeta} from "rainlang-interface-0.2.9/src/lib/parse/LibParseMeta.sol";
+} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
+import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
+import {LibParseMeta} from "rainlang-interface-0.2.13/src/lib/parse/LibParseMeta.sol";
 import {LibParseOperand} from "./LibParseOperand.sol";
-import {OperandV2, OPCODE_STACK, OPCODE_UNKNOWN} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {OperandV2, OPCODE_STACK, OPCODE_UNKNOWN} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibParseStackName} from "./LibParseStackName.sol";
 import {
     UnexpectedRHSChar,

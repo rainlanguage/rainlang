@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {ERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/ERC165.sol";
+import {ERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/ERC165.sol";
 import {LibMemoryKV, MemoryKVKey, MemoryKVVal} from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
 
 import {LibEval} from "../lib/eval/LibEval.sol";
@@ -14,8 +14,8 @@ import {
     SourceIndexV2,
     EvalV4,
     StackItem
-} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
-import {IOpcodeToolingV1} from "rain-sol-codegen-0.1.37/src/interface/IOpcodeToolingV1.sol";
+} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {IOpcodeToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IOpcodeToolingV1.sol";
 import {OddSetLength} from "../error/ErrStore.sol";
 import {ZeroFunctionPointers} from "../error/ErrEval.sol";
 

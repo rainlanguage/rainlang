@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Vm} from "forge-std-1.16.2/src/Vm.sol";
+import {Vm} from "forge-std-1.17.0/src/Vm.sol";
 import {TestRainlangParser} from "../../concrete/TestRainlangParser.sol";
 import {TestRainlangStore} from "../../concrete/TestRainlangStore.sol";
 import {TestRainlangInterpreter} from "../../concrete/TestRainlangInterpreter.sol";

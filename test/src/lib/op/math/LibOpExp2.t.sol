@@ -5,14 +5,10 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpExp2} from "../../../../../src/lib/op/math/LibOpExp2.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 
 contract LibOpExp2Test is OpTest {
-    function beforeOpTestConstructor() internal virtual override {
-        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
-    }
-
     /// Directly test the integrity logic of LibOpExp2.
     /// Inputs are always 1, outputs are always 1.
     function testOpExp2Integrity(IntegrityCheckState memory state, OperandV2 operand) external pure {
@@ -39,15 +35,18 @@ contract LibOpExp2Test is OpTest {
     function testOpExp2EvalExample() external view {
         checkHappy("_: exp2(0);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "2^0");
         checkHappy("_: exp2(1);", Float.unwrap(LibDecimalFloat.packLossless(2, 0)), "2^1");
-        checkHappy("_: exp2(0.5);", Float.unwrap(LibDecimalFloat.packLossless(1415, -3)), "2^0.5");
-        checkHappy("_: exp2(2);", Float.unwrap(LibDecimalFloat.packLossless(4000, -3)), "2^2");
-        checkHappy("_: exp2(3);", Float.unwrap(LibDecimalFloat.packLossless(8000, -3)), "2^3");
+        checkHappy(
+            "_: exp2(0.5);",
+            Float.unwrap(LibDecimalFloat.packLossless(14142135623730950488016887242096980785697, -40)),
+            "2^0.5"
+        );
+        checkHappy("_: exp2(2);", Float.unwrap(LibDecimalFloat.packLossless(4, 0)), "2^2");
+        checkHappy("_: exp2(3);", Float.unwrap(LibDecimalFloat.packLossless(8, 0)), "2^3");
     }
 
     /// Test exp2 with negative input. exp2(-1) = 0.5.
     function testOpExp2EvalNegativeInput() external view {
-        (Float expected,) =
-            LibDecimalFloat.packLossy(5000000000000000000000000000000000000000000000000000000000000000000, -67);
+        (Float expected,) = LibDecimalFloat.packLossy(50000000000000000000000000000000000000000, -41);
         checkHappy("_: exp2(-1);", Float.unwrap(expected), "2^(-1)");
     }
 

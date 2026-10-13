@@ -14,7 +14,7 @@ import {
     CMASK_EOL,
     CMASK_EOS,
     CMASK_COMMENT_HEAD
-} from "rain-string-0.2.0/src/lib/parse/LibParseCMask.sol";
+} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 
 /// @title LibParseUnexpectedRHSTest

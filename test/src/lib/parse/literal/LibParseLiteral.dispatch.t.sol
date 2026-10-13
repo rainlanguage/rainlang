@@ -2,16 +2,16 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.2/src/Test.sol";
+import {Test} from "forge-std-1.17.0/src/Test.sol";
 import {LibBytes, Pointer} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
 import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseState.sol";
 import {LibParseLiteral, UnsupportedLiteralType} from "../../../../../src/lib/parse/literal/LibParseLiteral.sol";
 import {UppercaseHexPrefix} from "../../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {LibAllStandardOps} from "../../../../../src/lib/op/LibAllStandardOps.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {ISubParserV4} from "rainlang-interface-0.2.9/src/interface/ISubParserV4.sol";
-import {LibIntOrAString, IntOrAString} from "rain-intorastring-0.1.0/src/lib/LibIntOrAString.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
+import {ISubParserV4} from "rainlang-interface-0.2.13/src/interface/ISubParserV4.sol";
+import {LibIntOrAString, IntOrAString} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
 
 /// @title LibParseLiteralDispatchTest
 /// @notice Tests for tryParseLiteral dispatch and parseLiteral revert path.
