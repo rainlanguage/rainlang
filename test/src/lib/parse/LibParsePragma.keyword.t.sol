@@ -13,8 +13,8 @@ import {
 import {LibBytes, Pointer} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
 import {
     CMASK_WHITESPACE,
-    LITERAL_HEX_DISPATCH_START_SEQUENCE,
     CMASK_INTERSTITIAL_HEAD,
+    CMASK_LITERAL_HEAD,
     CMASK_HEX
 } from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {LibConformString} from "rain-string-0.3.9/src/lib/mut/LibConformString.sol";
@@ -115,22 +115,15 @@ contract LibParsePragmaKeywordTest is Test {
     }
 
     /// Anything that DOES start with the keyword and WITH whitespace BUT NOT
-    /// hex values should more the cursor forward exactly the length of the
-    /// keyword + the whitespace char.
+    /// a literal should move the cursor forward exactly the length of the
+    /// keyword + the whitespace char. The char after the whitespace is neither
+    /// interstitial nor a literal head, so nothing after it is read.
     /// forge-config: default.fuzz.runs = 100
     function testPragmaKeywordWhitespaceNoHex(uint256 seed, string calldata calldataStr) external view {
         seed = bound(seed, 0, type(uint256).max - 1);
         bytes1 whitespace = LibConformString.charFromMask(seed, CMASK_WHITESPACE);
-        bytes1 notInterstitialHead = LibConformString.charFromMask(seed + 1, ~CMASK_INTERSTITIAL_HEAD);
-        if (bytes(calldataStr).length > 2) {
-            vm.assume(
-                keccak256(bytes(calldataStr[0:2]))
-                    // LITERAL_HEX_DISPATCH_START_SEQUENCE is a constant that is
-                    // definitely a uint16 so this is safe.
-                    //forge-lint: disable-next-line(unsafe-typecast)
-                    != keccak256(abi.encodePacked(uint16(LITERAL_HEX_DISPATCH_START_SEQUENCE)))
-            );
-        }
+        bytes1 notInterstitialHead =
+            LibConformString.charFromMask(seed + 1, ~(CMASK_INTERSTITIAL_HEAD | CMASK_LITERAL_HEAD));
         string memory str = string.concat(
             string(PRAGMA_KEYWORD_BYTES), string(abi.encodePacked(whitespace, notInterstitialHead)), calldataStr
         );
@@ -153,7 +146,8 @@ contract LibParsePragmaKeywordTest is Test {
         string calldata suffix
     ) external view {
         vm.assume(bytes(whitespace).length > 0);
-        bytes1 notHexData = LibConformString.charFromMask(seed, ~CMASK_HEX);
+        bytes1 notHexData =
+            LibConformString.charFromMask(seed, ~(CMASK_HEX | CMASK_LITERAL_HEAD | CMASK_INTERSTITIAL_HEAD));
         LibConformString.conformStringToMask(whitespace, CMASK_WHITESPACE);
         string memory str = string.concat(
             string(PRAGMA_KEYWORD_BYTES),
@@ -194,7 +188,8 @@ contract LibParsePragmaKeywordTest is Test {
         vm.assume(bytes(whitespace0).length > 0);
         vm.assume(bytes(whitespace1).length > 0);
 
-        bytes1 notHexData = LibConformString.charFromMask(seed, ~CMASK_HEX);
+        bytes1 notHexData =
+            LibConformString.charFromMask(seed, ~(CMASK_HEX | CMASK_LITERAL_HEAD | CMASK_INTERSTITIAL_HEAD));
 
         LibConformString.conformStringToMask(whitespace0, CMASK_WHITESPACE);
         LibConformString.conformStringToMask(whitespace1, CMASK_WHITESPACE);

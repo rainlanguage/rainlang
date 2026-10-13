@@ -9,7 +9,7 @@ import {LibParse, UnexpectedRHSChar, UnexpectedRightParen} from "../../../../src
 import {LibBytecode} from "rainlang-interface-0.2.13/src/lib/bytecode/LibBytecode.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
-import {ParseDecimalOverflow} from "rain-string-0.3.9/src/error/ErrParse.sol";
+import {ParseDecimalPrecisionLoss} from "rain-math-float-0.2.45/src/error/ErrParse.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralIntegerDecimalTest
@@ -200,19 +200,19 @@ contract LibParseLiteralIntegerDecimalTest is ParseTest {
         assertEq(constants[0], bytes32(uint256(int256(type(int128).max))));
     }
 
-    /// Check that decimal literals will revert if they overflow uint256.
-    function testParseIntegerLiteralDecimalUint256OverflowSimple() external {
-        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, LibParseError.tagErrorOffset(81)));
+    /// A decimal literal whose digits overflow uint256 is not exactly a Float.
+    /// It reverts precision loss with the cursor after the literal.
+    function testParseIntegerLiteralDecimalUint256DigitsPrecisionLossSimple() external {
+        vm.expectRevert(abi.encodeWithSelector(ParseDecimalPrecisionLoss.selector, LibParseError.tagErrorOffset(85)));
         (bytes memory bytecode, bytes32[] memory constants) =
             this.parseExternal("_: 115792089237316195423570985008687907853269984665640564039457584007913129639936e-18;");
         (bytecode);
         (constants);
     }
 
-    /// Check that decimal literals will revert if they overflow uint256 with
-    /// leading zeros.
-    function testParseIntegerLiteralDecimalUint256OverflowLeadingZeros() external {
-        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, LibParseError.tagErrorOffset(83)));
+    /// As above, with leading zeros.
+    function testParseIntegerLiteralDecimalUint256DigitsPrecisionLossLeadingZeros() external {
+        vm.expectRevert(abi.encodeWithSelector(ParseDecimalPrecisionLoss.selector, LibParseError.tagErrorOffset(87)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal(
             "_: 00115792089237316195423570985008687907853269984665640564039457584007913129639936e-18;"
         );
@@ -220,20 +220,18 @@ contract LibParseLiteralIntegerDecimalTest is ParseTest {
         (constants);
     }
 
-    // Check that decimal literals will revert if they overflow uint256 with
-    // a non-one leading digit.
-    function testParseIntegerLiteralDecimalUint256OverflowLeadingDigitBasic() external {
-        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, LibParseError.tagErrorOffset(81)));
+    /// As above, with a non-one leading digit.
+    function testParseIntegerLiteralDecimalUint256DigitsPrecisionLossLeadingDigitBasic() external {
+        vm.expectRevert(abi.encodeWithSelector(ParseDecimalPrecisionLoss.selector, LibParseError.tagErrorOffset(85)));
         (bytes memory bytecode, bytes32[] memory constants) =
             this.parseExternal("_: 215792089237316195423570985008687907853269984665640564039457584007913129639935e-18;");
         (bytecode);
         (constants);
     }
 
-    /// Check that decimal literals will revert if they overflow uint256 with
-    /// a non-one leading digit and leading zeros.
-    function testParseIntegerLiteralDecimalUint256OverflowLeadingDigitLeadingZeros() external {
-        vm.expectRevert(abi.encodeWithSelector(ParseDecimalOverflow.selector, LibParseError.tagErrorOffset(83)));
+    /// As above, with a non-one leading digit and leading zeros.
+    function testParseIntegerLiteralDecimalUint256DigitsPrecisionLossLeadingDigitLeadingZeros() external {
+        vm.expectRevert(abi.encodeWithSelector(ParseDecimalPrecisionLoss.selector, LibParseError.tagErrorOffset(87)));
         (bytes memory bytecode, bytes32[] memory constants) = this.parseExternal(
             "_: 00215792089237316195423570985008687907853269984665640564039457584007913129639935e-18;"
         );

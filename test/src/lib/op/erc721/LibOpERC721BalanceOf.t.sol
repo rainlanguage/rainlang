@@ -18,7 +18,7 @@ import {SignedContextV1} from "rainlang-interface-0.2.13/src/interface/IInterpre
 import {UnexpectedOperand} from "../../../../../src/error/ErrParse.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";
-import {LibDecimalFloat} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
 import {NotAnAddress} from "../../../../../src/error/ErrRainType.sol";
 import {LibTestCast} from "test/lib/typecast/LibTestCast.sol";
 import {LibBytes32Array} from "rain-solmem-0.1.28/src/lib/LibBytes32Array.sol";
@@ -100,7 +100,9 @@ contract LibOpERC721BalanceOfTest is OpTest {
             })
         );
         assertEq(stack.length, 1);
-        assertEq(StackItem.unwrap(stack[0]), bytes32(balance));
+        // The packed form depends on the balance: one past int224 packs with a
+        // shifted exponent. The value must round trip exactly.
+        assertEq(LibDecimalFloat.toFixedDecimalLossless(Float.wrap(StackItem.unwrap(stack[0])), 0), balance);
         assertEq(kvs.length, 0);
     }
 
