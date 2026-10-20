@@ -49,7 +49,7 @@ rain-deploy = "0.1.18"
 "rain-lib-typecast" = "0.1.4"
 "rain-math-binary" = "0.1.4"
 "rain-math-float" = "0.3.10"
-"rain-math-float-deploy" = { version = "0.1.4", git = "https://github.com/rainlanguage/rain.math.float.deploy.git", rev = "e4ee28109aa0379f6ca176c146841bd8f755f312" }
+"rain-math-float-deploy" = { version = "0.1.4", git = "https://github.com/rainlanguage/rain.math.float.deploy.git", rev = "9ff057239879342bd8f5ae66d13ec1f6778a5150" }
 "rain-metadata" = "0.1.43"
 rain-sol-codegen = "0.1.39"
 "rain-solmem" = "0.1.28"

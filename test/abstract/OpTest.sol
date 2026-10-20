@@ -202,6 +202,35 @@ abstract contract OpTest is RainlangExpressionDeployerDeploymentTest {
         opReferenceCheckExpectations(state, operand, referenceFn, pointers, inputs, calcOutputs);
     }
 
+    /// Runs `runFn` over `inputs` and returns the outputs it leaves on the
+    /// stack, so a revert inside `runFn` surfaces with its own revert data.
+    function opRunOutputs(
+        OperandV2 operand,
+        function(InterpreterState memory, OperandV2, Pointer) view returns (Pointer) runFn,
+        StackItem[] memory inputs
+    ) internal view returns (StackItem[] memory) {
+        uint256 calcOutputs = uint256(OperandV2.unwrap(operand) >> 0x14) & 0x0F;
+        ReferenceCheckPointers memory pointers = opReferenceCheckPointers(inputs, calcOutputs);
+        Pointer cursor = runFn(opTestDefaultInterpreterState(), operand, pointers.stackTop);
+        StackItem[] memory outputs = new StackItem[](calcOutputs);
+        for (uint256 i = 0; i < calcOutputs; i++) {
+            outputs[i] = StackItem.wrap(cursor.unsafeReadWord());
+            cursor = cursor.unsafeAddWord();
+        }
+        return outputs;
+    }
+
+    /// Both self-calls must succeed with identical return data or revert with
+    /// identical revert data.
+    function assertSameOutcome(bytes memory callA, bytes memory callB) internal view {
+        //slither-disable-next-line low-level-calls
+        (bool successA, bytes memory resultA) = address(this).staticcall(callA);
+        //slither-disable-next-line low-level-calls
+        (bool successB, bytes memory resultB) = address(this).staticcall(callB);
+        assertEq(successA, successB, "success");
+        assertEq(resultA, resultB, "result");
+    }
+
     function parseAndEval(bytes memory rainString, bytes32[][] memory context)
         internal
         view

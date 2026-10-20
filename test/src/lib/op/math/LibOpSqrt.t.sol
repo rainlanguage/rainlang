@@ -77,4 +77,31 @@ contract LibOpSqrtTest is OpTest {
     function testOpSqrtEvalOperandDisallowed() external {
         checkUnhappyParse("_: sqrt<0>(1);", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
+
+    function externalRun(StackItem[] memory inputs) external view returns (StackItem[] memory) {
+        return opRunOutputs(LibOperand.build(1, 1, 0), LibOpSqrt.run, inputs);
+    }
+
+    function externalReference(StackItem[] memory inputs) external view returns (StackItem[] memory) {
+        return LibOpSqrt.referenceFn(opTestDefaultInterpreterState(), LibOperand.build(1, 1, 0), inputs);
+    }
+
+    function checkRunMatchesReference(Float a) internal view {
+        StackItem[] memory inputs = new StackItem[](1);
+        inputs[0] = StackItem.wrap(Float.unwrap(a));
+        assertSameOutcome(abi.encodeCall(this.externalRun, (inputs)), abi.encodeCall(this.externalReference, (inputs)));
+    }
+
+    /// `run` and the in-library reference agree on every float, reverts
+    /// included.
+    function testOpSqrtRunMatchesReferenceAnyFloat(Float a) external view {
+        checkRunMatchesReference(a);
+    }
+
+    /// `run` and the in-library reference agree where results are mostly in
+    /// range.
+    function testOpSqrtRunMatchesReferenceNearOne(int224 signedCoefficient, int32 exponent) external view {
+        exponent = int32(bound(exponent, -76, -56));
+        checkRunMatchesReference(LibDecimalFloat.packLossless(signedCoefficient, exponent));
+    }
 }

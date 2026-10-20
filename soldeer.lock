@@ -72,7 +72,7 @@ integrity = "f1509e5fa3a4182b625f4650fb368fe605f76ffcaeaa6fbbf1159346b69f2809"
 name = "rain-math-float-deploy"
 version = "0.1.4"
 git = "https://github.com/rainlanguage/rain.math.float.deploy.git"
-rev = "e4ee28109aa0379f6ca176c146841bd8f755f312"
+rev = "9ff057239879342bd8f5ae66d13ec1f6778a5150"
 
 [[dependencies]]
 name = "rain-metadata"
