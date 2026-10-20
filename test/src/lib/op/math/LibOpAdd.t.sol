@@ -92,6 +92,13 @@ contract LibOpAddTest is OpTest {
         checkHappy("_: add(-5 5);", Float.unwrap(LibDecimalFloat.packLossless(0, -76)), "-5 + 5");
     }
 
+    /// Cancelling operands round once toward zero (rain.math.float SPEC add/sub).
+    function testOpAddEvalCancellingRoundsTowardZero() external view {
+        checkHappyEq("_: add(1 -1e-100);", LibDecimalFloat.packLossless(1e67 - 1, -67), "1 + -1e-100");
+        checkHappyEq("_: add(-1e-100 1);", LibDecimalFloat.packLossless(1e67 - 1, -67), "-1e-100 + 1");
+        checkHappyEq("_: add(1e100 -1);", LibDecimalFloat.packLossless(1e67 - 1, 33), "1e100 + -1");
+    }
+
     /// Test the eval of `add` opcode parsed from a string. Tests two inputs.
     /// Tests that adding 0 to 0 is 0.
     function testOpAddEval2InputsHappyZero() external view {

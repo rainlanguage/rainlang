@@ -55,6 +55,12 @@ contract LibOpCeilTest is OpTest {
         );
     }
 
+    /// A zero at any exponent ceils to `FLOAT_ZERO` (rain.math.float SPEC ceil).
+    function testOpCeilEvalZeroAnyExponent() external view {
+        checkHappy("_: ceil(0x0000000500000000000000000000000000000000000000000000000000000000);", 0, "0e5");
+        checkHappy("_: ceil(0xffffff9c00000000000000000000000000000000000000000000000000000000);", 0, "0e-100");
+    }
+
     /// Test the eval of `ceil` for bad inputs.
     function testOpCeilZeroInputs() external {
         checkBadInputs("_: ceil();", 0, 1, 0);

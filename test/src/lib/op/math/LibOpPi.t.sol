@@ -63,6 +63,17 @@ contract LibOpPiTest is OpTest {
         assertEq(kvs.length, 0);
     }
 
+    /// The first 67 digits of pi, truncated.
+    function testOpPiEvalTruncatesTowardZero() external view {
+        checkHappy(
+            "_: pi();",
+            Float.unwrap(
+                LibDecimalFloat.packLossless(3141592653589793238462643383279502884197169399375105820974944592307, -66)
+            ),
+            "pi"
+        );
+    }
+
     function testOpPiEvalOneInput() external {
         checkBadInputs("_: pi(0x00);", 1, 0, 1);
     }

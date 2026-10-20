@@ -387,6 +387,25 @@ contract LibOpAgreeTest is OpTest {
         );
     }
 
+    /// bc: the proportional term beyond the highest is 38124891136564819969.37.
+    function testOpAgreeEvalProportionalLimitExact() external view {
+        checkHappy(
+            "_: agree(0 1.000000000000000000000000000000000000000000000000000000000658505972 -38124891136564819967 5789604461865809771178549250434395392663499233282028201969066711282e10);",
+            bytes32(uint256(1)),
+            "under the exact limit"
+        );
+        checkHappy(
+            "_: agree(0 1.000000000000000000000000000000000000000000000000000000000658505972 -38124891136564819969 5789604461865809771178549250434395392663499233282028201969066711282e10);",
+            bytes32(uint256(1)),
+            "a fraction under the exact limit"
+        );
+        checkHappy(
+            "_: agree(0 1.000000000000000000000000000000000000000000000000000000000658505972 -38124891136564819970 5789604461865809771178549250434395392663499233282028201969066711282e10);",
+            0,
+            "a fraction over the exact limit"
+        );
+    }
+
     /// The absolute tolerance is in the same units as the values and does not
     /// scale with them.
     function testOpAgreeEvalAbsoluteBoundary() external view {

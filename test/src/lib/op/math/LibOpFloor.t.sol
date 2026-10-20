@@ -65,6 +65,12 @@ contract LibOpFloorTest is OpTest {
         assertTrue(result.eq(expected), errString);
     }
 
+    /// A zero at any exponent floors to `FLOAT_ZERO` (rain.math.float SPEC floor).
+    function testOpFloorEvalZeroAnyExponent() external view {
+        checkHappy("_: floor(0x0000000500000000000000000000000000000000000000000000000000000000);", 0, "0e5");
+        checkHappy("_: floor(0xffffff9c00000000000000000000000000000000000000000000000000000000);", 0, "0e-100");
+    }
+
     /// Test the eval of `floor` for bad inputs.
     function testOpFloorZeroInputs() external {
         checkBadInputs("_: floor();", 0, 1, 0);

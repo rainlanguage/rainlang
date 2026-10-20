@@ -44,6 +44,11 @@ contract LibOpHeadroomTest is OpTest {
         checkHappy("_: headroom(-3.8);", Float.unwrap(LibDecimalFloat.packLossless(0.8e67, -67)), "-3.8");
     }
 
+    /// `ceil(1e-100) - 1e-100` truncated toward zero to 67 digits.
+    function testOpHeadroomEvalCancellingRoundsTowardZero() external view {
+        checkHappyEq("_: headroom(1e-100);", LibDecimalFloat.packLossless(1e67 - 1, -67), "1e-100");
+    }
+
     /// Test the eval of `headroom` for bad inputs.
     function testOpHeadroomZeroInputs() external {
         checkBadInputs("_: headroom();", 0, 1, 0);

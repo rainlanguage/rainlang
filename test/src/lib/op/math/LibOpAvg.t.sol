@@ -55,6 +55,11 @@ contract LibOpAvgTest is OpTest {
         checkHappy("_: avg(4 0.5);", Float.unwrap(LibDecimalFloat.packLossless(2.25e66, -66)), "4 5");
     }
 
+    /// `(1 - 1e-100) / 2` truncated toward zero to 67 digits.
+    function testOpAvgEvalCancellingRoundsTowardZero() external view {
+        checkHappyEq("_: avg(1 -1e-100);", LibDecimalFloat.packLossless(5e66 - 1, -67), "1 -1e-100");
+    }
+
     /// Test the eval of `avg` for bad inputs.
     function testOpAvgEvalOneInput() external {
         checkBadInputs("_: avg(1);", 1, 2, 1);

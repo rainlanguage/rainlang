@@ -74,6 +74,11 @@ contract LibOpLinearGrowthTest is OpTest {
         );
     }
 
+    /// `1 + -1e-100 * 1` truncated toward zero to 67 digits.
+    function testOpLinearGrowthEvalCancellingRoundsTowardZero() external view {
+        checkHappyEq("_: linear-growth(1 -1e-100 1);", LibDecimalFloat.packLossless(1e67 - 1, -67), "1 -1e-100 1");
+    }
+
     function testOpLinearGrowthEvalZeroInputs() external {
         checkBadInputs(": linear-growth();", 0, 3, 0);
     }

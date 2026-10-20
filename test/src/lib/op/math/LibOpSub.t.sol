@@ -86,10 +86,10 @@ contract LibOpSubTest is OpTest {
         checkHappy("_: sub(1 2);", Float.unwrap(LibDecimalFloat.packLossless(-1e67, -67)), "1 2");
         checkHappy("_: sub(1 0.1);", Float.unwrap(LibDecimalFloat.packLossless(9e66, -67)), "1 0.1");
 
-        // Subtracting 1 from max value is still max value because floats.
+        // The exact difference rounds toward zero, one unit below max.
         checkHappy(
             "_: sub(max-positive-value() 1);",
-            Float.unwrap(LibDecimalFloat.packLossless(type(int224).max, type(int32).max)),
+            Float.unwrap(LibDecimalFloat.packLossless(type(int224).max - 1, type(int32).max)),
             "max-positive-value() 1"
         );
         checkHappy(
@@ -105,6 +105,13 @@ contract LibOpSubTest is OpTest {
         checkHappy("_: sub(1 1 0);", Float.unwrap(LibDecimalFloat.packLossless(0, 0)), "1 1 0");
         checkHappy("_: sub(2 1 1);", Float.unwrap(LibDecimalFloat.packLossless(0, -76)), "2 1 1");
         checkHappy("_: sub(2 2 0);", Float.unwrap(LibDecimalFloat.packLossless(0, 0)), "2 2 0");
+    }
+
+    /// Cancelling operands round once toward zero (rain.math.float SPEC add/sub).
+    function testOpSubEvalCancellingRoundsTowardZero() external view {
+        checkHappyEq("_: sub(1 1e-100);", LibDecimalFloat.packLossless(1e67 - 1, -67), "1 - 1e-100");
+        checkHappyEq("_: sub(1e100 1);", LibDecimalFloat.packLossless(1e67 - 1, 33), "1e100 - 1");
+        checkHappyEq("_: sub(-1 -1e-100);", LibDecimalFloat.packLossless(-(1e67 - 1), -67), "-1 - -1e-100");
     }
 
     function testOpSubZeroOutputs() external {

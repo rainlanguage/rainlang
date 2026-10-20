@@ -263,6 +263,13 @@ abstract contract OpTest is RainlangExpressionDeployerDeploymentTest {
         assertEq(kvs.length, 0);
     }
 
+    function checkHappyEq(bytes memory rainString, Float expected, string memory errString) internal view {
+        (StackItem[] memory stack, bytes32[] memory kvs) = parseAndEval(rainString);
+        assertEq(stack.length, 1, errString);
+        assertTrue(LibDecimalFloat.eq(Float.wrap(StackItem.unwrap(stack[0])), expected), errString);
+        assertEq(kvs.length, 0);
+    }
+
     function checkHappyKVs(bytes memory rainString, bytes32[] memory expectedKVs, string memory errString)
         internal
         view
