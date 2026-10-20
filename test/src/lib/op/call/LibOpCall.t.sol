@@ -18,7 +18,7 @@ import {LibBytecode, SourceIndexOutOfBounds} from "rainlang-interface-0.2.13/src
 import {BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {STACK_TRACER} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.45/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpCallTest
 /// @notice Test the LibOpCall library that includes the "call" word.
