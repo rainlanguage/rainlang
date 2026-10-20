@@ -12,10 +12,10 @@ import {
     StackItem,
     FullyQualifiedNamespace,
     SourceIndexV2
-} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
-import {SignedContextV1} from "rainlang-interface-0.2.9/src/interface/IInterpreterCallerV4.sol";
-import {LibContext} from "rainlang-interface-0.2.9/src/lib/caller/LibContext.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
+} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {SignedContextV1} from "rainlang-interface-0.2.13/src/interface/IInterpreterCallerV4.sol";
+import {LibContext} from "rainlang-interface-0.2.13/src/lib/caller/LibContext.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpPiTest
 /// @notice Tests for the mathematical constant pi opcode.
@@ -61,6 +61,17 @@ contract LibOpPiTest is OpTest {
         assertEq(stack.length, 1);
         assertEq(StackItem.unwrap(stack[0]), Float.unwrap(LibDecimalFloat.FLOAT_PI));
         assertEq(kvs.length, 0);
+    }
+
+    /// The first 67 digits of pi, truncated.
+    function testOpPiEvalTruncatesTowardZero() external view {
+        checkHappy(
+            "_: pi();",
+            Float.unwrap(
+                LibDecimalFloat.packLossless(3141592653589793238462643383279502884197169399375105820974944592307, -66)
+            ),
+            "pi"
+        );
     }
 
     function testOpPiEvalOneInput() external {

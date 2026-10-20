@@ -5,15 +5,11 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpPower} from "../../../../../src/lib/op/math/LibOpPower.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
-import {PowNegativeBase} from "rain-math-float-0.2.4/src/error/ErrDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {PowNegativeBase} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.sol";
 
 contract LibOpPowerTest is OpTest {
-    function beforeOpTestConstructor() internal virtual override {
-        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
-    }
-
     /// Directly test the integrity logic of LibOpPower.
     /// Inputs are always 2, outputs are always 1.
     function testOpPowIntegrity(IntegrityCheckState memory state, OperandV2 operand) external pure {
@@ -56,24 +52,32 @@ contract LibOpPowerTest is OpTest {
         // 1 ^ 1
         checkHappy("_: power(1 1);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "1 1");
         // 1 ^ 2
-        checkHappy("_: power(1 2);", Float.unwrap(LibDecimalFloat.packLossless(1e3, -3)), "1 2");
+        checkHappy("_: power(1 2);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "1 2");
         // 2 ^ 2
-        checkHappy("_: power(2 2);", Float.unwrap(LibDecimalFloat.packLossless(4000, -3)), "2 2");
+        checkHappy("_: power(2 2);", Float.unwrap(LibDecimalFloat.packLossless(4, 0)), "2 2");
         // 2 ^ 3
-        checkHappy("_: power(2 3);", Float.unwrap(LibDecimalFloat.packLossless(8000, -3)), "2 3");
+        checkHappy("_: power(2 3);", Float.unwrap(LibDecimalFloat.packLossless(8, 0)), "2 3");
         // 2 ^ 4
-        checkHappy("_: power(2 4);", Float.unwrap(LibDecimalFloat.packLossless(16000, -3)), "2 4");
+        checkHappy("_: power(2 4);", Float.unwrap(LibDecimalFloat.packLossless(16, 0)), "2 4");
         // sqrt 4 = 2
-        checkHappy("_: power(4 0.5);", Float.unwrap(LibDecimalFloat.packLossless(2e3, -3)), "4 0.5");
+        checkHappy("_: power(4 0.5);", Float.unwrap(LibDecimalFloat.packLossless(2e40, -40)), "4 0.5");
         // -1 ^ 0 = 1
         checkHappy("_: power(-1 0);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "-1 0");
     }
 
-    function testOpPowNegativeBaseError() external {
-        // Negative base with positive exponent.
-        checkUnhappy("_: power(-1 2);", abi.encodeWithSelector(PowNegativeBase.selector, -1, 0));
-        // Negative base with negative exponent.
-        checkUnhappy("_: power(-1 -2);", abi.encodeWithSelector(PowNegativeBase.selector, -1, 0));
+    /// A negative base with a whole exponent is `(-a)^b`, negated when `b` is
+    /// odd.
+    function testOpPowNegativeBaseWholeExponent() external view {
+        checkHappy("_: power(-1 2);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "-1 2");
+        checkHappy("_: power(-1 -2);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "-1 -2");
+        checkHappy("_: power(-2 3);", Float.unwrap(LibDecimalFloat.packLossless(-8, 0)), "-2 3");
+        checkHappy("_: power(-2 2);", Float.unwrap(LibDecimalFloat.packLossless(4, 0)), "-2 2");
+    }
+
+    /// A negative base with a fractional exponent has no real result.
+    function testOpPowNegativeBaseFractionalExponentError() external {
+        checkUnhappy("_: power(-1 0.5);", abi.encodeWithSelector(PowNegativeBase.selector, -1, 0));
+        checkUnhappy("_: power(-2 -1.5);", abi.encodeWithSelector(PowNegativeBase.selector, -2, 0));
     }
 
     /// Test the eval of `power` for bad inputs.

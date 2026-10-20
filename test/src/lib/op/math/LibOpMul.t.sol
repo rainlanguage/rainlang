@@ -2,13 +2,13 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {console2} from "forge-std-1.16.2/src/Test.sol";
+import {console2} from "forge-std-1.17.0/src/Test.sol";
 import {LibOpMul} from "../../../../../src/lib/op/math/LibOpMul.sol";
 import {OpTest, IntegrityCheckState, OperandV2} from "test/abstract/OpTest.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {ExponentOverflow, CoefficientOverflow} from "rain-math-float-0.2.4/src/error/ErrDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {ExponentOverflow, ExponentUnderflow} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.sol";
 
 contract LibOpMulTest is OpTest {
     /// Directly test the integrity logic of LibOpMul. This tests the
@@ -58,7 +58,7 @@ contract LibOpMulTest is OpTest {
             // Truncation is intentional so that we can read out the selector
             // separate from the overall error.
             //forge-lint: disable-next-line(unsafe-typecast)
-            assertTrue(bytes4(err) == CoefficientOverflow.selector || bytes4(err) == ExponentOverflow.selector);
+            assertTrue(bytes4(err) == ExponentUnderflow.selector || bytes4(err) == ExponentOverflow.selector);
         }
     }
 

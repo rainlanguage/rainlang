@@ -9,7 +9,7 @@ import {
 } from "../../../error/ErrExtern.sol";
 import {OutOfBoundsConstantRead} from "../../../error/ErrIntegrity.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {OperandV2} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {OperandV2} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {
@@ -17,10 +17,10 @@ import {
     ExternDispatchV2,
     EncodedExternDispatchV2,
     StackItem
-} from "rainlang-interface-0.2.9/src/interface/IInterpreterExternV4.sol";
+} from "rainlang-interface-0.2.13/src/interface/IInterpreterExternV4.sol";
 import {LibExtern} from "../../extern/LibExtern.sol";
 import {LibBytes32Array} from "rain-solmem-0.1.28/src/lib/LibBytes32Array.sol";
-import {ERC165Checker} from "@openzeppelin-contracts-5.6.1/utils/introspection/ERC165Checker.sol";
+import {ERC165Checker} from "@openzeppelin-contracts-5.7.0/utils/introspection/ERC165Checker.sol";
 import {BadOutputsLength} from "../../../error/ErrExtern.sol";
 
 /// @title LibOpExtern

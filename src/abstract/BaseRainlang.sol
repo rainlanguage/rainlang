@@ -3,7 +3,7 @@
 pragma solidity ^0.8.25;
 
 import {IRainlang} from "../interface/IRainlang.sol";
-import {ERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/ERC165.sol";
+import {ERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/ERC165.sol";
 
 /// @title BaseRainlang
 /// @notice Rainlang contract that exposes the addresses of the four core

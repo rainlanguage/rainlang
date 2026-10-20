@@ -5,8 +5,8 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpLinearGrowth} from "../../../../../../src/lib/op/math/growth/LibOpLinearGrowth.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 
 contract LibOpLinearGrowthTest is OpTest {
     /// Directly test the integrity logic of LibOpLinearGrowth.
@@ -72,6 +72,11 @@ contract LibOpLinearGrowthTest is OpTest {
         checkHappy(
             "_: linear-growth(-1 -0.1 2);", Float.unwrap(LibDecimalFloat.packLossless(-1.2e67, -67)), "-1 -0.1 2"
         );
+    }
+
+    /// `1 + -1e-100 * 1` truncated toward zero to 67 digits.
+    function testOpLinearGrowthEvalCancellingRoundsTowardZero() external view {
+        checkHappyEq("_: linear-growth(1 -1e-100 1);", LibDecimalFloat.packLossless(1e67 - 1, -67), "1 -1e-100 1");
     }
 
     function testOpLinearGrowthEvalZeroInputs() external {

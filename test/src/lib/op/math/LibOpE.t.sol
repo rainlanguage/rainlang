@@ -12,10 +12,10 @@ import {
     StackItem,
     FullyQualifiedNamespace,
     SourceIndexV2
-} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
-import {SignedContextV1} from "rainlang-interface-0.2.9/src/interface/IInterpreterCallerV4.sol";
-import {LibContext} from "rainlang-interface-0.2.9/src/lib/caller/LibContext.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
+} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {SignedContextV1} from "rainlang-interface-0.2.13/src/interface/IInterpreterCallerV4.sol";
+import {LibContext} from "rainlang-interface-0.2.13/src/lib/caller/LibContext.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpETest
 /// @notice Tests for the mathematical constant e opcode.

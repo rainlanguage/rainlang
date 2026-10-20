@@ -4,9 +4,9 @@ pragma solidity =0.8.25;
 
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpCeil} from "../../../../../src/lib/op/math/LibOpCeil.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 
 contract LibOpCeilTest is OpTest {
     /// Directly test the integrity logic of LibOpCeil.
@@ -53,6 +53,12 @@ contract LibOpCeilTest is OpTest {
             Float.unwrap(LibDecimalFloat.packLossless(type(int224).min, type(int32).max)),
             "min-negative-value"
         );
+    }
+
+    /// A zero at any exponent ceils to `FLOAT_ZERO` (rain.math.float SPEC ceil).
+    function testOpCeilEvalZeroAnyExponent() external view {
+        checkHappy("_: ceil(0x0000000500000000000000000000000000000000000000000000000000000000);", 0, "0e5");
+        checkHappy("_: ceil(0xffffff9c00000000000000000000000000000000000000000000000000000000);", 0, "0e-100");
     }
 
     /// Test the eval of `ceil` for bad inputs.

@@ -5,8 +5,8 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpHeadroom} from "../../../../../src/lib/op/math/LibOpHeadroom.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 
 contract LibOpHeadroomTest is OpTest {
     /// Directly test the integrity logic of LibOpHeadroom.
@@ -42,6 +42,11 @@ contract LibOpHeadroomTest is OpTest {
         checkHappy("_: headroom(-2);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "-2");
         checkHappy("_: headroom(-3);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "-3");
         checkHappy("_: headroom(-3.8);", Float.unwrap(LibDecimalFloat.packLossless(0.8e67, -67)), "-3.8");
+    }
+
+    /// `ceil(1e-100) - 1e-100` truncated toward zero to 67 digits.
+    function testOpHeadroomEvalCancellingRoundsTowardZero() external view {
+        checkHappyEq("_: headroom(1e-100);", LibDecimalFloat.packLossless(1e67 - 1, -67), "1e-100");
     }
 
     /// Test the eval of `headroom` for bad inputs.

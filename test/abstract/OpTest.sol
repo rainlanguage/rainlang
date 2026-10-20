@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 // Exported for convenience in op tests.
 //forge-lint: disable-next-line(unused-import)
-import {Test, stdError} from "forge-std-1.16.2/src/Test.sol";
+import {Test, stdError} from "forge-std-1.17.0/src/Test.sol";
 import {LibMemCpy} from "rain-solmem-0.1.28/src/lib/LibMemCpy.sol";
 import {MemoryKV} from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
 import {LibUint256Array} from "rain-solmem-0.1.28/src/lib/LibUint256Array.sol";
@@ -15,7 +15,7 @@ import {LibInterpreterState, InterpreterState} from "../../src/lib/state/LibInte
 import {LibInterpreterStateFingerprint} from "../lib/state/LibInterpreterStateFingerprint.sol";
 import {IntegrityCheckState, LibIntegrityCheck} from "../../src/lib/integrity/LibIntegrityCheck.sol";
 
-import {LibContext} from "rainlang-interface-0.2.9/src/lib/caller/LibContext.sol";
+import {LibContext} from "rainlang-interface-0.2.13/src/lib/caller/LibContext.sol";
 import {UnexpectedOperand} from "../../src/error/ErrParse.sol";
 import {BadOpInputsLength, BadOpOutputsLength} from "../../src/lib/integrity/LibIntegrityCheck.sol";
 import {
@@ -24,15 +24,15 @@ import {
     IInterpreterStoreV3,
     EvalV4,
     StackItem
-} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
-import {FullyQualifiedNamespace, StateNamespace} from "rainlang-interface-0.2.9/src/interface/IInterpreterStoreV3.sol";
-import {SignedContextV1} from "rainlang-interface-0.2.9/src/interface/IInterpreterCallerV4.sol";
-import {LibNamespace} from "rainlang-interface-0.2.9/src/lib/ns/LibNamespace.sol";
-import {ExponentOverflow, CoefficientOverflow} from "rain-math-float-0.2.4/src/error/ErrDecimalFloat.sol";
-import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.1/src/lib/LibTOFUTokenDecimals.sol";
+} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {FullyQualifiedNamespace, StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
+import {SignedContextV1} from "rainlang-interface-0.2.13/src/interface/IInterpreterCallerV4.sol";
+import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
+import {ExponentOverflow} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.sol";
+import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.4/src/lib/LibTOFUTokenDecimals.sol";
 
-import {console2} from "forge-std-1.16.2/src/console2.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
+import {console2} from "forge-std-1.17.0/src/console2.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 
 bytes32 constant PRE = keccak256(abi.encodePacked("pre"));
 bytes32 constant POST = keccak256(abi.encodePacked("post"));
@@ -263,6 +263,13 @@ abstract contract OpTest is RainlangExpressionDeployerDeploymentTest {
         assertEq(kvs.length, 0);
     }
 
+    function checkHappyEq(bytes memory rainString, Float expected, string memory errString) internal view {
+        (StackItem[] memory stack, bytes32[] memory kvs) = parseAndEval(rainString);
+        assertEq(stack.length, 1, errString);
+        assertTrue(LibDecimalFloat.eq(Float.wrap(StackItem.unwrap(stack[0])), expected), errString);
+        assertEq(kvs.length, 0);
+    }
+
     function checkHappyKVs(bytes memory rainString, bytes32[] memory expectedKVs, string memory errString)
         internal
         view
@@ -278,12 +285,6 @@ abstract contract OpTest is RainlangExpressionDeployerDeploymentTest {
 
     function checkUnhappyOverflow(bytes memory rainString, int256 signedCoefficient, int256 exponent) internal {
         checkUnhappy(rainString, abi.encodeWithSelector(ExponentOverflow.selector, signedCoefficient, exponent));
-    }
-
-    function checkUnhappyCoefficientOverflow(bytes memory rainString, int256 signedCoefficient, int256 exponent)
-        internal
-    {
-        checkUnhappy(rainString, abi.encodeWithSelector(CoefficientOverflow.selector, signedCoefficient, exponent));
     }
 
     function checkUnhappy(bytes memory rainString, bytes memory err) internal {

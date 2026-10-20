@@ -3,18 +3,14 @@
 pragma solidity =0.8.25;
 
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
-import {PowNegativeBase} from "rain-math-float-0.2.4/src/error/ErrDecimalFloat.sol";
+import {PowNegativeBase} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.sol";
 import {LibOpSqrt} from "../../../../../src/lib/op/math/LibOpSqrt.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 
 contract LibOpSqrtTest is OpTest {
     using LibDecimalFloat for Float;
-
-    function beforeOpTestConstructor() internal virtual override {
-        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
-    }
 
     /// Directly test the integrity logic of LibOpSqrt.
     /// Inputs are always 1, outputs are always 1.
@@ -40,16 +36,22 @@ contract LibOpSqrtTest is OpTest {
     /// Test the eval of `sqrt`.
     function testOpSqrtEvalExamples() external view {
         checkHappy("_: sqrt(0);", 0, "0");
-        checkHappy("_: sqrt(1);", Float.unwrap(LibDecimalFloat.packLossless(1e3, -3)), "1");
+        checkHappy("_: sqrt(1);", Float.unwrap(LibDecimalFloat.packLossless(1e40, -40)), "1");
         checkHappy(
             "_: sqrt(0.5);",
-            Float.unwrap(
-                LibDecimalFloat.packLossless(7067137809187279151943462897526501766784452296819787985865724381625, -67)
-            ),
+            Float.unwrap(LibDecimalFloat.packLossless(70710678118654752440084436210484903928484, -41)),
             "0.5"
         );
-        checkHappy("_: sqrt(2);", Float.unwrap(LibDecimalFloat.packLossless(1415, -3)), "2");
-        checkHappy("_: sqrt(2.5);", Float.unwrap(LibDecimalFloat.packLossless(1581, -3)), "2.5");
+        checkHappy(
+            "_: sqrt(2);",
+            Float.unwrap(LibDecimalFloat.packLossless(14142135623730950488016887242096980785697, -40)),
+            "2"
+        );
+        checkHappy(
+            "_: sqrt(2.5);",
+            Float.unwrap(LibDecimalFloat.packLossless(15811388300841896659994467722163592668598, -40)),
+            "2.5"
+        );
     }
 
     /// Test the eval of `sqrt` for bad inputs.

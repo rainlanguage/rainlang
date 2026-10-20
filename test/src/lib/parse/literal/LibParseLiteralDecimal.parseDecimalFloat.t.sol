@@ -2,19 +2,20 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.2/src/Test.sol";
+import {Test} from "forge-std-1.17.0/src/Test.sol";
 
 import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseState.sol";
 import {LibBytes, Pointer} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
 import {LibParseLiteralDecimal} from "../../../../../src/lib/parse/literal/LibParseLiteralDecimal.sol";
-import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
-import {ParseEmptyDecimalString} from "rain-string-0.2.0/src/error/ErrParse.sol";
+import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";
+import {ParseEmptyDecimalString} from "rain-string-0.3.9/src/error/ErrParse.sol";
 import {
     ParseDecimalPrecisionLoss,
     MalformedExponentDigits,
     MalformedDecimalPoint
-} from "rain-math-float-0.2.4/src/error/ErrParse.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
+} from "rain-math-float-0.3.10/src/error/ErrParse.sol";
+import {ExponentOverflow} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralDecimalParseDecimalFloatTest
@@ -243,6 +244,39 @@ contract LibParseLiteralDecimalParseDecimalFloatTest is Test {
         checkParseDecimalRevert(
             "1.57896044618658097711785492504343953926634992332820282019728792003956564819967",
             abi.encodeWithSelector(ParseDecimalPrecisionLoss.selector, LibParseError.tagErrorOffset(79))
+        );
+    }
+
+    /// 2^223 and 2^223 + 1 at the largest exponent are past the largest Float.
+    function testParseLiteralDecimalFloatPastLargestFloatRevert() external {
+        checkParseDecimalRevert(
+            "13479973333575319897333507543509815336818572211270286240551805124608e2147483647",
+            abi.encodeWithSelector(
+                ExponentOverflow.selector,
+                int256(13479973333575319897333507543509815336818572211270286240551805124608),
+                int256(2147483647)
+            )
+        );
+        checkParseDecimalRevert(
+            "13479973333575319897333507543509815336818572211270286240551805124609e2147483647",
+            abi.encodeWithSelector(
+                ExponentOverflow.selector,
+                int256(13479973333575319897333507543509815336818572211270286240551805124609),
+                int256(2147483647)
+            )
+        );
+    }
+
+    function testParseLiteralDecimalFloatPastEveryFloatRevert() external {
+        checkParseDecimalRevert(
+            "13479973333575319897333507543509815336818572211270286240551805124610e2147483647",
+            abi.encodeWithSelector(ExponentOverflow.selector, LibParseError.tagErrorOffset(79))
+        );
+        checkParseDecimalRevert(
+            "1e9999999999", abi.encodeWithSelector(ExponentOverflow.selector, LibParseError.tagErrorOffset(12))
+        );
+        checkParseDecimalRevert(
+            "-1e9999999999", abi.encodeWithSelector(ExponentOverflow.selector, LibParseError.tagErrorOffset(13))
         );
     }
 }

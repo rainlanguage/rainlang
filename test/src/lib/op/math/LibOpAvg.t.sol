@@ -5,8 +5,8 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpAvg} from "../../../../../src/lib/op/math/LibOpAvg.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 
 contract LibOpAvgTest is OpTest {
     /// Directly test the integrity logic of LibOpAvg.
@@ -53,6 +53,11 @@ contract LibOpAvgTest is OpTest {
         checkHappy("_: avg(2 3);", Float.unwrap(LibDecimalFloat.packLossless(2.5e66, -66)), "2 3");
         checkHappy("_: avg(2 4);", Float.unwrap(LibDecimalFloat.packLossless(3e66, -66)), "2 4");
         checkHappy("_: avg(4 0.5);", Float.unwrap(LibDecimalFloat.packLossless(2.25e66, -66)), "4 5");
+    }
+
+    /// `(1 - 1e-100) / 2` truncated toward zero to 67 digits.
+    function testOpAvgEvalCancellingRoundsTowardZero() external view {
+        checkHappyEq("_: avg(1 -1e-100);", LibDecimalFloat.packLossless(5e66 - 1, -67), "1 -1e-100");
     }
 
     /// Test the eval of `avg` for bad inputs.

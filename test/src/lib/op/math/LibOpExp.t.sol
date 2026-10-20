@@ -5,14 +5,10 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpExp} from "../../../../../src/lib/op/math/LibOpExp.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
-import {StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 
 contract LibOpExpTest is OpTest {
-    function beforeOpTestConstructor() internal virtual override {
-        vm.createSelectFork(vm.envString("ARBITRUM_RPC_URL"));
-    }
-
     /// Directly test the integrity logic of LibOpExp.
     /// Inputs are always 1, outputs are always 1.
     function testOpExpIntegrity(IntegrityCheckState memory state, OperandV2 operand) external pure {
@@ -42,46 +38,29 @@ contract LibOpExpTest is OpTest {
         checkHappy("_: exp(0);", Float.unwrap(LibDecimalFloat.packLossless(1, 0)), "e^0");
         checkHappy(
             "_: exp(1);",
-            Float.unwrap(
-                LibDecimalFloat.packLossless(
-                    2.718281828459045235360287471352662497757247093699959574966967627724e66, -66
-                )
-            ),
+            Float.unwrap(LibDecimalFloat.packLossless(27182818284590452353602874713526624977572, -40)),
             "e^1"
         );
         checkHappy(
             "_: exp(0.5);",
-            Float.unwrap(
-                LibDecimalFloat.packLossless(
-                    1.648640914229522617680143735676331248878623546849979787483483813862e66, -66
-                )
-            ),
+            Float.unwrap(LibDecimalFloat.packLossless(16487212707001281468486507878141635716538, -40)),
             "e^0.5"
         );
         checkHappy(
             "_: exp(2);",
-            Float.unwrap(
-                LibDecimalFloat.packLossless(
-                    7.389056098930650227230427460575007813180315570551847324087127822522e66, -66
-                )
-            ),
+            Float.unwrap(LibDecimalFloat.packLossless(73890560989306502272304274605750078131803, -40)),
             "e^2"
         );
         checkHappy(
             "_: exp(3);",
-            Float.unwrap(
-                LibDecimalFloat.packLossless(
-                    20.08553692318766774092852965458171789698790783855415014437893422969e65, -65
-                )
-            ),
+            Float.unwrap(LibDecimalFloat.packLossless(20085536923187667740928529654581717896988, -39)),
             "e^3"
         );
     }
 
     /// Test exp with negative input. exp(-1) = 1/e ≈ 0.3678794...
     function testOpExpEvalNegativeInput() external view {
-        (Float expected,) =
-            LibDecimalFloat.packLossy(3678794411714423215955237701614608674458111310317678345078368016974, -67);
+        (Float expected,) = LibDecimalFloat.packLossy(36787944117144232159552377016146086744581, -41);
         checkHappy("_: exp(-1);", Float.unwrap(expected), "e^(-1)");
     }
 

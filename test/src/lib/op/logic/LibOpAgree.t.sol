@@ -5,14 +5,14 @@ pragma solidity =0.8.25;
 import {OpTest} from "test/abstract/OpTest.sol";
 import {LibOpAgree} from "../../../../../src/lib/op/logic/LibOpAgree.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
-import {OperandV2, StackItem} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.2.4/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 import {
     LibDecimalFloatImplementation
-} from "rain-math-float-0.2.4/src/lib/implementation/LibDecimalFloatImplementation.sol";
-import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "rain-math-float-0.2.4/src/error/ErrDecimalFloat.sol";
+} from "rain-math-float-0.3.10/src/lib/implementation/LibDecimalFloatImplementation.sol";
+import {AgreeToleranceNegative, AgreeNoPositiveTolerance} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.sol";
 
 contract LibOpAgreeTest is OpTest {
     using LibDecimalFloat for Float;
@@ -87,7 +87,7 @@ contract LibOpAgreeTest is OpTest {
     ///
     /// The coefficient is bounded non-negative rather than having its sign
     /// flipped, because negating the most negative int224 does not fit back
-    /// into an int224 and `packLossless` would revert `CoefficientOverflow`.
+    /// into an int224 and `packLossless` would revert `LossyConversionToFloat`.
     /// The exponent is held to a modest range so the fuzz explores tolerance
     /// MAGNITUDES without wandering into the representable extremes, which
     /// `testOpAgreeEvalExtremeTolerance` covers deliberately instead.
@@ -384,6 +384,25 @@ contract LibOpAgreeTest is OpTest {
         checkHappy("_: agree(0 0.01 98.999999999999999999 100);", 0, "a hair over a 1% proportional limit");
         checkHappy(
             "_: agree(0 0.01 99.000000000000000001 100);", bytes32(uint256(1)), "a hair under a 1% proportional limit"
+        );
+    }
+
+    /// bc: the proportional term beyond the highest is 38124891136564819969.37.
+    function testOpAgreeEvalProportionalLimitExact() external view {
+        checkHappy(
+            "_: agree(0 1.000000000000000000000000000000000000000000000000000000000658505972 -38124891136564819967 5789604461865809771178549250434395392663499233282028201969066711282e10);",
+            bytes32(uint256(1)),
+            "under the exact limit"
+        );
+        checkHappy(
+            "_: agree(0 1.000000000000000000000000000000000000000000000000000000000658505972 -38124891136564819969 5789604461865809771178549250434395392663499233282028201969066711282e10);",
+            bytes32(uint256(1)),
+            "a fraction under the exact limit"
+        );
+        checkHappy(
+            "_: agree(0 1.000000000000000000000000000000000000000000000000000000000658505972 -38124891136564819970 5789604461865809771178549250434395392663499233282028201969066711282e10);",
+            0,
+            "a fraction over the exact limit"
         );
     }
 

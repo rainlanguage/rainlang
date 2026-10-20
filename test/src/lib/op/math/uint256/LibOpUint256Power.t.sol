@@ -2,12 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {stdError} from "forge-std-1.16.2/src/Test.sol";
+import {stdError} from "forge-std-1.17.0/src/Test.sol";
 import {OpTest} from "test/abstract/OpTest.sol";
 import {LibOpUint256Power} from "../../../../../../src/lib/op/math/uint256/LibOpUint256Power.sol";
 import {IntegrityCheckState} from "../../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../../../../../src/lib/state/LibInterpreterState.sol";
-import {StackItem, OperandV2} from "rainlang-interface-0.2.9/src/interface/IInterpreterV4.sol";
+import {StackItem, OperandV2} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 
 contract LibOpUint256PowerTest is OpTest {

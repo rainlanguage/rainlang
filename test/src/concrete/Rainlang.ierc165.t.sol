@@ -2,9 +2,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.2/src/Test.sol";
+import {Test} from "forge-std-1.17.0/src/Test.sol";
 
-import {IERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/IERC165.sol";
+import {IERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/IERC165.sol";
 import {TestRainlang} from "test/concrete/TestRainlang.sol";
 import {IRainlang} from "../../../src/interface/IRainlang.sol";
 
