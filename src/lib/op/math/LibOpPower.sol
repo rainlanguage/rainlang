@@ -8,7 +8,9 @@ import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 import {DecimalFloat} from "rain-math-float-deploy-0.1.5/src/concrete/DecimalFloat.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.5/src/lib/deploy/LibDecimalFloatDeploy.sol";
+import {
+    DEPLOYED_ADDRESS as DECIMAL_FLOAT_ADDRESS
+} from "rain-math-float-deploy-0.1.5/src/generated/0_1_5/DecimalFloat.sol";
 
 /// @title LibOpPower
 /// @notice Opcode to raise a decimal floating point value to a float decimal power.
@@ -35,7 +37,7 @@ library LibOpPower {
             stackTop := add(stackTop, 0x20)
             b := mload(stackTop)
         }
-        a = DecimalFloat(LibDecimalFloatDeploy.ZOLTU_DEPLOYED_DECIMAL_FLOAT_ADDRESS).pow(a, b);
+        a = DecimalFloat(DECIMAL_FLOAT_ADDRESS).pow(a, b);
 
         assembly ("memory-safe") {
             mstore(stackTop, a)

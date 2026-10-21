@@ -8,7 +8,9 @@ import {InterpreterState} from "../../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../../integrity/LibIntegrityCheck.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 import {DecimalFloat} from "rain-math-float-deploy-0.1.5/src/concrete/DecimalFloat.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.5/src/lib/deploy/LibDecimalFloatDeploy.sol";
+import {
+    DEPLOYED_ADDRESS as DECIMAL_FLOAT_ADDRESS
+} from "rain-math-float-deploy-0.1.5/src/generated/0_1_5/DecimalFloat.sol";
 
 /// @title LibOpExponentialGrowth
 /// @notice Exponential growth is base(1 + rate)^t where base is the initial
@@ -37,10 +39,7 @@ library LibOpExponentialGrowth {
             stackTop := add(stackTop, 0x40)
             t := mload(stackTop)
         }
-        base = base.mul(
-            DecimalFloat(LibDecimalFloatDeploy.ZOLTU_DEPLOYED_DECIMAL_FLOAT_ADDRESS)
-                .pow(rate.add(LibDecimalFloat.FLOAT_ONE), t)
-        );
+        base = base.mul(DecimalFloat(DECIMAL_FLOAT_ADDRESS).pow(rate.add(LibDecimalFloat.FLOAT_ONE), t));
 
         assembly ("memory-safe") {
             mstore(stackTop, base)

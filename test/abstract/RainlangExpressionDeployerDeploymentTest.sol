@@ -16,10 +16,11 @@ import {
     TEST_EXPRESSION_DEPLOYER_ADDRESS
 } from "../lib/deploy/LibTestInterpreterDeploy.sol";
 import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.4/src/lib/LibTOFUTokenDecimals.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.5/src/lib/deploy/LibDecimalFloatDeploy.sol";
 import {
-    CREATION_CODE as DECIMAL_FLOAT_CREATION_CODE
-} from "rain-math-float-deploy-0.1.5/src/generated/candidate/DecimalFloat.sol";
+    CREATION_CODE as DECIMAL_FLOAT_CREATION_CODE,
+    DEPLOYED_ADDRESS as DECIMAL_FLOAT_ADDRESS,
+    BYTECODE_HASH as DECIMAL_FLOAT_BYTECODE_HASH
+} from "rain-math-float-deploy-0.1.5/src/generated/0_1_5/DecimalFloat.sol";
 
 /// @title RainlangExpressionDeployerDeploymentTest
 /// @notice Binds a parser, store, interpreter and expression deployer for the
@@ -69,10 +70,7 @@ abstract contract RainlangExpressionDeployerDeploymentTest is Test {
             LibRainDeploy.deployZoltu(LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CREATION_CODE);
         }
 
-        if (
-            LibDecimalFloatDeploy.ZOLTU_DEPLOYED_DECIMAL_FLOAT_ADDRESS.codehash
-                != LibDecimalFloatDeploy.DECIMAL_FLOAT_CONTRACT_HASH
-        ) {
+        if (DECIMAL_FLOAT_ADDRESS.codehash != DECIMAL_FLOAT_BYTECODE_HASH) {
             LibRainDeploy.etchZoltuFactory(vm);
             LibRainDeploy.deployZoltu(DECIMAL_FLOAT_CREATION_CODE);
         }

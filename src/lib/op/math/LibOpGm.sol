@@ -8,7 +8,9 @@ import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 import {DecimalFloat} from "rain-math-float-deploy-0.1.5/src/concrete/DecimalFloat.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.5/src/lib/deploy/LibDecimalFloatDeploy.sol";
+import {
+    DEPLOYED_ADDRESS as DECIMAL_FLOAT_ADDRESS
+} from "rain-math-float-deploy-0.1.5/src/generated/0_1_5/DecimalFloat.sol";
 
 /// @title LibOpGm
 /// @notice Opcode for the signed geometric mean of two decimal floating point
@@ -40,8 +42,7 @@ library LibOpGm {
         }
         bool aNeg = a.lt(LibDecimalFloat.FLOAT_ZERO);
         bool bNeg = b.lt(LibDecimalFloat.FLOAT_ZERO);
-        Float result = DecimalFloat(LibDecimalFloatDeploy.ZOLTU_DEPLOYED_DECIMAL_FLOAT_ADDRESS)
-            .pow(a.abs().mul(b.abs()), LibDecimalFloat.FLOAT_HALF);
+        Float result = DecimalFloat(DECIMAL_FLOAT_ADDRESS).pow(a.abs().mul(b.abs()), LibDecimalFloat.FLOAT_HALF);
         if (aNeg != bNeg) {
             result = result.minus();
         }
