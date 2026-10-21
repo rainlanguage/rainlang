@@ -149,4 +149,41 @@ contract LibOpGmTest is OpTest {
     function testOpGmEvalOperandDisallowed() external {
         checkUnhappyParse("_: gm<0>(1 1);", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
+
+    function externalRun(StackItem[] memory inputs) external view returns (StackItem[] memory) {
+        return opRunOutputs(LibOperand.build(2, 1, 0), LibOpGm.run, inputs);
+    }
+
+    function externalReference(StackItem[] memory inputs) external view returns (StackItem[] memory) {
+        return LibOpGm.referenceFn(opTestDefaultInterpreterState(), LibOperand.build(2, 1, 0), inputs);
+    }
+
+    function checkRunMatchesReference(Float a, Float b) internal view {
+        StackItem[] memory inputs = new StackItem[](2);
+        inputs[0] = StackItem.wrap(Float.unwrap(a));
+        inputs[1] = StackItem.wrap(Float.unwrap(b));
+        assertSameOutcome(abi.encodeCall(this.externalRun, (inputs)), abi.encodeCall(this.externalReference, (inputs)));
+    }
+
+    /// `run` and the in-library reference agree on every pair of floats,
+    /// reverts included.
+    function testOpGmRunMatchesReferenceAnyFloats(Float a, Float b) external view {
+        checkRunMatchesReference(a, b);
+    }
+
+    /// `run` and the in-library reference agree where results are mostly in
+    /// range.
+    function testOpGmRunMatchesReferenceNearOne(
+        int224 signedCoefficientA,
+        int32 exponentA,
+        int224 signedCoefficientB,
+        int32 exponentB
+    ) external view {
+        exponentA = int32(bound(exponentA, -76, -56));
+        exponentB = int32(bound(exponentB, -76, -56));
+        checkRunMatchesReference(
+            LibDecimalFloat.packLossless(signedCoefficientA, exponentA),
+            LibDecimalFloat.packLossless(signedCoefficientB, exponentB)
+        );
+    }
 }

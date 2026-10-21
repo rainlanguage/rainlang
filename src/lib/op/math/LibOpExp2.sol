@@ -7,6 +7,10 @@ import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {DecimalFloat} from "rain-math-float-deploy-0.1.5/src/concrete/DecimalFloat.sol";
+import {
+    DEPLOYED_ADDRESS as DECIMAL_FLOAT_ADDRESS
+} from "rain-math-float-deploy-0.1.5/src/generated/0_1_5/DecimalFloat.sol";
 
 /// @title LibOpExp2
 /// @notice Opcode for the binary exponential 2^x as decimal floating point.
@@ -31,7 +35,7 @@ library LibOpExp2 {
             a := mload(stackTop)
         }
 
-        a = LibDecimalFloat.FLOAT_TWO.pow(a);
+        a = DecimalFloat(DECIMAL_FLOAT_ADDRESS).pow(LibDecimalFloat.FLOAT_TWO, a);
 
         assembly ("memory-safe") {
             mstore(stackTop, a)

@@ -127,4 +127,46 @@ contract LibOpExponentialGrowthTest is OpTest {
     function testOpExponentialGrowthEvalOperandDisallowed() external {
         checkUnhappyParse("_: exponential-growth<0>(1 0 0);", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
+
+    function externalRun(StackItem[] memory inputs) external view returns (StackItem[] memory) {
+        return opRunOutputs(LibOperand.build(3, 1, 0), LibOpExponentialGrowth.run, inputs);
+    }
+
+    function externalReference(StackItem[] memory inputs) external view returns (StackItem[] memory) {
+        return LibOpExponentialGrowth.referenceFn(opTestDefaultInterpreterState(), LibOperand.build(3, 1, 0), inputs);
+    }
+
+    function checkRunMatchesReference(Float base, Float rate, Float t) internal view {
+        StackItem[] memory inputs = new StackItem[](3);
+        inputs[0] = StackItem.wrap(Float.unwrap(base));
+        inputs[1] = StackItem.wrap(Float.unwrap(rate));
+        inputs[2] = StackItem.wrap(Float.unwrap(t));
+        assertSameOutcome(abi.encodeCall(this.externalRun, (inputs)), abi.encodeCall(this.externalReference, (inputs)));
+    }
+
+    /// `run` and the in-library reference agree on every triple of floats,
+    /// reverts included.
+    function testOpExponentialGrowthRunMatchesReferenceAnyFloats(Float base, Float rate, Float t) external view {
+        checkRunMatchesReference(base, rate, t);
+    }
+
+    /// `run` and the in-library reference agree where results are mostly in
+    /// range.
+    function testOpExponentialGrowthRunMatchesReferenceNearOne(
+        int224 signedCoefficientBase,
+        int32 exponentBase,
+        int224 signedCoefficientRate,
+        int32 exponentRate,
+        int224 signedCoefficientT,
+        int32 exponentT
+    ) external view {
+        exponentBase = int32(bound(exponentBase, -76, -56));
+        exponentRate = int32(bound(exponentRate, -70, -66));
+        exponentT = int32(bound(exponentT, -70, -64));
+        checkRunMatchesReference(
+            LibDecimalFloat.packLossless(signedCoefficientBase, exponentBase),
+            LibDecimalFloat.packLossless(signedCoefficientRate, exponentRate),
+            LibDecimalFloat.packLossless(signedCoefficientT, exponentT)
+        );
+    }
 }

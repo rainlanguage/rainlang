@@ -68,4 +68,31 @@ contract LibOpExp2Test is OpTest {
     function testOpExp2TwoOutputs() external {
         checkBadOutputs("_ _: exp2(1);", 1, 1, 2);
     }
+
+    function externalRun(StackItem[] memory inputs) external view returns (StackItem[] memory) {
+        return opRunOutputs(LibOperand.build(1, 1, 0), LibOpExp2.run, inputs);
+    }
+
+    function externalReference(StackItem[] memory inputs) external view returns (StackItem[] memory) {
+        return LibOpExp2.referenceFn(opTestDefaultInterpreterState(), LibOperand.build(1, 1, 0), inputs);
+    }
+
+    function checkRunMatchesReference(Float a) internal view {
+        StackItem[] memory inputs = new StackItem[](1);
+        inputs[0] = StackItem.wrap(Float.unwrap(a));
+        assertSameOutcome(abi.encodeCall(this.externalRun, (inputs)), abi.encodeCall(this.externalReference, (inputs)));
+    }
+
+    /// `run` and the in-library reference agree on every float, reverts
+    /// included.
+    function testOpExp2RunMatchesReferenceAnyFloat(Float a) external view {
+        checkRunMatchesReference(a);
+    }
+
+    /// `run` and the in-library reference agree where results are mostly in
+    /// range.
+    function testOpExp2RunMatchesReferenceNearOne(int224 signedCoefficient, int32 exponent) external view {
+        exponent = int32(bound(exponent, -70, -64));
+        checkRunMatchesReference(LibDecimalFloat.packLossless(signedCoefficient, exponent));
+    }
 }
