@@ -7,8 +7,8 @@ import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
-import {DecimalFloat} from "rain-math-float-deploy-0.1.4/src/concrete/DecimalFloat.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.4/src/lib/deploy/LibDecimalFloatDeploy.sol";
+import {DecimalFloat} from "rain-math-float-deploy-0.1.5/src/concrete/DecimalFloat.sol";
+import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.5/src/lib/deploy/LibDecimalFloatDeploy.sol";
 
 /// @title LibOpPower
 /// @notice Opcode to raise a decimal floating point value to a float decimal power.

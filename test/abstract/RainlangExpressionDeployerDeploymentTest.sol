@@ -16,10 +16,10 @@ import {
     TEST_EXPRESSION_DEPLOYER_ADDRESS
 } from "../lib/deploy/LibTestInterpreterDeploy.sol";
 import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.4/src/lib/LibTOFUTokenDecimals.sol";
-import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.4/src/lib/deploy/LibDecimalFloatDeploy.sol";
+import {LibDecimalFloatDeploy} from "rain-math-float-deploy-0.1.5/src/lib/deploy/LibDecimalFloatDeploy.sol";
 import {
     CREATION_CODE as DECIMAL_FLOAT_CREATION_CODE
-} from "rain-math-float-deploy-0.1.4/src/generated/candidate/DecimalFloat.sol";
+} from "rain-math-float-deploy-0.1.5/src/generated/candidate/DecimalFloat.sol";
 
 /// @title RainlangExpressionDeployerDeploymentTest
 /// @notice Binds a parser, store, interpreter and expression deployer for the

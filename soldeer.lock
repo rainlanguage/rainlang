@@ -70,9 +70,10 @@ integrity = "f1509e5fa3a4182b625f4650fb368fe605f76ffcaeaa6fbbf1159346b69f2809"
 
 [[dependencies]]
 name = "rain-math-float-deploy"
-version = "0.1.4"
-git = "https://github.com/rainlanguage/rain.math.float.deploy.git"
-rev = "9ff057239879342bd8f5ae66d13ec1f6778a5150"
+version = "0.1.5"
+url = "https://soldeer-revisions.s3.amazonaws.com/rain-math-float-deploy/0_1_5_21-10-2026_09:10:57_rain.math.float.zip"
+checksum = "614dac632e19c28043732f0672357eb3c3d515b63f6f73971c5e3c8c20bda178"
+integrity = "a9f57b86d5aafe6086b4b406f00bf61fdbce6616a4edf107e628c6695eb955d7"
 
 [[dependencies]]
 name = "rain-metadata"
