@@ -20,7 +20,7 @@ import {
     CREATION_CODE as DECIMAL_FLOAT_CREATION_CODE,
     DEPLOYED_ADDRESS as DECIMAL_FLOAT_ADDRESS,
     BYTECODE_HASH as DECIMAL_FLOAT_BYTECODE_HASH
-} from "rain-math-float-deploy-0.1.6/src/generated/0_1_6/DecimalFloat.sol";
+} from "rain-math-float-deploy-0.1.7/src/generated/0_1_6/DecimalFloat.sol";
 
 /// @title RainlangExpressionDeployerDeploymentTest
 /// @notice Binds a parser, store, interpreter and expression deployer for the
