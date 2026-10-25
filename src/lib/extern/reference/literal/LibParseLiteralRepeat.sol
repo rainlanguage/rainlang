@@ -54,7 +54,7 @@ library LibParseLiteralRepeat {
     /// @return The repeated value as a Float at exponent 0. Reverts if it does
     /// not fit the Float coefficient.
     //slither-disable-next-line dead-code
-    function parseRepeat(uint256 dispatchValue, uint256 cursor, uint256 end) internal pure returns (uint256) {
+    function parseRepeat(uint256 dispatchValue, uint256 cursor, uint256 end) internal pure returns (Float) {
         if (dispatchValue > 9) {
             revert RepeatDispatchNotDigit(dispatchValue);
         }
@@ -72,6 +72,6 @@ library LibParseLiteralRepeat {
                 value += dispatchValue * 10 ** i;
             }
         }
-        return uint256(Float.unwrap(LibDecimalFloat.packLossless(SafeCast.toInt256(value), 0)));
+        return LibDecimalFloat.packLossless(SafeCast.toInt256(value), 0);
     }
 }

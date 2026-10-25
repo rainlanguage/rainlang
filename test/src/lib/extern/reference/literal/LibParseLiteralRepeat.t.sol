@@ -16,7 +16,7 @@ import {
 contract LibParseLiteralRepeatTest is Test {
     /// External wrapper for parseRepeat so that expectRevert can catch
     /// the revert at a deeper call depth.
-    function externalParseRepeat(uint256 dispatchValue, uint256 cursor, uint256 end) external pure returns (uint256) {
+    function externalParseRepeat(uint256 dispatchValue, uint256 cursor, uint256 end) external pure returns (Float) {
         return LibParseLiteralRepeat.parseRepeat(dispatchValue, cursor, end);
     }
 
@@ -36,8 +36,8 @@ contract LibParseLiteralRepeatTest is Test {
             for (uint256 length = 0; length < 78; length++) {
                 uint256 expected = repeatSum(dispatchValue, length);
                 if (expected <= uint256(int256(type(int224).max))) {
-                    uint256 value = LibParseLiteralRepeat.parseRepeat(dispatchValue, 0, length);
-                    (int256 coefficient, int256 exponent) = LibDecimalFloat.unpack(Float.wrap(bytes32(value)));
+                    Float value = LibParseLiteralRepeat.parseRepeat(dispatchValue, 0, length);
+                    (int256 coefficient, int256 exponent) = LibDecimalFloat.unpack(value);
                     //forge-lint: disable-next-line(unsafe-typecast)
                     assertEq(coefficient, int256(expected));
                     assertEq(exponent, 0);
