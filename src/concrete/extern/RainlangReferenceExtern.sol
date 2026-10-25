@@ -213,12 +213,12 @@ contract RainlangReferenceExtern is BaseRainlangSubParser, BaseRainlangExtern {
     /// @inheritdoc IParserToolingV1
     function buildLiteralParserFunctionPointers() external pure override returns (bytes memory) {
         unchecked {
-            function(uint256, uint256, uint256) internal pure returns (uint256) lengthPointer;
+            function(uint256, uint256, uint256) internal pure returns (Float) lengthPointer;
             uint256 length = SUB_PARSER_LITERAL_PARSERS_LENGTH;
             assembly ("memory-safe") {
                 lengthPointer := length
             }
-            function(uint256, uint256, uint256) internal pure returns (uint256)[SUB_PARSER_LITERAL_PARSERS_LENGTH + 1]
+            function(uint256, uint256, uint256) internal pure returns (Float)[SUB_PARSER_LITERAL_PARSERS_LENGTH + 1]
                 memory parsersFixed = [lengthPointer, LibParseLiteralRepeat.parseRepeat];
             uint256[] memory parsersDynamic;
             assembly ("memory-safe") {

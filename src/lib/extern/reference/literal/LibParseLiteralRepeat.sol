@@ -2,6 +2,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {SafeCast} from "@openzeppelin-contracts-5.7.0/utils/math/SafeCast.sol";
+
 /// @title LibParseLiteralRepeat
 /// @notice This is a library that mimics the literal libraries elsewhere in this repo,
 /// but structured to fit sub parsing rather than internal logic. It is NOT
@@ -48,14 +51,15 @@ library LibParseLiteralRepeat {
     /// @param dispatchValue The single decimal digit to repeat (0-9).
     /// @param cursor Pointer to the start of the literal body.
     /// @param end Pointer to the end of the literal body.
-    /// @return The computed repeated value.
+    /// @return The repeated value as a Float at exponent 0. Reverts if it does
+    /// not fit the Float coefficient.
     //slither-disable-next-line dead-code
-    function parseRepeat(uint256 dispatchValue, uint256 cursor, uint256 end) internal pure returns (uint256) {
+    function parseRepeat(uint256 dispatchValue, uint256 cursor, uint256 end) internal pure returns (Float) {
         if (dispatchValue > 9) {
             revert RepeatDispatchNotDigit(dispatchValue);
         }
+        uint256 value = 0;
         unchecked {
-            uint256 value = 0;
             // Safe: cursor always <= end (parser invariant).
             uint256 length = end - cursor;
             if (length >= MAX_REPEAT_LITERAL_LENGTH) {
@@ -67,7 +71,7 @@ library LibParseLiteralRepeat {
                 // value accumulates at most 77 terms, sum <= 10**77 - 1 < 2^256.
                 value += dispatchValue * 10 ** i;
             }
-            return value;
         }
+        return LibDecimalFloat.packLossless(SafeCast.toInt256(value), 0);
     }
 }
