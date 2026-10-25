@@ -10,6 +10,8 @@ import {
     UnconsumedRepeatDispatchBytes
 } from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
 import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {LossyConversionToFloat} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.sol";
 
 contract RainlangReferenceExternRepeatTest is OpTest {
     using Strings for address;
@@ -27,6 +29,37 @@ contract RainlangReferenceExternRepeatTest is OpTest {
 
         expectedStack[0] = StackItem.wrap(bytes32(uint256(88)));
         checkHappy(bytes(string.concat(baseStr, "eighteight: [ref-extern-repeat-8 zz];")), expectedStack, "repeat 8 zz");
+    }
+
+    function body(uint256 length) internal pure returns (string memory) {
+        bytes memory b = new bytes(length);
+        for (uint256 i = 0; i < length; i++) {
+            b[i] = "a";
+        }
+        return string(b);
+    }
+
+    /// The largest repeat body that fits the Float coefficient keeps its value.
+    function testRainlangReferenceExternRepeatMaxInRangeKeepsValue() external {
+        RainlangReferenceExtern extern = new RainlangReferenceExtern();
+        string memory baseStr = string.concat("using-words-from ", address(extern).toHexString(), " ");
+
+        StackItem[] memory expectedStack = new StackItem[](1);
+        expectedStack[0] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(10 ** 67 - 1), 0)));
+        checkHappy(
+            bytes(string.concat(baseStr, "_: [ref-extern-repeat-9 ", body(67), "];")), expectedStack, "repeat 9 x67"
+        );
+    }
+
+    /// A repeat body past the Float coefficient reverts the parse.
+    function testRainlangReferenceExternRepeatOverflowingBodyReverts() external {
+        RainlangReferenceExtern extern = new RainlangReferenceExtern();
+        string memory baseStr = string.concat("using-words-from ", address(extern).toHexString(), " ");
+
+        vm.expectRevert(abi.encodeWithSelector(LossyConversionToFloat.selector, int256(10 ** 68 - 1), 0));
+        bytes memory bytecode =
+            I_DEPLOYER.parse2(bytes(string.concat(baseStr, "_: [ref-extern-repeat-9 ", body(68), "];")));
+        (bytecode);
     }
 
     /// Repeat count 0 produces 0 regardless of body length.
