@@ -28,38 +28,46 @@ contract LibParseLiteralRepeatTest is Test {
         return expected;
     }
 
-    /// Bodies whose repeated value fits the Float coefficient parse to that
-    /// value at exponent 0.
-    function testParseRepeatInRangeBodyKeepsValue(uint256 dispatchValue, uint256 length) external pure {
-        dispatchValue = bound(dispatchValue, 0, 9);
-        length = bound(length, 0, 67);
-        uint256 value = LibParseLiteralRepeat.parseRepeat(dispatchValue, 0, length);
-        (int256 coefficient, int256 exponent) = LibDecimalFloat.unpack(Float.wrap(bytes32(value)));
-        assertEq(coefficient, int256(repeatSum(dispatchValue, length)));
-        assertEq(exponent, 0);
-    }
-
-    /// Repeating 0 is 0 at every allowed length.
-    function testParseRepeatZeroIsZeroAtAnyLength() external pure {
-        for (uint256 length = 0; length < 78; length++) {
-            assertEq(LibParseLiteralRepeat.parseRepeat(0, 0, length), 0);
-        }
-    }
-
-    /// Every non-zero body whose repeated value exceeds the Float coefficient
-    /// reverts instead of spilling into the exponent.
-    function testParseRepeatOverflowingBodyReverts() external {
-        for (uint256 dispatchValue = 1; dispatchValue <= 9; dispatchValue++) {
-            for (uint256 length = 68; length < 78; length++) {
+    /// Every body whose repeated value fits the Float coefficient parses to
+    /// that value at exponent 0.
+    function testParseRepeatInRangeBodyKeepsValue() external pure {
+        uint256 checked = 0;
+        for (uint256 dispatchValue = 0; dispatchValue <= 9; dispatchValue++) {
+            for (uint256 length = 0; length < 78; length++) {
                 uint256 expected = repeatSum(dispatchValue, length);
-                if (expected > uint256(type(int256).max)) {
-                    vm.expectRevert(abi.encodeWithSelector(SafeCast.SafeCastOverflowedUintToInt.selector, expected));
-                } else {
-                    vm.expectRevert(abi.encodeWithSelector(LossyConversionToFloat.selector, int256(expected), 0));
+                if (expected <= uint256(int256(type(int224).max))) {
+                    uint256 value = LibParseLiteralRepeat.parseRepeat(dispatchValue, 0, length);
+                    (int256 coefficient, int256 exponent) = LibDecimalFloat.unpack(Float.wrap(bytes32(value)));
+                    //forge-lint: disable-next-line(unsafe-typecast)
+                    assertEq(coefficient, int256(expected));
+                    assertEq(exponent, 0);
+                    checked++;
                 }
-                this.externalParseRepeat(dispatchValue, 0, length);
             }
         }
+        assertGt(checked, 0);
+    }
+
+    /// Every body whose repeated value exceeds the Float coefficient reverts
+    /// instead of spilling into the exponent.
+    function testParseRepeatOverflowingBodyReverts() external {
+        uint256 checked = 0;
+        for (uint256 dispatchValue = 1; dispatchValue <= 9; dispatchValue++) {
+            for (uint256 length = 0; length < 78; length++) {
+                uint256 expected = repeatSum(dispatchValue, length);
+                if (expected > uint256(int256(type(int224).max))) {
+                    if (expected > uint256(type(int256).max)) {
+                        vm.expectRevert(abi.encodeWithSelector(SafeCast.SafeCastOverflowedUintToInt.selector, expected));
+                    } else {
+                        //forge-lint: disable-next-line(unsafe-typecast)
+                        vm.expectRevert(abi.encodeWithSelector(LossyConversionToFloat.selector, int256(expected), 0));
+                    }
+                    this.externalParseRepeat(dispatchValue, 0, length);
+                    checked++;
+                }
+            }
+        }
+        assertGt(checked, 0);
     }
 
     /// Dispatch value 10 must revert.
