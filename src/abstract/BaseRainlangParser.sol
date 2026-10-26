@@ -21,7 +21,7 @@ uint8 constant PARSE_META_BUILD_DEPTH = 2;
 /// @title BaseRainlangParser
 /// @notice Converts Rainlang text to bytecode.
 /// @dev The parser implementation. NOT intended to be called directly so
-/// intentionally does NOT implement various interfaces. The expression compiler
+/// intentionally does NOT implement various interfaces. The compiler
 /// calls into this contract and exposes the relevant interfaces, with additional
 /// safety and integrity checks.
 ///
@@ -44,7 +44,7 @@ abstract contract BaseRainlangParser is ERC165, IParserToolingV1 {
     }
 
     /// @notice Parses Rainlang source `data` into bytecode and constants. Called by
-    /// the expression compiler. Does not perform integrity checks — those are
+    /// the compiler. Does not perform integrity checks — those are
     /// the compiler's responsibility.
     /// @param data The Rainlang source bytes to parse.
     /// @return The compiled bytecode.

@@ -15,13 +15,13 @@ import {LibAllStandardOps} from "../lib/op/LibAllStandardOps.sol";
 import {IIntegrityToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IIntegrityToolingV1.sol";
 import {BaseRainlangParser} from "./BaseRainlangParser.sol";
 
-/// @title BaseRainlangExpressionCompiler
+/// @title BaseRainlangCompiler
 /// @notice Coordinates parse, integrity check, and serialization for
 /// compiling Rainlang expressions. Everything except the parser it delegates
 /// to, the integrity function pointer table and the described-by meta hash,
 /// which a concrete binds by overriding `parser`, `integrityFunctionPointers`
 /// and `describedByMetaV1`.
-abstract contract BaseRainlangExpressionCompiler is
+abstract contract BaseRainlangCompiler is
     IDescribedByMetaV1,
     IParserV2,
     IParserPragmaV1,

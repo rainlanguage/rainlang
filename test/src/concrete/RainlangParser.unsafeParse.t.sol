@@ -2,10 +2,10 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
+import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDeploymentTest.sol";
 import {LibBytecode} from "rainlang-interface-0.2.13/src/lib/bytecode/LibBytecode.sol";
 
-contract RainlangParserUnsafeParseTest is RainlangExpressionCompilerDeploymentTest {
+contract RainlangParserUnsafeParseTest is RainlangCompilerDeploymentTest {
     /// Parsing a simple hex literal expression returns correct bytecode
     /// structure and constant value.
     function testUnsafeParseHappyPath() external view {

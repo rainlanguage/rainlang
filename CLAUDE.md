@@ -40,10 +40,10 @@ task.
 `test/concrete/Test*.sol` are the `BaseRainlang*` contracts built from current
 source with no generated tables; `test/lib/deploy/LibTestInterpreterDeploy.sol`
 places them at fixed test addresses and
-`test/abstract/RainlangExpressionCompilerDeploymentTest.deployRainlang()` is the
-one hook that binds them. `rainlang.deploy` and the word repos override that
-hook with the deployed pins, so `test/` ships in the package: `/test` is
-deliberately absent from `.soldeerignore`.
+`test/abstract/RainlangCompilerDeploymentTest.deployRainlang()` is the one hook
+that binds them. `rainlang.deploy` and the word repos override that hook with
+the deployed pins, so `test/` ships in the package: `/test` is deliberately
+absent from `.soldeerignore`.
 
 `optimizer_runs = 1000000` looks wrong (the org uses 100000) and is
 load-bearing: every live CREATE2 address in `rainlang.deploy` is a pure function

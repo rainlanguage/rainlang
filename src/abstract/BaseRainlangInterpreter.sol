@@ -49,7 +49,7 @@ abstract contract BaseRainlangInterpreter is IInterpreterV4, IOpcodeToolingV1, E
     /// raw function pointer arithmetic. Memory safety, stack bounds, and
     /// opcode well-formedness all rely on the bytecode having passed
     /// `LibIntegrityCheck.integrityCheck2` at compile time. Callers MUST
-    /// source `eval.bytecode` from a `RainlangExpressionCompiler`
+    /// source `eval.bytecode` from a `RainlangCompiler`
     /// that validated it against this interpreter's opcode function
     /// pointer table. Calling `eval4` with raw, manually constructed, or
     /// otherwise unverified bytecode is undefined behaviour and can read

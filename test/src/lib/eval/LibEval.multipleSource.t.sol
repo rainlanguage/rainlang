@@ -2,12 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
+import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDeploymentTest.sol";
 import {StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
 
-contract LibEvalMultipleSourceTest is RainlangExpressionCompilerDeploymentTest {
+contract LibEvalMultipleSourceTest is RainlangCompilerDeploymentTest {
     /// Evaluating sourceIndex 1 of a two-source expression must use the
     /// second source's bytecode.
     function testEvalSourceIndex1() external view {

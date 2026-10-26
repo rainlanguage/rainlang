@@ -2,15 +2,14 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-/// @title IRainlang
+/// @title IRainlangV2
 /// @notice Interface for Rainlang that exposes the deterministic deploy
 /// addresses of the four core interpreter components (Compiler, Interpreter,
 /// Store, Parser).
-interface IRainlang {
-    /// @notice Returns the deterministic deploy address of the expression
-    /// compiler.
-    /// @return The expression compiler address.
-    function expressionCompilerAddress() external pure returns (address);
+interface IRainlangV2 {
+    /// @notice Returns the deterministic deploy address of the compiler.
+    /// @return The compiler address.
+    function compilerAddress() external pure returns (address);
 
     /// @notice Returns the deterministic deploy address of the interpreter.
     /// @return The interpreter address.

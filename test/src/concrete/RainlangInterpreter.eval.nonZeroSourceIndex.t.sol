@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
+import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDeploymentTest.sol";
 import {StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
@@ -10,7 +10,7 @@ import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalF
 
 /// @title RainlangInterpreterEvalNonZeroSourceIndexTest
 /// @notice Tests that `eval4` correctly selects non-zero source indices.
-contract RainlangInterpreterEvalNonZeroSourceIndexTest is RainlangExpressionCompilerDeploymentTest {
+contract RainlangInterpreterEvalNonZeroSourceIndexTest is RainlangCompilerDeploymentTest {
     using LibDecimalFloat for Float;
 
     /// @notice eval4 with sourceIndex = 1 MUST evaluate the second source, not

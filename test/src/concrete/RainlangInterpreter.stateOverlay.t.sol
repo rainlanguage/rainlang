@@ -2,14 +2,14 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
+import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDeploymentTest.sol";
 import {StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 import {OddSetLength} from "../../../src/error/ErrStore.sol";
 
-contract RainlangInterpreterStateOverlayTest is RainlangExpressionCompilerDeploymentTest {
+contract RainlangInterpreterStateOverlayTest is RainlangCompilerDeploymentTest {
     /// Odd-length stateOverlay MUST revert with OddSetLength.
     function testStateOverlayOddLength(bytes32[] memory stateOverlay) external {
         vm.assume(stateOverlay.length % 2 != 0);

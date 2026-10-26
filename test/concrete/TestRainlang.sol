@@ -7,32 +7,32 @@ import {
     TEST_PARSER_ADDRESS,
     TEST_STORE_ADDRESS,
     TEST_INTERPRETER_ADDRESS,
-    TEST_EXPRESSION_COMPILER_ADDRESS
+    TEST_COMPILER_ADDRESS
 } from "../lib/deploy/LibTestInterpreterDeploy.sol";
 // Referenced by NatSpec only.
 //forge-lint: disable-next-line(unused-import)
-import {IRainlang} from "../../src/interface/IRainlang.sol";
+import {IRainlangV2} from "../../src/interface/IRainlangV2.sol";
 
 /// @title TestRainlang
 /// @notice `BaseRainlang` bound to the addresses `LibTestInterpreterDeploy`
 /// places the test concretes at.
 contract TestRainlang is BaseRainlang {
-    /// @inheritdoc IRainlang
-    function expressionCompilerAddress() external pure virtual override returns (address) {
-        return TEST_EXPRESSION_COMPILER_ADDRESS;
+    /// @inheritdoc IRainlangV2
+    function compilerAddress() external pure virtual override returns (address) {
+        return TEST_COMPILER_ADDRESS;
     }
 
-    /// @inheritdoc IRainlang
+    /// @inheritdoc IRainlangV2
     function interpreterAddress() external pure virtual override returns (address) {
         return TEST_INTERPRETER_ADDRESS;
     }
 
-    /// @inheritdoc IRainlang
+    /// @inheritdoc IRainlangV2
     function storeAddress() external pure virtual override returns (address) {
         return TEST_STORE_ADDRESS;
     }
 
-    /// @inheritdoc IRainlang
+    /// @inheritdoc IRainlangV2
     function parserAddress() external pure virtual override returns (address) {
         return TEST_PARSER_ADDRESS;
     }

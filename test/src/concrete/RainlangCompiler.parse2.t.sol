@@ -7,7 +7,7 @@ import {MissingFinalSemi} from "../../../src/error/ErrParse.sol";
 import {BadOpInputsLength} from "rainlang-interface-0.2.13/src/error/ErrIntegrity.sol";
 import {LibParseError} from "../../../src/lib/parse/LibParseError.sol";
 
-contract RainlangExpressionCompilerParse2Test is OpTest {
+contract RainlangCompilerParse2Test is OpTest {
     /// parse2 with empty input must return valid serialized bytecode
     /// with zero sources.
     function testParse2EmptyInput() external view {

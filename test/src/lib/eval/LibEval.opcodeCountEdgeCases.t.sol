@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
+import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDeploymentTest.sol";
 import {StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
@@ -12,7 +12,7 @@ import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.so
 /// (count mod 8) are handled by a separate remainder loop. These tests
 /// exercise opcode-count edge cases: zero opcodes (neither loop body runs),
 /// and exact multiples of 8 (remainder is zero, only the unrolled loop runs).
-contract LibEvalOpcodeCountEdgeCasesTest is RainlangExpressionCompilerDeploymentTest {
+contract LibEvalOpcodeCountEdgeCasesTest is RainlangCompilerDeploymentTest {
     /// Evaluating a zero-opcode source (no inputs, no ops) must succeed
     /// and return no outputs.
     function testEvalZeroOpcodeSource() external view {

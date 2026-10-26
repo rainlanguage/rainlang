@@ -7,7 +7,7 @@ import {PragmaV1} from "rainlang-interface-0.2.13/src/interface/IParserPragmaV1.
 import {NoWhitespaceAfterUsingWordsFrom} from "../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../src/lib/parse/LibParseError.sol";
 
-contract RainlangExpressionCompilerParsePragma1Test is OpTest {
+contract RainlangCompilerParsePragma1Test is OpTest {
     /// No pragma keyword yields empty usingWordsFrom.
     function testParsePragma1NoPragma() external view {
         PragmaV1 memory pragma_ = I_COMPILER.parsePragma1(bytes("_: 1;"));

@@ -2,12 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
+import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDeploymentTest.sol";
 import {ParenOverflow} from "../../../../src/error/ErrParse.sol";
 
 /// @title LibParseParenOverflowTest
 /// @notice Tests for paren overflow in LibParse.
-contract LibParseParenOverflowTest is RainlangExpressionCompilerDeploymentTest {
+contract LibParseParenOverflowTest is RainlangCompilerDeploymentTest {
     /// Exactly 19 levels of paren nesting must succeed.
     /// 62 bytes of group data at 3 bytes each fits 20 by size, but
     /// pushOpToSource zeroes a phantom counter one slot ahead, so the

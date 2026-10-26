@@ -10,7 +10,7 @@ import {MemoryKV} from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
 import {LibUint256Array} from "rain-solmem-0.1.28/src/lib/LibUint256Array.sol";
 import {LibPointer, Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 
-import {RainlangExpressionCompilerDeploymentTest} from "./RainlangExpressionCompilerDeploymentTest.sol";
+import {RainlangCompilerDeploymentTest} from "./RainlangCompilerDeploymentTest.sol";
 import {LibInterpreterState, InterpreterState} from "../../src/lib/state/LibInterpreterState.sol";
 import {LibInterpreterStateFingerprint} from "../lib/state/LibInterpreterStateFingerprint.sol";
 import {IntegrityCheckState, LibIntegrityCheck} from "../../src/lib/integrity/LibIntegrityCheck.sol";
@@ -37,7 +37,7 @@ import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalF
 bytes32 constant PRE = keccak256(abi.encodePacked("pre"));
 bytes32 constant POST = keccak256(abi.encodePacked("post"));
 
-abstract contract OpTest is RainlangExpressionCompilerDeploymentTest {
+abstract contract OpTest is RainlangCompilerDeploymentTest {
     using LibInterpreterState for InterpreterState;
     using LibInterpreterStateFingerprint for InterpreterState;
     using LibUint256Array for uint256[];
