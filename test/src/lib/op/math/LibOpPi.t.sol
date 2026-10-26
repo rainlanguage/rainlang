@@ -45,7 +45,7 @@ contract LibOpPiTest is OpTest {
 
     /// Test the eval of a mathematical constant pi opcode parsed from a string.
     function testOpPiEval() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_: pi();");
+        bytes memory bytecode = I_COMPILER.parse2("_: pi();");
 
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({

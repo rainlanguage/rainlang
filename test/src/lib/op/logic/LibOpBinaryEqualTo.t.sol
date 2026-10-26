@@ -76,14 +76,14 @@ contract LibOpBinaryEqualToTest is OpTest {
     /// Test that an equal to without inputs fails integrity check.
     function testOpBinaryEqualToEvalFail0Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 2, 0));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: binary-equal-to();");
+        bytes memory bytecode = I_COMPILER.parse2("_: binary-equal-to();");
         (bytecode);
     }
 
     /// Test that an equal to with 1 input fails integrity check.
     function testOpBinaryEqualToEvalFail1Input() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 2, 1));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: binary-equal-to(0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: binary-equal-to(0x00);");
         (bytecode);
     }
 

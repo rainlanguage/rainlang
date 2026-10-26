@@ -241,14 +241,14 @@ contract LibOpConditionsTest is OpTest {
     /// Test that conditions without inputs fails integrity check.
     function testOpConditionsEvalFail0Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 2, 0));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: conditions();");
+        bytes memory bytecode = I_COMPILER.parse2("_: conditions();");
         (bytecode);
     }
 
     /// Test that conditions with 1 inputs fails integrity check.
     function testOpConditionsEvalFail1Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 2, 1));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: conditions(0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: conditions(0x00);");
         (bytecode);
     }
 

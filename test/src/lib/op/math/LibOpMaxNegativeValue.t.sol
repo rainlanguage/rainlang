@@ -54,7 +54,7 @@ contract LibOpMaxNegativeValueTest is OpTest {
     /// Test that a max-negative-value with inputs fails integrity check.
     function testOpMaxNegativeValueEvalFail() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 0, 1));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: max-negative-value(0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: max-negative-value(0x00);");
         (bytecode);
     }
 

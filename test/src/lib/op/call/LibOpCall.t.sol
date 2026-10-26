@@ -207,7 +207,7 @@ contract LibOpCallTest is OpTest, BytecodeTest {
                 1
             );
         }
-        bytes memory bytecode = I_DEPLOYER.parse2(rainlang);
+        bytes memory bytecode = I_COMPILER.parse2(rainlang);
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
@@ -274,7 +274,7 @@ contract LibOpCallTest is OpTest, BytecodeTest {
 
     /// Boilerplate for checking the stack and kvs of a call.
     function checkCallRun(bytes memory rainlang, StackItem[] memory stack, bytes32[] memory kvs) internal view {
-        bytes memory bytecode = I_DEPLOYER.parse2(rainlang);
+        bytes memory bytecode = I_COMPILER.parse2(rainlang);
         (StackItem[] memory actualStack, bytes32[] memory actualKVs) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
@@ -375,7 +375,7 @@ contract LibOpCallTest is OpTest, BytecodeTest {
 
     /// Boilerplate to check a generic runtime error happens upon recursion.
     function checkCallRunRecursive(bytes memory rainlang) internal {
-        bytes memory bytecode = I_DEPLOYER.parse2(rainlang);
+        bytes memory bytecode = I_COMPILER.parse2(rainlang);
         // But it will unconditionally happen at runtime.
         vm.expectRevert();
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
@@ -405,14 +405,14 @@ contract LibOpCallTest is OpTest, BytecodeTest {
     /// Test a mismatch in the inputs from caller and callee.
     function testOpCallRunInputsMismatch() external {
         vm.expectRevert(abi.encodeWithSelector(CallInputsMismatchSource.selector, 2, 1));
-        bytes memory bytecode = I_DEPLOYER.parse2("a: call<1>(10 11); ten:,a b c:ten 11 12;");
+        bytes memory bytecode = I_COMPILER.parse2("a: call<1>(10 11); ten:,a b c:ten 11 12;");
         (bytecode);
     }
 
     /// Test a mismatch in the outputs from caller and callee.
     function testOpCallRunOutputsMismatch() external {
         vm.expectRevert(abi.encodeWithSelector(CallOutputsExceedSource.selector, 3, 4));
-        bytes memory bytecode = I_DEPLOYER.parse2("ten eleven a b: call<1>(10 11); ten eleven:,a:9;");
+        bytes memory bytecode = I_COMPILER.parse2("ten eleven a b: call<1>(10 11); ten eleven:,a:9;");
         (bytecode);
     }
 }

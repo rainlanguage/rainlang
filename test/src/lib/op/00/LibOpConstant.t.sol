@@ -84,16 +84,16 @@ contract LibOpConstantTest is OpTest {
     }
 
     /// Test the case of an empty constants array via. an end to end test. We
-    /// expect the deployer to revert, as the integrity check MUST fail.
+    /// expect the compiler to revert, as the integrity check MUST fail.
     function testOpConstantEvalZeroConstants() external {
         vm.expectRevert(abi.encodeWithSelector(OutOfBoundsConstantRead.selector, 0, 0, 0));
-        bytes memory bytecode = I_DEPLOYER.parse2("_ _ _: constant() constant() constant();");
+        bytes memory bytecode = I_COMPILER.parse2("_ _ _: constant() constant() constant();");
         (bytecode);
     }
 
     /// Test the eval of a constant opcode parsed from a string.
     function testOpConstantEval() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_ _: 2 1.001;");
+        bytes memory bytecode = I_COMPILER.parse2("_ _: 2 1.001;");
 
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({

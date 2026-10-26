@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {BaseRainlangExpressionDeployer} from "../../src/abstract/BaseRainlangExpressionDeployer.sol";
+import {BaseRainlangCompiler} from "../../src/abstract/BaseRainlangCompiler.sol";
 import {BaseRainlangParser} from "../../src/abstract/BaseRainlangParser.sol";
 import {LibAllStandardOps} from "../../src/lib/op/LibAllStandardOps.sol";
 import {TEST_PARSER_ADDRESS} from "../lib/deploy/LibTestInterpreterDeploy.sol";
@@ -10,22 +10,22 @@ import {TEST_PARSER_ADDRESS} from "../lib/deploy/LibTestInterpreterDeploy.sol";
 //forge-lint: disable-next-line(unused-import)
 import {IDescribedByMetaV1} from "rain-metadata-0.1.43/src/interface/IDescribedByMetaV1.sol";
 
-/// @dev Stands in for the meta hash a deployed expression deployer describes
+/// @dev Stands in for the meta hash a deployed compiler describes
 /// itself by; the test concrete has no meta.
-bytes32 constant TEST_DESCRIBED_BY_META_HASH = keccak256("TestRainlangExpressionDeployer");
+bytes32 constant TEST_DESCRIBED_BY_META_HASH = keccak256("TestRainlangCompiler");
 
-/// @title TestRainlangExpressionDeployer
-/// @notice `BaseRainlangExpressionDeployer` over the current source: the
+/// @title TestRainlangCompiler
+/// @notice `BaseRainlangCompiler` over the current source: the
 /// integrity function pointers are read from `LibAllStandardOps` at runtime
 /// and the parser is the one `LibTestInterpreterDeploy` places at
 /// `TEST_PARSER_ADDRESS`.
-contract TestRainlangExpressionDeployer is BaseRainlangExpressionDeployer {
-    /// @inheritdoc BaseRainlangExpressionDeployer
+contract TestRainlangCompiler is BaseRainlangCompiler {
+    /// @inheritdoc BaseRainlangCompiler
     function parser() internal pure virtual override returns (BaseRainlangParser) {
         return BaseRainlangParser(TEST_PARSER_ADDRESS);
     }
 
-    /// @inheritdoc BaseRainlangExpressionDeployer
+    /// @inheritdoc BaseRainlangCompiler
     function integrityFunctionPointers() internal pure virtual override returns (bytes memory) {
         return LibAllStandardOps.integrityFunctionPointers();
     }

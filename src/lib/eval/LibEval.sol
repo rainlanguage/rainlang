@@ -36,7 +36,7 @@ library LibEval {
     /// source count. All callers MUST validate it before calling. `eval4` does
     /// this via `LibBytecode.sourceInputsOutputsLength` (which reverts with
     /// `SourceIndexOutOfBounds`). `LibOpCall.run` relies on integrity checks
-    /// at deploy time to reject invalid source indices in operands. The
+    /// at compile time to reject invalid source indices in operands. The
     /// function pointer table is read-only during evaluation so a corrupt
     /// source index cannot modify the dispatch table, but it would cause the
     /// cursor to land at an arbitrary bytecode position and execute whatever

@@ -25,7 +25,7 @@ import {BinaryInNeedlesZero} from "../../../error/ErrIntegrity.sol";
 /// THE NEEDLE COUNT IS CAPPED AT 14 in practice. The operand field holds a
 /// uint16, but an opcode takes at most 15 inputs, and the set needs at least
 /// one of them. A larger count asks for more inputs than an opcode can carry
-/// and is reported as `BadOpInputsLength` at deploy time, naming the input
+/// and is reported as `BadOpInputsLength` at compile time, naming the input
 /// count it would have needed.
 ///
 /// MEMBERSHIP IS BINARY EQUALITY, the same equality `binary-equal-to` uses:
@@ -54,7 +54,7 @@ library LibOpBinaryIn {
     function integrity(IntegrityCheckState memory, OperandV2 operand) internal pure returns (uint256, uint256) {
         uint256 needles = uint256(OperandV2.unwrap(operand)) & 0xFFFF;
         // Zero needles would make the check vacuously true, which is never what
-        // an `ensure` guard wants, so it is rejected at deploy time rather than
+        // an `ensure` guard wants, so it is rejected at compile time rather than
         // silently passing at runtime.
         if (needles == 0) {
             revert BinaryInNeedlesZero();
@@ -62,7 +62,7 @@ library LibOpBinaryIn {
         uint256 inputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
         // Every needle plus at least one set member. Reporting the minimum when
         // the bytecode declares fewer is what surfaces the mistake as a
-        // `BadOpInputsLength` at deploy time.
+        // `BadOpInputsLength` at compile time.
         // `needles` is at most `type(uint16).max` so this cannot overflow.
         unchecked {
             inputs = inputs > needles ? inputs : needles + 1;

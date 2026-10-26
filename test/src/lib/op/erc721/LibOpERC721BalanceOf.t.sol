@@ -72,7 +72,7 @@ contract LibOpERC721BalanceOfTest is OpTest {
     }
 
     function testOpERC721BalanceOfEvalHappy(address token, address account, uint256 balance) public {
-        bytes memory bytecode = I_DEPLOYER.parse2(
+        bytes memory bytecode = I_COMPILER.parse2(
             bytes(
                 string.concat(
                     "_: erc721-balance-of(", Strings.toHexString(token), " ", Strings.toHexString(account), ");"
@@ -109,28 +109,28 @@ contract LibOpERC721BalanceOfTest is OpTest {
     /// Test that balance of without inputs fails integrity check.
     function testOpERC721BalanceOfIntegrityFail0() external {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 2, 0));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: erc721-balance-of();");
+        bytes memory bytecode = I_COMPILER.parse2("_: erc721-balance-of();");
         (bytecode);
     }
 
     /// Test that balance of with one input fails integrity check.
     function testOpERC721BalanceOfIntegrityFail1() external {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 2, 1));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: erc721-balance-of(0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: erc721-balance-of(0x00);");
         (bytecode);
     }
 
     /// Test that balance of with three inputs fails integrity check.
     function testOpERC721BalanceOfIntegrityFail3() external {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 3, 2, 3));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: erc721-balance-of(0x00 0x01 0x02);");
+        bytes memory bytecode = I_COMPILER.parse2("_: erc721-balance-of(0x00 0x01 0x02);");
         (bytecode);
     }
 
     /// Test that operand fails integrity check.
     function testOpERC721BalanceOfIntegrityFailOperand() external {
         vm.expectRevert(abi.encodeWithSelector(UnexpectedOperand.selector));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: erc721-balance-of<0>(0x00 0x01);");
+        bytes memory bytecode = I_COMPILER.parse2("_: erc721-balance-of<0>(0x00 0x01);");
         (bytecode);
     }
 

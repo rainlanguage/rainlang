@@ -88,7 +88,7 @@ contract LibOpEveryTest is OpTest {
     /// Test that every without inputs fails integrity check.
     function testOpEveryEvalFail() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 1, 0));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: every();");
+        bytes memory bytecode = I_COMPILER.parse2("_: every();");
         (bytecode);
     }
 

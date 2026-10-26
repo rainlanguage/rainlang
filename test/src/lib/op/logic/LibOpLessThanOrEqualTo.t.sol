@@ -117,7 +117,7 @@ contract LibOpLessThanOrEqualToTest is OpTest {
     /// Test the eval of greater than or equal to opcode parsed from a string.
     /// Tests 2 inputs. Both inputs are 0.
     function testOpLessThanOrEqualToEval2ZeroInputs() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_: less-than-or-equal-to(0 0);");
+        bytes memory bytecode = I_COMPILER.parse2("_: less-than-or-equal-to(0 0);");
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
@@ -138,7 +138,7 @@ contract LibOpLessThanOrEqualToTest is OpTest {
     /// Test the eval of greater than or equal to opcode parsed from a string.
     /// Tests 2 inputs. The first input is 0, the second input is 1.
     function testOpLessThanOrEqualToEval2InputsFirstZeroSecondOne() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_: less-than-or-equal-to(0 1);");
+        bytes memory bytecode = I_COMPILER.parse2("_: less-than-or-equal-to(0 1);");
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
@@ -159,7 +159,7 @@ contract LibOpLessThanOrEqualToTest is OpTest {
     /// Test the eval of greater than or equal to opcode parsed from a string.
     /// Tests 2 inputs. The first input is 1, the second input is 0.
     function testOpLessThanOrEqualToEval2InputsFirstOneSecondZero() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_: less-than-or-equal-to(1 0);");
+        bytes memory bytecode = I_COMPILER.parse2("_: less-than-or-equal-to(1 0);");
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
@@ -180,7 +180,7 @@ contract LibOpLessThanOrEqualToTest is OpTest {
     /// Test the eval of greater than or equal to opcode parsed from a string.
     /// Tests 2 inputs. Both inputs are 1.
     function testOpLessThanOrEqualToEval2InputsBothOne() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_: less-than-or-equal-to(1 1);");
+        bytes memory bytecode = I_COMPILER.parse2("_: less-than-or-equal-to(1 1);");
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
@@ -288,14 +288,14 @@ contract LibOpLessThanOrEqualToTest is OpTest {
     /// Test that a less than or equal to without inputs fails integrity check.
     function testOpLessThanOrEqualToEvalFail0Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 2, 0));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: less-than-or-equal-to();");
+        bytes memory bytecode = I_COMPILER.parse2("_: less-than-or-equal-to();");
         (bytecode);
     }
 
     /// Test that a less than or equal to with 1 input fails integrity check.
     function testOpLessThanOrEqualToEvalFail1Input() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 2, 1));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: less-than-or-equal-to(0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: less-than-or-equal-to(0x00);");
         (bytecode);
     }
 

@@ -14,7 +14,11 @@ import {
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {ISubParserV4} from "rainlang-interface-0.2.13/src/interface/ISubParserV4.sol";
 import {LibConformString} from "rain-string-0.3.9/src/lib/mut/LibConformString.sol";
-import {CMASK_WHITESPACE, CMASK_SUB_PARSEABLE_LITERAL_END} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
+import {
+    CMASK_WHITESPACE,
+    CMASK_SUB_PARSEABLE_LITERAL_END,
+    CMASK_PRINTABLE
+} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
 
 contract LibParseLiteralSubParseableTest is Test {
@@ -157,13 +161,17 @@ contract LibParseLiteralSubParseableTest is Test {
         vm.assume(bytes(dispatch).length > 0);
         vm.assume(bytes(whitespace).length > 0);
 
-        // Dispatch can be any ASCII other than whitespace or literal end char.
-        LibConformString.conformStringToMask(dispatch, ~(CMASK_WHITESPACE | CMASK_SUB_PARSEABLE_LITERAL_END));
+        // Dispatch can be any printable ASCII other than the literal end char.
+        LibConformString.conformStringToMask(
+            dispatch, ~(CMASK_WHITESPACE | CMASK_SUB_PARSEABLE_LITERAL_END) & CMASK_PRINTABLE
+        );
         // Whitespace can be any standard rainlang whitespace.
         LibConformString.conformStringToWhitespace(whitespace);
-        // Body can be any ASCII other than the literal end, including
-        // whitespace.
-        LibConformString.conformStringToMask(body, ~CMASK_SUB_PARSEABLE_LITERAL_END);
+        // Body can be any printable ASCII or whitespace other than the literal
+        // end.
+        LibConformString.conformStringToMask(
+            body, ~CMASK_SUB_PARSEABLE_LITERAL_END & (CMASK_PRINTABLE | CMASK_WHITESPACE)
+        );
 
         string memory data = string(abi.encodePacked("[", dispatch, whitespace, body, "]"));
 
@@ -184,6 +192,79 @@ contract LibParseLiteralSubParseableTest is Test {
 
         checkParseSubParseable(
             data, dispatch, expectedBody, bytes(dispatch).length + bytes(whitespace).length + bytes(body).length + 2
+        );
+    }
+
+    /// Maps `seed` onto a byte that is neither printable ASCII nor whitespace.
+    function disallowedByte(uint256 seed) internal pure returns (bytes1) {
+        uint256 disallowed = ~(CMASK_PRINTABLE | CMASK_WHITESPACE);
+        uint256 count;
+        for (uint256 i = 0; i < 256; i++) {
+            if (disallowed & (uint256(1) << i) != 0) count++;
+        }
+        uint256 n = bound(seed, 0, count - 1);
+        for (uint256 i = 0; i < 256; i++) {
+            if (disallowed & (uint256(1) << i) != 0) {
+                // forge-lint: disable-next-line(unsafe-typecast)
+                if (n == 0) return bytes1(uint8(i));
+                n--;
+            }
+        }
+        revert("unreachable");
+    }
+
+    /// Any byte that is neither printable ASCII nor whitespace anywhere in the
+    /// body reverts at that byte's offset.
+    function testParseLiteralSubParseableBodyDisallowedByteReverts(uint256 seed, uint256 length, uint256 position)
+        external
+    {
+        length = bound(length, 1, 64);
+        position = bound(position, 0, length - 1);
+        bytes memory body = new bytes(length);
+        for (uint256 i = 0; i < length; i++) {
+            body[i] = "a";
+        }
+        body[position] = disallowedByte(seed);
+        checkParseSubParseableError(
+            string(bytes.concat("[a ", body, "]")),
+            abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, LibParseError.tagErrorOffset(3 + position))
+        );
+    }
+
+    /// A disallowed byte at the head, middle and end of the body.
+    function testParseLiteralSubParseableBodyDisallowedByteKnown() external {
+        checkParseSubParseableError(
+            string(bytes("[a \x80bc]")),
+            abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, LibParseError.tagErrorOffset(3))
+        );
+        checkParseSubParseableError(
+            "[a b\x00c]", abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, LibParseError.tagErrorOffset(4))
+        );
+        checkParseSubParseableError(
+            "[a bc\x7F]", abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, LibParseError.tagErrorOffset(5))
+        );
+        checkParseSubParseableError(
+            unicode"[a é]",
+            abi.encodeWithSelector(UnclosedSubParseableLiteral.selector, LibParseError.tagErrorOffset(3))
+        );
+    }
+
+    /// Any byte that is neither printable ASCII nor whitespace in the dispatch
+    /// reverts at that byte's offset.
+    function testParseLiteralSubParseableDispatchDisallowedByteReverts(uint256 seed, uint256 length, uint256 position)
+        external
+    {
+        length = bound(length, 1, 64);
+        position = bound(position, 0, length - 1);
+        bytes memory dispatch = new bytes(length);
+        for (uint256 i = 0; i < length; i++) {
+            dispatch[i] = "a";
+        }
+        dispatch[position] = disallowedByte(seed);
+        bytes4 selector = position == 0 ? SubParseableMissingDispatch.selector : UnclosedSubParseableLiteral.selector;
+        checkParseSubParseableError(
+            string(bytes.concat("[", dispatch, " b]")),
+            abi.encodeWithSelector(selector, LibParseError.tagErrorOffset(1 + position))
         );
     }
 

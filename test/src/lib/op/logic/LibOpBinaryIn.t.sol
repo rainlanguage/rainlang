@@ -128,7 +128,7 @@ contract LibOpBinaryInTest is OpTest {
         checkUnhappyParse("_: binary-in<1 1>(1 1);", abi.encodeWithSelector(UnexpectedOperandValue.selector));
     }
 
-    /// Zero needles is rejected at deploy time.
+    /// Zero needles is rejected at compile time.
     function testOpBinaryInEvalZeroNeedles() external {
         checkUnhappyParse2("_: binary-in<0>(1 1);", abi.encodeWithSelector(BinaryInNeedlesZero.selector));
     }

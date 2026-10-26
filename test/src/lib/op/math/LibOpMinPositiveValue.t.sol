@@ -56,7 +56,7 @@ contract LibOpMinPositiveValueTest is OpTest {
     /// Test that a min-positive-value with inputs fails integrity check.
     function testOpMinPositiveValueEvalFail() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 0, 1));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: min-positive-value(0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: min-positive-value(0x00);");
         (bytecode);
     }
 

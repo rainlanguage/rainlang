@@ -2,10 +2,10 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDeploymentTest.sol";
 import {LibBytecode} from "rainlang-interface-0.2.13/src/lib/bytecode/LibBytecode.sol";
 
-contract LibIntegrityCheckMultiSourceTest is RainlangExpressionDeployerDeploymentTest {
+contract LibIntegrityCheckMultiSourceTest is RainlangCompilerDeploymentTest {
     /// Two-source expression must pass integrity and produce correct
     /// per-source metadata.
     function testIntegrityTwoSources() external view {
