@@ -22,11 +22,8 @@ tests.
 `script/Build.sol` writes `src/generated/RainlangReferenceExternPointers.sol` —
 the reference extern's parse meta, function pointer tables and meta hash.
 Committed because contract and pointers file depend on each other circularly.
-Never hand-edit it. `src/generated/0_1_9/` is the frozen record of the last
-release this repo cut while it still carried the deploy half; nothing here reads
-it, and it stays because frozen snapshots are append-only org-wide (rainix
-`frozen-snapshots-append-only`). After any source change affecting the extern's
-bytecode:
+Never hand-edit it. Deploy records live in `rainlang.deploy`. After any source
+change affecting the extern's bytecode:
 
 1. `nix develop -c rainlang-prelude`
 2. `nix develop -c forge script --silent ./script/Build.sol`
