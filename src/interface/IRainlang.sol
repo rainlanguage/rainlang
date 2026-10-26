@@ -4,13 +4,13 @@ pragma solidity ^0.8.25;
 
 /// @title IRainlang
 /// @notice Interface for Rainlang that exposes the deterministic deploy
-/// addresses of the four core interpreter components (Deployer, Interpreter,
+/// addresses of the four core interpreter components (Compiler, Interpreter,
 /// Store, Parser).
 interface IRainlang {
     /// @notice Returns the deterministic deploy address of the expression
-    /// deployer.
-    /// @return The expression deployer address.
-    function expressionDeployerAddress() external pure returns (address);
+    /// compiler.
+    /// @return The expression compiler address.
+    function expressionCompilerAddress() external pure returns (address);
 
     /// @notice Returns the deterministic deploy address of the interpreter.
     /// @return The interpreter address.

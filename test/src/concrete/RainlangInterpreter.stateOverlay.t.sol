@@ -2,19 +2,19 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
 import {StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 import {OddSetLength} from "../../../src/error/ErrStore.sol";
 
-contract RainlangInterpreterStateOverlayTest is RainlangExpressionDeployerDeploymentTest {
+contract RainlangInterpreterStateOverlayTest is RainlangExpressionCompilerDeploymentTest {
     /// Odd-length stateOverlay MUST revert with OddSetLength.
     function testStateOverlayOddLength(bytes32[] memory stateOverlay) external {
         vm.assume(stateOverlay.length % 2 != 0);
 
-        bytes memory bytecode = I_DEPLOYER.parse2("_: 1;");
+        bytes memory bytecode = I_COMPILER.parse2("_: 1;");
 
         vm.expectRevert(abi.encodeWithSelector(OddSetLength.selector, stateOverlay.length));
         I_INTERPRETER.eval4(
@@ -32,7 +32,7 @@ contract RainlangInterpreterStateOverlayTest is RainlangExpressionDeployerDeploy
 
     /// Show that state overlay can prewarm a get.
     function testStateOverlayGet() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_: get(9);");
+        bytes memory bytecode = I_COMPILER.parse2("_: get(9);");
 
         bytes32 k = Float.unwrap(LibDecimalFloat.packLossless(9, 0));
         bytes32 v = bytes32(uint256(42));
@@ -62,7 +62,7 @@ contract RainlangInterpreterStateOverlayTest is RainlangExpressionDeployerDeploy
     /// @notice stateOverlay with two key-value pairs MUST apply both to the
     /// state KV. Both keys should be readable via `get` in the evaluated source.
     function testStateOverlayMultiplePairs() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("a b: get(1) get(2);");
+        bytes memory bytecode = I_COMPILER.parse2("a b: get(1) get(2);");
 
         bytes32 k1 = Float.unwrap(LibDecimalFloat.packLossless(1, 0));
         bytes32 v1 = bytes32(uint256(100));
@@ -95,7 +95,7 @@ contract RainlangInterpreterStateOverlayTest is RainlangExpressionDeployerDeploy
 
     /// @notice stateOverlay with three key-value pairs MUST apply all three.
     function testStateOverlayThreePairs() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("a b c: get(1) get(2) get(3);");
+        bytes memory bytecode = I_COMPILER.parse2("a b c: get(1) get(2) get(3);");
 
         bytes32 k1 = Float.unwrap(LibDecimalFloat.packLossless(1, 0));
         bytes32 v1 = bytes32(uint256(10));
@@ -135,7 +135,7 @@ contract RainlangInterpreterStateOverlayTest is RainlangExpressionDeployerDeploy
     /// for that key MUST win (last-write-wins semantics from sequential `set`
     /// calls).
     function testStateOverlayDuplicateKeyLastWins() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_: get(5);");
+        bytes memory bytecode = I_COMPILER.parse2("_: get(5);");
 
         bytes32 k = Float.unwrap(LibDecimalFloat.packLossless(5, 0));
         bytes32 v1 = bytes32(uint256(111));
@@ -169,7 +169,7 @@ contract RainlangInterpreterStateOverlayTest is RainlangExpressionDeployerDeploy
     /// @notice When stateOverlay has duplicate keys interleaved with other
     /// keys, each duplicate key's last value MUST win independently.
     function testStateOverlayDuplicateKeysInterleaved() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("a b: get(1) get(2);");
+        bytes memory bytecode = I_COMPILER.parse2("a b: get(1) get(2);");
 
         bytes32 k1 = Float.unwrap(LibDecimalFloat.packLossless(1, 0));
         bytes32 k2 = Float.unwrap(LibDecimalFloat.packLossless(2, 0));
@@ -207,7 +207,7 @@ contract RainlangInterpreterStateOverlayTest is RainlangExpressionDeployerDeploy
 
     /// Show that state overlay can be overridden by a set in the bytecode.
     function testStateOverlaySet() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_:get(9),:set(9 42),_:get(9);");
+        bytes memory bytecode = I_COMPILER.parse2("_:get(9),:set(9 42),_:get(9);");
 
         bytes32 k = Float.unwrap(LibDecimalFloat.packLossless(9, 0));
         bytes32 v = Float.unwrap(LibDecimalFloat.packLossless(43, 0));
@@ -245,7 +245,7 @@ contract RainlangInterpreterStateOverlayTest is RainlangExpressionDeployerDeploy
     /// in a batch) without concatenating prior writes.
     function testStateOverlayMergesUntouchedSeedWithNewWrite() external view {
         // Sets key 2; never reads or writes the seeded key 1.
-        bytes memory bytecode = I_DEPLOYER.parse2(":set(2 22);");
+        bytes memory bytecode = I_COMPILER.parse2(":set(2 22);");
 
         bytes32 k1 = Float.unwrap(LibDecimalFloat.packLossless(1, 0));
         bytes32 v1 = Float.unwrap(LibDecimalFloat.packLossless(11, 0));

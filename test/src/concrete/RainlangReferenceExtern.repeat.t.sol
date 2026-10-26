@@ -58,7 +58,7 @@ contract RainlangReferenceExternRepeatTest is OpTest {
 
         vm.expectRevert(abi.encodeWithSelector(LossyConversionToFloat.selector, int256(10 ** 68 - 1), 0));
         bytes memory bytecode =
-            I_DEPLOYER.parse2(bytes(string.concat(baseStr, "_: [ref-extern-repeat-9 ", body(68), "];")));
+            I_COMPILER.parse2(bytes(string.concat(baseStr, "_: [ref-extern-repeat-9 ", body(68), "];")));
         (bytecode);
     }
 
@@ -81,7 +81,7 @@ contract RainlangReferenceExternRepeatTest is OpTest {
         string memory baseStr = string.concat("using-words-from ", address(extern).toHexString(), " ");
 
         vm.expectRevert(abi.encodeWithSelector(InvalidRepeatCount.selector));
-        bytes memory bytecode = I_DEPLOYER.parse2(bytes(string.concat(baseStr, "_: [ref-extern-repeat--1 abc];")));
+        bytes memory bytecode = I_COMPILER.parse2(bytes(string.concat(baseStr, "_: [ref-extern-repeat--1 abc];")));
         (bytecode);
     }
 
@@ -91,7 +91,7 @@ contract RainlangReferenceExternRepeatTest is OpTest {
         string memory baseStr = string.concat("using-words-from ", address(extern).toHexString(), " ");
 
         vm.expectRevert(abi.encodeWithSelector(InvalidRepeatCount.selector));
-        bytes memory bytecode = I_DEPLOYER.parse2(bytes(string.concat(baseStr, "_: [ref-extern-repeat-1.5 abc];")));
+        bytes memory bytecode = I_COMPILER.parse2(bytes(string.concat(baseStr, "_: [ref-extern-repeat-1.5 abc];")));
         (bytecode);
     }
 
@@ -101,7 +101,7 @@ contract RainlangReferenceExternRepeatTest is OpTest {
         string memory baseStr = string.concat("using-words-from ", address(extern).toHexString(), " ");
 
         vm.expectRevert(abi.encodeWithSelector(InvalidRepeatCount.selector));
-        bytes memory bytecode = I_DEPLOYER.parse2(bytes(string.concat(baseStr, "_: [ref-extern-repeat-10 abc];")));
+        bytes memory bytecode = I_COMPILER.parse2(bytes(string.concat(baseStr, "_: [ref-extern-repeat-10 abc];")));
         (bytecode);
     }
 
@@ -111,7 +111,7 @@ contract RainlangReferenceExternRepeatTest is OpTest {
         string memory baseStr = string.concat("using-words-from ", address(extern).toHexString(), " ");
 
         vm.expectRevert(abi.encodeWithSelector(UnconsumedRepeatDispatchBytes.selector));
-        bytes memory bytecode = I_DEPLOYER.parse2(bytes(string.concat(baseStr, "_: [ref-extern-repeat-5x abc];")));
+        bytes memory bytecode = I_COMPILER.parse2(bytes(string.concat(baseStr, "_: [ref-extern-repeat-5x abc];")));
         (bytecode);
     }
 }

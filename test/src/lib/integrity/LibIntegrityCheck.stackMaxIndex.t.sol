@@ -2,10 +2,10 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
 import {LibBytecode} from "rainlang-interface-0.2.13/src/lib/bytecode/LibBytecode.sol";
 
-contract LibIntegrityCheckStackMaxIndexTest is RainlangExpressionDeployerDeploymentTest {
+contract LibIntegrityCheckStackMaxIndexTest is RainlangExpressionCompilerDeploymentTest {
     /// stackMaxIndex must track the peak stack height, not the final height.
     /// `_: add(1 2);` pushes two constants (peak = 2), then add consumes
     /// both and produces one result (final = 1). The stackAllocation in the

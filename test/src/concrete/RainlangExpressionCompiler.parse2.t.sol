@@ -7,18 +7,18 @@ import {MissingFinalSemi} from "../../../src/error/ErrParse.sol";
 import {BadOpInputsLength} from "rainlang-interface-0.2.13/src/error/ErrIntegrity.sol";
 import {LibParseError} from "../../../src/lib/parse/LibParseError.sol";
 
-contract RainlangExpressionDeployerParse2Test is OpTest {
+contract RainlangExpressionCompilerParse2Test is OpTest {
     /// parse2 with empty input must return valid serialized bytecode
     /// with zero sources.
     function testParse2EmptyInput() external view {
-        bytes memory result = I_DEPLOYER.parse2("");
+        bytes memory result = I_COMPILER.parse2("");
         assertTrue(result.length > 0);
     }
 
     /// parse2 with malformed Rainlang must propagate the parse error.
     function testParse2MissingFinalSemi() external {
         vm.expectRevert(abi.encodeWithSelector(MissingFinalSemi.selector, LibParseError.tagErrorOffset(4)));
-        I_DEPLOYER.parse2("_: 1");
+        I_COMPILER.parse2("_: 1");
     }
 
     /// parse2 with input that parses but fails integrity must propagate
@@ -26,6 +26,6 @@ contract RainlangExpressionDeployerParse2Test is OpTest {
     function testParse2IntegrityFailure() external {
         // add is opIndex 1, needs 2 inputs, bytecode says 1.
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 2, 1));
-        I_DEPLOYER.parse2("_: add(1);");
+        I_COMPILER.parse2("_: add(1);");
     }
 }

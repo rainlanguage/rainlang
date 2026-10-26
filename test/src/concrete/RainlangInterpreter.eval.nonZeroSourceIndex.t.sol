@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
 import {StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
@@ -10,14 +10,14 @@ import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalF
 
 /// @title RainlangInterpreterEvalNonZeroSourceIndexTest
 /// @notice Tests that `eval4` correctly selects non-zero source indices.
-contract RainlangInterpreterEvalNonZeroSourceIndexTest is RainlangExpressionDeployerDeploymentTest {
+contract RainlangInterpreterEvalNonZeroSourceIndexTest is RainlangExpressionCompilerDeploymentTest {
     using LibDecimalFloat for Float;
 
     /// @notice eval4 with sourceIndex = 1 MUST evaluate the second source, not
     /// the first.
     function testEvalNonZeroSourceIndex() external view {
         // Source 0 produces 42. Source 1 produces 99.
-        bytes memory bytecode = I_DEPLOYER.parse2("_: 42;_: 99;");
+        bytes memory bytecode = I_COMPILER.parse2("_: 42;_: 99;");
 
         (StackItem[] memory stack,) = I_INTERPRETER.eval4(
             EvalV4({
@@ -40,7 +40,7 @@ contract RainlangInterpreterEvalNonZeroSourceIndexTest is RainlangExpressionDepl
     /// work when correct inputs are provided.
     function testEvalNonZeroSourceIndexWithInputs() external view {
         // Source 0: no-op. Source 1: takes one input and adds 1 to it.
-        bytes memory bytecode = I_DEPLOYER.parse2("_: 42;x:, _: add(x 1);");
+        bytes memory bytecode = I_COMPILER.parse2("_: 42;x:, _: add(x 1);");
 
         Float inputVal = LibDecimalFloat.packLossless(10, 0);
         StackItem[] memory inputs = new StackItem[](1);
@@ -66,7 +66,7 @@ contract RainlangInterpreterEvalNonZeroSourceIndexTest is RainlangExpressionDepl
     /// @notice Source index 0 and source index 1 produce different results from
     /// the same bytecode, confirming sourceIndex is respected.
     function testEvalSourceIndexSelectsCorrectSource() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_: 7;_: 13;");
+        bytes memory bytecode = I_COMPILER.parse2("_: 7;_: 13;");
 
         (StackItem[] memory stack0,) = I_INTERPRETER.eval4(
             EvalV4({

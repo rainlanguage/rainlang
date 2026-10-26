@@ -107,28 +107,28 @@ contract LibOpIfTest is OpTest {
     /// Test that an if without inputs fails integrity check.
     function testOpIfEvalFail0Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 3, 0));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: if();");
+        bytes memory bytecode = I_COMPILER.parse2("_: if();");
         (bytecode);
     }
 
     /// Test that an if with 1 input fails integrity check.
     function testOpIfEvalFail1Input() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 3, 1));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: if(0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: if(0x00);");
         (bytecode);
     }
 
     /// Test that an if with 2 inputs fails integrity check.
     function testOpIfEvalFail2Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 2, 3, 2));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: if(0x00 0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: if(0x00 0x00);");
         (bytecode);
     }
 
     /// Test that an if with 4 inputs fails integrity check.
     function testOpIfEvalFail4Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 4, 3, 4));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: if(0x00 0x00 0x00 0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: if(0x00 0x00 0x00 0x00);");
         (bytecode);
     }
 

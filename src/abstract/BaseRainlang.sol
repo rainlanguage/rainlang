@@ -7,7 +7,7 @@ import {ERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/ERC165.s
 
 /// @title BaseRainlang
 /// @notice Rainlang contract that exposes the addresses of the four core
-/// interpreter components: Deployer, Interpreter, Store, and Parser, so that
+/// interpreter components: Compiler, Interpreter, Store, and Parser, so that
 /// external tooling can discover all component addresses from a single known
 /// Rainlang address. The addresses themselves are the `IRainlang` functions,
 /// which a concrete binds.

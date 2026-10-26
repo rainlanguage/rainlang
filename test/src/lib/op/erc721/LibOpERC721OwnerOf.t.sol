@@ -60,7 +60,7 @@ contract LibOpERC721OwnerOfTest is OpTest {
     }
 
     function testOpERC721OwnerOfEvalHappy(address token, uint256 tokenId, address owner) public {
-        bytes memory bytecode = I_DEPLOYER.parse2(
+        bytes memory bytecode = I_COMPILER.parse2(
             bytes(
                 string.concat(
                     "_: erc721-owner-of(", Strings.toHexString(token), " ", Strings.toHexString(tokenId), ");"
@@ -92,21 +92,21 @@ contract LibOpERC721OwnerOfTest is OpTest {
     /// Test that owner of without inputs fails integrity check.
     function testOpERC721OwnerOfEvalFail0() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 2, 0));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: erc721-owner-of();");
+        bytes memory bytecode = I_COMPILER.parse2("_: erc721-owner-of();");
         (bytecode);
     }
 
     /// Test that owner of with one input fails integrity check.
     function testOpERC721OwnerOfEvalFail1() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 2, 1));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: erc721-owner-of(0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: erc721-owner-of(0x00);");
         (bytecode);
     }
 
     /// Test that owner of with too many inputs fails integrity check.
     function testOpERC721OwnerOfEvalFail3() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 3, 2, 3));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: erc721-owner-of(0x00 0x01 0x02);");
+        bytes memory bytecode = I_COMPILER.parse2("_: erc721-owner-of(0x00 0x01 0x02);");
         (bytecode);
     }
 

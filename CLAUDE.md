@@ -40,7 +40,7 @@ task.
 `test/concrete/Test*.sol` are the `BaseRainlang*` contracts built from current
 source with no generated tables; `test/lib/deploy/LibTestInterpreterDeploy.sol`
 places them at fixed test addresses and
-`test/abstract/RainlangExpressionDeployerDeploymentTest.deployRainlang()` is the
+`test/abstract/RainlangExpressionCompilerDeploymentTest.deployRainlang()` is the
 one hook that binds them. `rainlang.deploy` and the word repos override that
 hook with the deployed pins, so `test/` ships in the package: `/test` is
 deliberately absent from `.soldeerignore`.

@@ -2,13 +2,13 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
 import {LibIntegrityCheck} from "../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 
 /// @title LibIntegrityCheckIoTest
 /// @notice Verifies that integrityCheck2 returns correctly encoded io bytes.
-contract LibIntegrityCheckIoTest is RainlangExpressionDeployerDeploymentTest {
+contract LibIntegrityCheckIoTest is RainlangExpressionCompilerDeploymentTest {
     /// External wrapper so the library call can be used with parser-built bytecode.
     function externalIntegrityCheck(bytes memory bytecode, bytes32[] memory constants)
         external

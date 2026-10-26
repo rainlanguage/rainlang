@@ -2,13 +2,13 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
 import {OpcodeIOOverflow} from "../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseStateOpcodeIOOverflowTest
 /// @notice Tests for OpcodeIOOverflow in endLine.
-contract LibParseStateOpcodeIOOverflowTest is RainlangExpressionDeployerDeploymentTest {
+contract LibParseStateOpcodeIOOverflowTest is RainlangExpressionCompilerDeploymentTest {
     /// A word with 16 paren-enclosed inputs overflows the 4-bit ioByte
     /// input nybble (max 15), triggering OpcodeIOOverflow.
     function testOpcodeIOOverflowInputs() external {

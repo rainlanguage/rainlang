@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
 import {StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
@@ -12,11 +12,11 @@ import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.so
 /// (count mod 8) are handled by a separate remainder loop. These tests
 /// exercise opcode-count edge cases: zero opcodes (neither loop body runs),
 /// and exact multiples of 8 (remainder is zero, only the unrolled loop runs).
-contract LibEvalOpcodeCountEdgeCasesTest is RainlangExpressionDeployerDeploymentTest {
+contract LibEvalOpcodeCountEdgeCasesTest is RainlangExpressionCompilerDeploymentTest {
     /// Evaluating a zero-opcode source (no inputs, no ops) must succeed
     /// and return no outputs.
     function testEvalZeroOpcodeSource() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2(":;");
+        bytes memory bytecode = I_COMPILER.parse2(":;");
         (StackItem[] memory stack,) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
@@ -34,7 +34,7 @@ contract LibEvalOpcodeCountEdgeCasesTest is RainlangExpressionDeployerDeployment
     /// Zero-opcode source with inputs — inputs appear as outputs with no
     /// ops executed.
     function testEvalZeroOpcodeSourceWithInputs(uint256 a, uint256 b) external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("x y:;");
+        bytes memory bytecode = I_COMPILER.parse2("x y:;");
         StackItem[] memory inputs = new StackItem[](2);
         inputs[0] = StackItem.wrap(bytes32(a));
         inputs[1] = StackItem.wrap(bytes32(b));
@@ -59,7 +59,7 @@ contract LibEvalOpcodeCountEdgeCasesTest is RainlangExpressionDeployerDeployment
     /// was executed in the correct order.
     function testEvalExactly8Opcodes() external view {
         bytes memory bytecode =
-            I_DEPLOYER.parse2("_: 0x01," "_: 0x02," "_: 0x03," "_: 0x04," "_: 0x05," "_: 0x06," "_: 0x07," "_: 0x08;");
+            I_COMPILER.parse2("_: 0x01," "_: 0x02," "_: 0x03," "_: 0x04," "_: 0x05," "_: 0x06," "_: 0x07," "_: 0x08;");
         (StackItem[] memory stack,) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
@@ -87,7 +87,7 @@ contract LibEvalOpcodeCountEdgeCasesTest is RainlangExpressionDeployerDeployment
     /// Exercises the loop-continuation path (cursor advances by 0x20 and
     /// re-enters) while still having zero remainder.
     function testEvalExactly16Opcodes() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2(
+        bytes memory bytecode = I_COMPILER.parse2(
             "_: 0x01," "_: 0x02," "_: 0x03," "_: 0x04," "_: 0x05," "_: 0x06," "_: 0x07," "_: 0x08," "_: 0x09,"
             "_: 0x0a," "_: 0x0b," "_: 0x0c," "_: 0x0d," "_: 0x0e," "_: 0x0f," "_: 0x10;"
         );

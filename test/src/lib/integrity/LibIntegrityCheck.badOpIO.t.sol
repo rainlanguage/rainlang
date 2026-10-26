@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
 import {LibIntegrityCheck} from "../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 import {BadOpInputsLength, BadOpOutputsLength} from "rainlang-interface-0.2.13/src/error/ErrIntegrity.sol";
@@ -13,7 +13,7 @@ import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 /// @notice Verifies that integrityCheck2 reverts with BadOpInputsLength and
 /// BadOpOutputsLength when a surgically corrupted IO byte in the bytecode
 /// does not match the integrity function's computed inputs/outputs.
-contract LibIntegrityCheckBadOpIOTest is RainlangExpressionDeployerDeploymentTest {
+contract LibIntegrityCheckBadOpIOTest is RainlangExpressionCompilerDeploymentTest {
     /// External wrapper so vm.expectRevert works with the library call.
     /// Computes integrity function pointers at runtime so they are valid
     /// for this contract's inlined library code.

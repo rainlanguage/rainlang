@@ -2,10 +2,10 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
 import {LibBytecode} from "rainlang-interface-0.2.13/src/lib/bytecode/LibBytecode.sol";
 
-contract LibIntegrityCheckZeroSourceTest is RainlangExpressionDeployerDeploymentTest {
+contract LibIntegrityCheckZeroSourceTest is RainlangExpressionCompilerDeploymentTest {
     /// Empty input produces zero-source bytecode. The parser emits a single
     /// byte (sourceCount = 0), and the integrity check (run inside parse2)
     /// must handle this without reverting.

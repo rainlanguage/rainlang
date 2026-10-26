@@ -49,7 +49,7 @@ contract LibOpChainIdTest is OpTest {
     /// Test that a chain ID with inputs fails integrity check.
     function testOpChainIdEvalFail() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 0, 1));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: chain-id(0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: chain-id(0x00);");
         (bytecode);
     }
 

@@ -2,14 +2,14 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangExpressionCompilerDeploymentTest} from "test/abstract/RainlangExpressionCompilerDeploymentTest.sol";
 import {StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
 import {InputsLengthMismatch} from "../../../src/error/ErrEval.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 
-contract RainlangInterpreterEvalTest is RainlangExpressionDeployerDeploymentTest {
+contract RainlangInterpreterEvalTest is RainlangExpressionCompilerDeploymentTest {
     using LibDecimalFloat for Float;
 
     /// Passing more inputs than the source expects MUST revert.
@@ -17,7 +17,7 @@ contract RainlangInterpreterEvalTest is RainlangExpressionDeployerDeploymentTest
         vm.assume(extraInputs > 0);
 
         // Source expects 0 inputs.
-        bytes memory bytecode = I_DEPLOYER.parse2("_: 1;");
+        bytes memory bytecode = I_COMPILER.parse2("_: 1;");
 
         StackItem[] memory inputs = new StackItem[](extraInputs);
 
@@ -53,7 +53,7 @@ contract RainlangInterpreterEvalTest is RainlangExpressionDeployerDeploymentTest
         rainlang[uint256(expectedInputs) * 2 - 1] = ":";
         rainlang[uint256(expectedInputs) * 2] = ";";
 
-        bytes memory bytecode = I_DEPLOYER.parse2(rainlang);
+        bytes memory bytecode = I_COMPILER.parse2(rainlang);
         StackItem[] memory inputs = new StackItem[](actualInputs);
 
         vm.expectRevert(abi.encodeWithSelector(InputsLengthMismatch.selector, expectedInputs, actualInputs));
@@ -78,7 +78,7 @@ contract RainlangInterpreterEvalTest is RainlangExpressionDeployerDeploymentTest
         Float fa = LibDecimalFloat.packLossless(a, 0);
         Float fb = LibDecimalFloat.packLossless(b, 0);
 
-        bytes memory bytecode = I_DEPLOYER.parse2("a b:, _: add(a b);");
+        bytes memory bytecode = I_COMPILER.parse2("a b:, _: add(a b);");
         StackItem[] memory inputs = new StackItem[](2);
         inputs[0] = StackItem.wrap(Float.unwrap(fa));
         inputs[1] = StackItem.wrap(Float.unwrap(fb));

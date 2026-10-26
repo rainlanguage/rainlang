@@ -156,7 +156,7 @@ contract LibOpStackTest is OpTest {
 
     /// Test the eval of a stack opcode parsed from a string.
     function testOpStackEval() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("foo: 1, bar: foo, _: -1;");
+        bytes memory bytecode = I_COMPILER.parse2("foo: 1, bar: foo, _: -1;");
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
@@ -177,7 +177,7 @@ contract LibOpStackTest is OpTest {
 
     /// Test the eval of several stack opcodes parsed from a string.
     function testOpStackEvalSeveral() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("foo: 1, bar: foo, _ baz: bar bar, bing _:foo baz;");
+        bytes memory bytecode = I_COMPILER.parse2("foo: 1, bar: foo, _ baz: bar bar, bing _:foo baz;");
 
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
