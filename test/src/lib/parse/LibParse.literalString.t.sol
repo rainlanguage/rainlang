@@ -88,7 +88,7 @@ contract LibParseLiteralStringTest is Test {
         vm.assume(keccak256(bytes(strA)) != keccak256(bytes(strB)));
 
         (bytes memory bytecode, bytes32[] memory constants) =
-            LibMetaFixture.newState(string.concat("_ _: \"", strA, "\"\"", strB, "\";")).parse();
+            LibMetaFixture.newState(string.concat("_ _: \"", strA, "\" \"", strB, "\";")).parse();
         uint256 sourceIndex = 0;
         assertEq(LibBytecode.sourceCount(bytecode), 1);
         assertEq(LibBytecode.sourceRelativeOffset(bytecode, sourceIndex), 0);
