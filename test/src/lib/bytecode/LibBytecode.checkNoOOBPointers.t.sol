@@ -112,7 +112,7 @@ contract LibBytecodeCheckNoOOBPointersTest is BytecodeTest {
         sourceCount = uint8(bytecode[0]);
 
         // Randomly corrupt an offset pointer.
-        uint256 sourceRelativeStart = 1 + sourceCount * 2;
+        uint256 sourceRelativeStart = 1 + uint256(sourceCount) * 2;
         seed = keccak256(abi.encodePacked(seed, uint256(0)));
         uint256 offsetIndex = uint256(seed) % sourceCount;
         uint256 nextOffset;
@@ -178,7 +178,21 @@ contract LibBytecodeCheckNoOOBPointersTest is BytecodeTest {
         sourceCount = uint8(bytecode[0]);
 
         // Split the bytecode into two parts at the end of the offset pointers.
-        uint256 sourceRelativeStart = 1 + sourceCount * 2;
+        uint256 sourceRelativeStart = 1 + uint256(sourceCount) * 2;
+
+        // Shifted offsets must still fit their two bytes.
+        {
+            uint256 lastOffsetPosition = (uint256(sourceCount) - 1) * 2 + 1;
+            uint256 lastOffset =
+                (uint256(uint8(bytecode[lastOffsetPosition])) << 8) | uint256(uint8(bytecode[lastOffsetPosition + 1]));
+            uint256 maxGarbageLength = type(uint16).max - lastOffset;
+            if (garbage.length > maxGarbageLength) {
+                assembly ("memory-safe") {
+                    mstore(garbage, maxGarbageLength)
+                }
+            }
+        }
+
         uint256 sourceAbsoluteStart;
         assembly ("memory-safe") {
             sourceAbsoluteStart := add(bytecode, add(0x20, sourceRelativeStart))
@@ -252,7 +266,7 @@ contract LibBytecodeCheckNoOOBPointersTest is BytecodeTest {
         sourceCount = uint8(bytecode[0]);
         vm.assume(sourceCount > 0);
 
-        uint256 pointerRegionSize = sourceCount * 2;
+        uint256 pointerRegionSize = uint256(sourceCount) * 2;
         uint256 corruptIndex = (uint256(seed) % pointerRegionSize) + 1;
         vm.assume(bytecode[corruptIndex] != bytes1(corruptOffsetByte));
         bytecode[corruptIndex] = bytes1(corruptOffsetByte);
@@ -275,7 +289,7 @@ contract LibBytecodeCheckNoOOBPointersTest is BytecodeTest {
         sourceCount = uint8(bytecode[0]);
         vm.assume(sourceCount > 0);
 
-        uint256 sourceRelativeStart = 1 + sourceCount * 2;
+        uint256 sourceRelativeStart = 1 + uint256(sourceCount) * 2;
 
         // Pick an offset pointer.
         seed = keccak256(abi.encodePacked(seed, uint256(0)));
@@ -317,7 +331,7 @@ contract LibBytecodeCheckNoOOBPointersTest is BytecodeTest {
         sourceCount = uint8(bytecode[0]);
         vm.assume(sourceCount > 0);
 
-        uint256 sourceRelativeStart = 1 + sourceCount * 2;
+        uint256 sourceRelativeStart = 1 + uint256(sourceCount) * 2;
 
         // Pick an offset pointer.
         seed = keccak256(abi.encodePacked(seed, uint256(0)));
@@ -372,7 +386,7 @@ contract LibBytecodeCheckNoOOBPointersTest is BytecodeTest {
         sourceCount = uint8(bytecode[0]);
         vm.assume(sourceCount > 0);
 
-        uint256 sourceRelativeStart = 1 + sourceCount * 2;
+        uint256 sourceRelativeStart = 1 + uint256(sourceCount) * 2;
 
         // Pick an offset pointer.
         seed = keccak256(abi.encodePacked(seed, uint256(0)));
@@ -452,5 +466,51 @@ contract LibBytecodeCheckNoOOBPointersTest is BytecodeTest {
         // table (the first offset must be zero) but leaves no header room.
         vm.expectRevert(abi.encodeWithSelector(TruncatedHeader.selector, bytecode));
         this.checkNoOOBPointersExternal(bytecode);
+    }
+
+    /// The `TruncatedHeader` counterexample decoded on rainlang issue 614: 14 sources,
+    /// source 13 holds the only op, offset 5 is corrupted to 21933.
+    function testCheckNoOOBPointersHeaderTruncatedDecodedCounterexample() external {
+        bytes memory bytecode = new bytes(89);
+        bytecode[0] = bytes1(uint8(14));
+        for (uint8 i = 0; i < 14; i++) {
+            bytecode[2 + uint256(i) * 2] = bytes1(i * 4);
+        }
+        bytecode[29 + 13 * 4] = bytes1(uint8(1));
+        LibBytecode.checkNoOOBPointers(bytecode);
+
+        bytecode[11] = bytes1(uint8(21933 >> 8));
+        bytecode[12] = bytes1(uint8(21933 & 0xFF));
+        vm.expectRevert(abi.encodeWithSelector(TruncatedHeader.selector, bytecode));
+        this.checkNoOOBPointersExternal(bytecode);
+
+        bytecode[11] = 0;
+        bytecode[12] = bytes1(uint8(21));
+        vm.expectRevert(abi.encodeWithSelector(TruncatedHeader.selector, bytecode));
+        this.checkNoOOBPointersExternal(bytecode);
+    }
+
+    /// More than 127 sources overflows a `uint8` offset table size.
+    function testCheckNoOOBPointersCorruptionsSourceCount128() external {
+        this.testCheckNoOOBPointersHeaderTruncated(new bytes(800), 128, bytes32(0), 0);
+        this.testCheckNoOOBPointersTrailingOffsetBytes(new bytes(800), hex"01", 128, bytes32(0));
+        this.testCheckNoOOBPointersCorruptOffsetPointer(new bytes(800), 128, bytes32(0), 1);
+        this.testCheckNoOOBPointersCorruptOpsCount(new bytes(800), 128, bytes32(0), 0xFF);
+        this.testCheckNoOOBPointersInputsNotMonotonic(new bytes(800), 128, bytes32(0), 0, 0);
+        this.testCheckNoOOBPointersOutputsNotMonotonic(new bytes(800), 128, bytes32(0), 0, 0);
+    }
+
+    /// Garbage that would push the last offset past two bytes is truncated so
+    /// the shifted offsets stay well formed.
+    function testCheckNoOOBPointersTrailingOffsetBytesOffsetOverflow() external {
+        bytes memory bytecode = new bytes(0x20000);
+        bytes32 fill = 0;
+        for (uint256 i = 0; i < bytecode.length; i += 0x20) {
+            fill = keccak256(abi.encode(fill));
+            assembly ("memory-safe") {
+                mstore(add(add(bytecode, 0x20), i), fill)
+            }
+        }
+        this.testCheckNoOOBPointersTrailingOffsetBytes(bytecode, new bytes(0x7000), 127, bytes32(0));
     }
 }
