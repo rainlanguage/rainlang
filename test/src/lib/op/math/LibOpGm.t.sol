@@ -55,7 +55,7 @@ contract LibOpGmTest is OpTest {
             Float.unwrap(LibDecimalFloat.packLossless(14142135623730950488016887242096980785697, -40)),
             "1 2"
         );
-        checkHappy("_: gm(2 2);", Float.unwrap(LibDecimalFloat.packLossless(2e40, -40)), "2 2");
+        checkHappy("_: gm(2 2);", Float.unwrap(LibDecimalFloat.packLossless(2, 0)), "2 2");
         checkHappy(
             "_: gm(2 3);",
             Float.unwrap(LibDecimalFloat.packLossless(24494897427831780981972840747058913919659, -40)),
@@ -70,6 +70,25 @@ contract LibOpGmTest is OpTest {
             "_: gm(4 0.5);",
             Float.unwrap(LibDecimalFloat.packLossless(14142135623730950488016887242096980785697, -40)),
             "4 0.5"
+        );
+    }
+
+    /// Products past every Float return their mean rather than reverting.
+    function testOpGmEvalProductPastEveryFloat() external view {
+        checkHappy(
+            "_: gm(max-positive-value() max-positive-value());",
+            Float.unwrap(LibDecimalFloat.FLOAT_MAX_POSITIVE_VALUE),
+            "max max"
+        );
+        checkHappy(
+            "_: gm(1e2000000000 1e2000000000);",
+            Float.unwrap(LibDecimalFloat.packLossless(1, 2000000000)),
+            "1e2000000000 1e2000000000"
+        );
+        checkHappy(
+            "_: gm(-1e2000000000 1e2000000000);",
+            Float.unwrap(LibDecimalFloat.packLossless(-1, 2000000000)),
+            "-1e2000000000 1e2000000000"
         );
     }
 

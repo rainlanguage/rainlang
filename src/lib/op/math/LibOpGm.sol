@@ -46,9 +46,32 @@ library LibOpGm {
         return stackTop;
     }
 
+    /// @notice Root of the exact product of two magnitudes, floored by the
+    /// fewest powers of ten that bring it under 1e76.
+    /// @param magnitudeA The first magnitude.
+    /// @param exponentA The first exponent.
+    /// @param magnitudeB The second magnitude.
+    /// @param exponentB The second exponent.
+    /// @return The root's coefficient.
+    /// @return The root's exponent.
+    function referenceRoot(uint256 magnitudeA, int256 exponentA, uint256 magnitudeB, int256 exponentB)
+        internal
+        pure
+        returns (int256, int256)
+    {
+        uint256 digits = Math.log10(magnitudeA) + Math.log10(magnitudeB) + 2;
+        uint256 shift = digits > 77 ? digits - 77 : 0;
+        uint256 product = Math.mulDiv(magnitudeA, magnitudeB, 10 ** shift);
+        while (product >= 1e76) {
+            shift++;
+            product = Math.mulDiv(magnitudeA, magnitudeB, 10 ** shift);
+        }
+        return LibDecimalFloatImplementation.sqrt(int256(product), exponentA + exponentB + int256(shift));
+    }
+
     /// @notice Gas intensive reference implementation of gm for testing. The
-    /// root of the exact product floored to under 1e76, clamped between the
-    /// magnitudes, ordered by value then by smaller coefficient.
+    /// root is clamped between the magnitudes, ordered by value then by
+    /// smaller coefficient.
     /// @param inputs The input values from the stack.
     /// @return The output values to push onto the stack.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
@@ -63,44 +86,28 @@ library LibOpGm {
             outputs[0] = StackItem.wrap(Float.unwrap(LibDecimalFloat.FLOAT_ZERO));
             return outputs;
         }
-        (int256 coefficientA, int256 exponentA) = a.unpack();
-        (int256 coefficientB, int256 exponentB) = b.unpack();
-        bool negative = (coefficientA < 0) != (coefficientB < 0);
-        uint256 magnitudeA = uint256(coefficientA < 0 ? -coefficientA : coefficientA);
-        uint256 magnitudeB = uint256(coefficientB < 0 ? -coefficientB : coefficientB);
+        (int256 lowCoefficient, int256 lowExponent) = a.unpack();
+        (int256 highCoefficient, int256 highExponent) = b.unpack();
+        bool negative = (lowCoefficient < 0) != (highCoefficient < 0);
+        lowCoefficient = lowCoefficient < 0 ? -lowCoefficient : lowCoefficient;
+        highCoefficient = highCoefficient < 0 ? -highCoefficient : highCoefficient;
 
-        uint256 digits = Math.log10(magnitudeA) + Math.log10(magnitudeB) + 2;
-        uint256 shift = digits > 77 ? digits - 77 : 0;
-        uint256 product = Math.mulDiv(magnitudeA, magnitudeB, 10 ** shift);
-        while (product >= 1e76) {
-            shift++;
-            product = Math.mulDiv(magnitudeA, magnitudeB, 10 ** shift);
-        }
         (int256 coefficient, int256 exponent) =
-            LibDecimalFloatImplementation.sqrt(int256(product), exponentA + exponentB + int256(shift));
+            referenceRoot(uint256(lowCoefficient), lowExponent, uint256(highCoefficient), highExponent);
 
-        int256 lowCoefficient = int256(magnitudeA);
-        int256 lowExponent = exponentA;
-        int256 highCoefficient = int256(magnitudeB);
-        int256 highExponent = exponentB;
         bool aIsLow = LibDecimalFloatImplementation.lt(lowCoefficient, lowExponent, highCoefficient, highExponent)
-            || (
-                LibDecimalFloatImplementation.eq(lowCoefficient, lowExponent, highCoefficient, highExponent)
-                    && magnitudeA <= magnitudeB
-            );
+            || (LibDecimalFloatImplementation.eq(lowCoefficient, lowExponent, highCoefficient, highExponent)
+                && lowCoefficient <= highCoefficient);
         if (!aIsLow) {
             (lowCoefficient, lowExponent, highCoefficient, highExponent) =
-                (highCoefficient, highExponent, lowCoefficient, lowExponent);
+            (highCoefficient, highExponent, lowCoefficient, lowExponent);
         }
         if (!LibDecimalFloatImplementation.lt(lowCoefficient, lowExponent, coefficient, exponent)) {
             (coefficient, exponent) = (lowCoefficient, lowExponent);
         } else if (!LibDecimalFloatImplementation.lt(coefficient, exponent, highCoefficient, highExponent)) {
             (coefficient, exponent) = (highCoefficient, highExponent);
         }
-        if (negative) {
-            coefficient = -coefficient;
-        }
-        (Float result,) = LibDecimalFloat.packLossy(coefficient, exponent);
+        (Float result,) = LibDecimalFloat.packLossy(negative ? -coefficient : coefficient, exponent);
         outputs[0] = StackItem.wrap(Float.unwrap(result));
         return outputs;
     }
