@@ -5,7 +5,11 @@ pragma solidity ^0.8.25;
 import {ParseState} from "../LibParseState.sol";
 import {LibParse} from "../LibParse.sol";
 import {UnclosedSubParseableLiteral, SubParseableMissingDispatch} from "../../../error/ErrParse.sol";
-import {CMASK_WHITESPACE, CMASK_SUB_PARSEABLE_LITERAL_END} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
+import {
+    CMASK_WHITESPACE,
+    CMASK_SUB_PARSEABLE_LITERAL_END,
+    CMASK_PRINTABLE
+} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {LibParseInterstitial} from "../LibParseInterstitial.sol";
 import {LibParseError} from "../LibParseError.sol";
 import {LibSubParse} from "../LibSubParse.sol";
@@ -25,8 +29,9 @@ library LibParseLiteralSubParseable {
     /// string immediately following the opening bracket, and the body is the
     /// string immediately following the dispatch, up to the closing bracket.
     /// The dispatch and body MUST be separated by at least one whitespace char.
-    /// This implies that the dispatch MAY NOT contain any whitespace chars, and
-    /// the body MAY contain any chars except for the closing bracket.
+    /// The dispatch MAY contain any printable ASCII except the closing bracket,
+    /// and the body MAY contain any printable ASCII or whitespace except the
+    /// closing bracket. Any other byte reverts at its offset.
     /// Leading and trailing whitespace before/after the dispatch/body is NOT
     /// supported. The former will error and the latter will be treated as part
     /// of the body.
@@ -49,7 +54,9 @@ library LibParseLiteralSubParseable {
             uint256 dispatchStart = cursor;
 
             // Skip all non-whitespace and non-bracket characters.
-            cursor = LibParseChar.skipMask(cursor, end, ~(CMASK_WHITESPACE | CMASK_SUB_PARSEABLE_LITERAL_END));
+            cursor = LibParseChar.skipMask(
+                cursor, end, ~(CMASK_WHITESPACE | CMASK_SUB_PARSEABLE_LITERAL_END) & CMASK_PRINTABLE
+            );
             uint256 dispatchEnd = cursor;
 
             if (dispatchEnd == dispatchStart) {
@@ -61,12 +68,11 @@ library LibParseLiteralSubParseable {
 
             uint256 bodyStart = cursor;
 
-            // Skip all chars til the close. Each byte is checked independently
-            // against the mask — multibyte encodings are not understood. A byte
-            // in a multibyte sequence that equals `]` (0x5D) would stop the
-            // scan prematurely. This cannot happen in valid UTF-8 (continuation
-            // bytes are 0x80-0xBF), but is possible in other encodings.
-            cursor = LibParseChar.skipMask(cursor, end, ~CMASK_SUB_PARSEABLE_LITERAL_END);
+            // Source is ASCII, so any other byte stops the scan and fails the
+            // close check below at its own offset.
+            cursor = LibParseChar.skipMask(
+                cursor, end, ~CMASK_SUB_PARSEABLE_LITERAL_END & (CMASK_PRINTABLE | CMASK_WHITESPACE)
+            );
             uint256 bodyEnd = cursor;
 
             if (cursor >= end) {
