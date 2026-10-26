@@ -4,8 +4,8 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.17.0/src/Test.sol";
 import {RainlangReferenceExtern} from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
-import {LibExtrospectBytecode} from "rain-extrospection-0.1.14/src/lib/LibExtrospectBytecode.sol";
-import {LibExtrospectMetamorphic} from "rain-extrospection-0.1.14/src/lib/LibExtrospectMetamorphic.sol";
+import {LibExtrospectBytecode} from "rain-extrospection-0.1.16/src/lib/LibExtrospectBytecode.sol";
+import {LibExtrospectMetamorphic} from "rain-extrospection-0.1.16/src/lib/LibExtrospectMetamorphic.sol";
 import {
     BYTECODE_HASH as REFERENCE_EXTERN_BYTECODE_HASH
 } from "../../../src/generated/RainlangReferenceExternPointers.sol";
