@@ -28,6 +28,7 @@ uint8 constant PARSE_META_BUILD_DEPTH = 2;
 /// Everything except the parse meta and the function pointer tables, which a
 /// concrete binds by overriding `parseMeta`, `operandHandlerFunctionPointers`
 /// and `literalParserFunctionPointers`.
+//slither-disable-next-line missing-inheritance
 abstract contract BaseRainlangParser is ERC165, IParserToolingV1 {
     using LibParse for ParseState;
     using LibParseState for ParseState;
