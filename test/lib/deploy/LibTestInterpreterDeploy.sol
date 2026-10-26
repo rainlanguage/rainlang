@@ -18,8 +18,7 @@ address constant TEST_STORE_ADDRESS = address(uint160(uint256(keccak256("rainlan
 address constant TEST_INTERPRETER_ADDRESS = address(uint160(uint256(keccak256("rainlang.test.interpreter"))));
 /// @dev Where `LibTestInterpreterDeploy.etchTestRainlang` places the expression
 /// compiler.
-address constant TEST_COMPILER_ADDRESS =
-    address(uint160(uint256(keccak256("rainlang.test.compiler"))));
+address constant TEST_COMPILER_ADDRESS = address(uint160(uint256(keccak256("rainlang.test.compiler"))));
 /// @dev Where `LibTestInterpreterDeploy.etchTestRainlang` places `TestRainlang`.
 address constant TEST_RAINLANG_ADDRESS = address(uint160(uint256(keccak256("rainlang.test.rainlang"))));
 

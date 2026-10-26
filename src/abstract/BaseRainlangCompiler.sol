@@ -21,13 +21,7 @@ import {BaseRainlangParser} from "./BaseRainlangParser.sol";
 /// to, the integrity function pointer table and the described-by meta hash,
 /// which a concrete binds by overriding `parser`, `integrityFunctionPointers`
 /// and `describedByMetaV1`.
-abstract contract BaseRainlangCompiler is
-    IDescribedByMetaV1,
-    IParserV2,
-    IParserPragmaV1,
-    IIntegrityToolingV1,
-    ERC165
-{
+abstract contract BaseRainlangCompiler is IDescribedByMetaV1, IParserV2, IParserPragmaV1, IIntegrityToolingV1, ERC165 {
     /// @inheritdoc ERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == type(IDescribedByMetaV1).interfaceId || interfaceId == type(IParserV2).interfaceId
