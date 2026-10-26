@@ -5,10 +5,22 @@ pragma solidity =0.8.25;
 import {Test} from "forge-std-1.17.0/src/Test.sol";
 
 import {ParseState, LibParseStackName} from "../../../../src/lib/parse/LibParse.sol";
+import {LibParseState} from "../../../../src/lib/parse/LibParseState.sol";
+import {ParseMemoryOverflow} from "../../../../src/error/ErrParse.sol";
 
 /// @title LibParseStackNameTest
 /// @notice Tests for handling named stack items.
 contract LibParseStackNameTest is Test {
+    /// Stack-name nodes pack a 16-bit next pointer, so a fuzzed state that
+    /// decodes past `0x10000` is one `checkParseMemoryOverflow` rejects.
+    function assumeParseMemoryInBound() internal pure {
+        uint256 freeMemoryPointer;
+        assembly ("memory-safe") {
+            freeMemoryPointer := mload(0x40)
+        }
+        vm.assume(freeMemoryPointer < 0x10000);
+    }
+
     /// Test that we can push and retrieve a stack name.
     function testPushAndRetrieveStackNameSingle(ParseState memory state, bytes32 word) external pure {
         state.lineTracker = 0;
@@ -16,6 +28,7 @@ contract LibParseStackNameTest is Test {
         state.stackNames = 0;
 
         (bool exists, uint256 index) = LibParseStackName.pushStackName(state, word);
+        assumeParseMemoryInBound();
         assertFalse(exists);
         assertEq(index, 1);
 
@@ -35,6 +48,7 @@ contract LibParseStackNameTest is Test {
         state.stackNames = 0;
 
         (bool exists, uint256 index) = LibParseStackName.pushStackName(state, word1);
+        assumeParseMemoryInBound();
         assertFalse(exists);
         assertEq(index, 1);
 
@@ -42,6 +56,7 @@ contract LibParseStackNameTest is Test {
         state.topLevel1 = index;
 
         (exists, index) = LibParseStackName.pushStackName(state, word2);
+        assumeParseMemoryInBound();
         assertFalse(exists);
         assertEq(index, 2);
 
@@ -64,6 +79,7 @@ contract LibParseStackNameTest is Test {
         state.stackNames = 0;
 
         (bool exists, uint256 index) = LibParseStackName.pushStackName(state, word);
+        assumeParseMemoryInBound();
         assertFalse(exists);
         assertEq(index, 1);
 
@@ -84,6 +100,7 @@ contract LibParseStackNameTest is Test {
         state.stackNameBloom = 0;
 
         LibParseStackName.pushStackName(state, word1);
+        assumeParseMemoryInBound();
         state.lineTracker = 1;
         state.topLevel1 = 1;
 
@@ -150,6 +167,7 @@ contract LibParseStackNameTest is Test {
         // Do this sequentially to avoid dupes.
         for (uint256 i = 0; i < n; i++) {
             (bool exists, uint256 index) = LibParseStackName.pushStackName(state, bytes32(i));
+            assumeParseMemoryInBound();
             assertFalse(exists);
             assertEq(index, i + 1);
             state.lineTracker = index;
@@ -161,5 +179,22 @@ contract LibParseStackNameTest is Test {
             assertTrue(exists);
             assertEq(index, i);
         }
+    }
+
+    /// A node allocated past `0x10000` loses its 16-bit pointer, so the parse
+    /// memory bound must reject the state. `0x11160` is where a fuzzed
+    /// `ParseState` once decoded to.
+    function testPushStackNamePastParseMemoryBoundRejected() external {
+        vm.expectRevert(abi.encodeWithSelector(ParseMemoryOverflow.selector, uint256(0x11180)));
+        this.externalPushStackNameAt(0x11160, 0xd2f67e6aeaad1ab7487a680eb9d3363a597afa7a3de33fa9bf3ae6edcb88435d);
+    }
+
+    function externalPushStackNameAt(uint256 freeMemoryPointer, bytes32 word) external pure {
+        ParseState memory state;
+        assembly ("memory-safe") {
+            mstore(0x40, freeMemoryPointer)
+        }
+        LibParseStackName.pushStackName(state, word);
+        LibParseState.checkParseMemoryOverflow();
     }
 }
