@@ -209,6 +209,7 @@ contract LibOpGmTest is OpTest {
     /// A product of exactly 1e76 is cut before the root.
     function testOpGmRunMatchesReferenceProductAtCoefficientCeiling() external view {
         checkRunMatchesReference(LibDecimalFloat.packLossless(1e38, 0), LibDecimalFloat.packLossless(1e38, 0));
+        checkRunMatchesReference(LibDecimalFloat.packLossless(5e37, 0), LibDecimalFloat.packLossless(2e38, 0));
     }
 
     /// A 76-digit product rounds on its last digit.
