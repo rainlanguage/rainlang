@@ -66,7 +66,9 @@ library LibOpGm {
             shift++;
             product = Math.mulDiv(magnitudeA, magnitudeB, 10 ** shift);
         }
-        return LibDecimalFloatImplementation.sqrt(int256(product), exponentA + exponentB + int256(shift));
+        (int256 rootCoefficient, int256 rootExponent) =
+            LibDecimalFloatImplementation.sqrt(int256(product), exponentA + exponentB + int256(shift));
+        return (rootCoefficient, rootExponent);
     }
 
     /// @notice Gas intensive reference implementation of gm for testing. The
@@ -107,6 +109,7 @@ library LibOpGm {
         } else if (!LibDecimalFloatImplementation.lt(coefficient, exponent, highCoefficient, highExponent)) {
             (coefficient, exponent) = (highCoefficient, highExponent);
         }
+        //slither-disable-next-line unused-return
         (Float result,) = LibDecimalFloat.packLossy(negative ? -coefficient : coefficient, exponent);
         outputs[0] = StackItem.wrap(Float.unwrap(result));
         return outputs;
