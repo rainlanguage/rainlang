@@ -67,7 +67,7 @@ contract LibOpBlockTimestampTest is OpTest {
         for (uint256 i; i < words.length; ++i) {
             blockTimestamp = bound(blockTimestamp, 0, uint256(type(uint64).max));
             vm.warp(blockTimestamp);
-            bytes memory bytecode = I_DEPLOYER.parse2(bytes(string.concat("_: ", words[i], "();")));
+            bytes memory bytecode = I_COMPILER.parse2(bytes(string.concat("_: ", words[i], "();")));
             (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
                 EvalV4({
                     store: I_STORE,
@@ -91,7 +91,7 @@ contract LibOpBlockTimestampTest is OpTest {
 
         for (uint256 i; i < words.length; ++i) {
             vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 0, 1));
-            bytes memory bytecode = I_DEPLOYER.parse2(bytes(string.concat("_: ", words[i], "(0x00);")));
+            bytes memory bytecode = I_COMPILER.parse2(bytes(string.concat("_: ", words[i], "(0x00);")));
             (bytecode);
         }
     }

@@ -102,7 +102,7 @@ contract LibOpContextTest is OpTest {
     function testOpContextEval00(bytes32[][] memory context) external view {
         vm.assume(context.length > 0);
         vm.assume(context[0].length > 0);
-        bytes memory bytecode = I_DEPLOYER.parse2("_: context<0 0>();");
+        bytes memory bytecode = I_COMPILER.parse2("_: context<0 0>();");
 
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
@@ -126,7 +126,7 @@ contract LibOpContextTest is OpTest {
     function testOpContextEval01(bytes32[][] memory context) external view {
         vm.assume(context.length > 0);
         vm.assume(context[0].length > 1);
-        bytes memory bytecode = I_DEPLOYER.parse2("_: context<0 1>();");
+        bytes memory bytecode = I_COMPILER.parse2("_: context<0 1>();");
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
@@ -149,7 +149,7 @@ contract LibOpContextTest is OpTest {
     function testOpContextEval10(bytes32[][] memory context) external view {
         vm.assume(context.length > 1);
         vm.assume(context[1].length > 0);
-        bytes memory bytecode = I_DEPLOYER.parse2("_: context<1 0>();");
+        bytes memory bytecode = I_COMPILER.parse2("_: context<1 0>();");
 
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
@@ -173,7 +173,7 @@ contract LibOpContextTest is OpTest {
     function testOpContextEval11(bytes32[][] memory context) external view {
         vm.assume(context.length > 1);
         vm.assume(context[1].length > 1);
-        bytes memory bytecode = I_DEPLOYER.parse2("_: context<1 1>();");
+        bytes memory bytecode = I_COMPILER.parse2("_: context<1 1>();");
 
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
@@ -197,7 +197,7 @@ contract LibOpContextTest is OpTest {
     function testOpContextEvalOOBi(bytes32[] memory context0) external {
         bytes32[][] memory context = new bytes32[][](1);
         context[0] = context0;
-        bytes memory bytecode = I_DEPLOYER.parse2("_: context<1 0>();");
+        bytes memory bytecode = I_COMPILER.parse2("_: context<1 0>();");
 
         vm.expectRevert(stdError.indexOOBError);
         I_INTERPRETER.eval4(
@@ -218,7 +218,7 @@ contract LibOpContextTest is OpTest {
         bytes32[][] memory context = new bytes32[][](1);
         bytes32[] memory context0 = new bytes32[](1);
         context0[0] = v;
-        bytes memory bytecode = I_DEPLOYER.parse2("_: context<0 1>();");
+        bytes memory bytecode = I_COMPILER.parse2("_: context<0 1>();");
 
         vm.expectRevert(stdError.indexOOBError);
         I_INTERPRETER.eval4(
@@ -238,7 +238,7 @@ contract LibOpContextTest is OpTest {
     function testOpContextEvalEmptyInnerArray() external {
         bytes32[][] memory context = new bytes32[][](1);
         context[0] = new bytes32[](0);
-        bytes memory bytecode = I_DEPLOYER.parse2("_: context<0 0>();");
+        bytes memory bytecode = I_COMPILER.parse2("_: context<0 0>();");
 
         vm.expectRevert(stdError.indexOOBError);
         I_INTERPRETER.eval4(
@@ -261,7 +261,7 @@ contract LibOpContextTest is OpTest {
             context[k] = new bytes32[](1);
         }
         context[255][0] = bytes32(uint256(42));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: context<255 0>();");
+        bytes memory bytecode = I_COMPILER.parse2("_: context<255 0>();");
 
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
@@ -284,7 +284,7 @@ contract LibOpContextTest is OpTest {
         bytes32[][] memory context = new bytes32[][](1);
         context[0] = new bytes32[](256);
         context[0][255] = bytes32(uint256(99));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: context<0 255>();");
+        bytes memory bytecode = I_COMPILER.parse2("_: context<0 255>();");
 
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({

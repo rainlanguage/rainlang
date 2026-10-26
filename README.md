@@ -20,10 +20,10 @@ recommend reinventing this wheel.
 
 ### Integrity / Runtime Separation
 
-Bytecode correctness is validated once at deploy time by `integrityCheck2`. Each
-opcode's `integrity()` function reports accurate stack IO (inputs and outputs)
-to the checker, which enforces that the bytecode-declared IO matches, the stack
-never underflows, and the final depth is correct.
+Bytecode correctness is validated once at compile time by `integrityCheck2`.
+Each opcode's `integrity()` function reports accurate stack IO (inputs and
+outputs) to the checker, which enforces that the bytecode-declared IO matches,
+the stack never underflows, and the final depth is correct.
 
 At runtime, `run()` functions trust that integrity has already validated the
 bytecode. They do not duplicate integrity checks — runtime gas efficiency

@@ -2,17 +2,17 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {RainlangExpressionDeployerDeploymentTest} from "test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDeploymentTest.sol";
 import {StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
 import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
 
-contract LibEvalMultipleSourceTest is RainlangExpressionDeployerDeploymentTest {
+contract LibEvalMultipleSourceTest is RainlangCompilerDeploymentTest {
     /// Evaluating sourceIndex 1 of a two-source expression must use the
     /// second source's bytecode.
     function testEvalSourceIndex1() external view {
         // Source 0: outputs 1, source 1: outputs 2.
-        bytes memory bytecode = I_DEPLOYER.parse2("_: 1;_: 2, _: 3;");
+        bytes memory bytecode = I_COMPILER.parse2("_: 1;_: 2, _: 3;");
         (StackItem[] memory stack,) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
@@ -30,7 +30,7 @@ contract LibEvalMultipleSourceTest is RainlangExpressionDeployerDeploymentTest {
     /// Source 0 and source 1 produce independent results — evaluating each
     /// returns only that source's outputs.
     function testEvalSourceIndex0VsIndex1() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_: 0x01;_: 0x02, _: 0x03;");
+        bytes memory bytecode = I_COMPILER.parse2("_: 0x01;_: 0x02, _: 0x03;");
 
         (StackItem[] memory stack0,) = I_INTERPRETER.eval4(
             EvalV4({

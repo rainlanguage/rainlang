@@ -45,7 +45,7 @@ contract LibOpETest is OpTest {
 
     /// Test the eval of a mathematical constant e opcode parsed from a string.
     function testOpEEval() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_: e();");
+        bytes memory bytecode = I_COMPILER.parse2("_: e();");
 
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({

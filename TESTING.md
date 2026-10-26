@@ -4,9 +4,9 @@
 
 Test base contracts in `test/abstract/`:
 
-- **`RainlangExpressionDeployerDeploymentTest`**
-  (`test/abstract/RainlangExpressionDeployerDeploymentTest.sol`) — Full stack
-  deployment. Exposes `I_PARSER`, `I_INTERPRETER`, `I_STORE`, `I_DEPLOYER`.
+- **`RainlangCompilerDeploymentTest`**
+  (`test/abstract/RainlangCompilerDeploymentTest.sol`) — Full stack deployment.
+  Exposes `I_PARSER`, `I_INTERPRETER`, `I_STORE`, `I_COMPILER`.
 - **`OpTest`** (`test/abstract/OpTest.sol`) — Opcode tests. Provides
   `opReferenceCheck()`, `checkHappy()`, `checkUnhappy()`.
 - **`ParseTest`** (`test/abstract/ParseTest.sol`) — Parser tests. Provides

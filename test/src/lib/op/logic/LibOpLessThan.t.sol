@@ -187,14 +187,14 @@ contract LibOpLessThanTest is OpTest {
     /// Test that a less than to without inputs fails integrity check.
     function testOpLessThanToEvalFail0Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 2, 0));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: less-than();");
+        bytes memory bytecode = I_COMPILER.parse2("_: less-than();");
         (bytecode);
     }
 
     /// Test that a less than to with 1 input fails integrity check.
     function testOpLessThanToEvalFail1Input() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 2, 1));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: less-than(0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: less-than(0x00);");
         (bytecode);
     }
 

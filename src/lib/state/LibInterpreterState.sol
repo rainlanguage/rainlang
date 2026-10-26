@@ -21,7 +21,7 @@ address constant STACK_TRACER = address(uint160(uint256(keccak256("rain.interpre
 /// bytecode, caller-provided context, and store configuration.
 /// @param stackBottoms Bottom pointer for each source's stack. The eval
 /// loop starts the stack top here and grows downward as values are pushed.
-/// @param constants Immutable values embedded in the expression at deploy
+/// @param constants Immutable values embedded in the expression at compile
 /// time. Opcodes index into this array via their operand.
 /// @param sourceIndex Index of the source currently being evaluated.
 /// @param stateKV Ephemeral key-value store scoped to a single eval call.
@@ -34,7 +34,7 @@ address constant STACK_TRACER = address(uint160(uint256(keccak256("rain.interpre
 /// @param context Two-dimensional array of caller-supplied read-only data.
 /// Rows and columns are accessed by the `context` opcode via its operand.
 /// @param bytecode Serialized sources produced by the parser and deployed
-/// by the expression deployer. Contains opcode + operand pairs packed into
+/// by the compiler. Contains opcode + operand pairs packed into
 /// 4-byte words, prefixed per-source with stack allocation metadata.
 /// @param fs Function pointers table for opcode dispatch. Each 2-byte
 /// entry is an offset into the contract code used by the eval loop to

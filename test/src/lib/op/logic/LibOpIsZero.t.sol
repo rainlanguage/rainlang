@@ -55,14 +55,14 @@ contract LibOpIsZeroTest is OpTest {
     /// Test that an iszero without inputs fails integrity check.
     function testOpIsZeroEvalFail0Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 0, 1, 0));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: is-zero();");
+        bytes memory bytecode = I_COMPILER.parse2("_: is-zero();");
         (bytecode);
     }
 
     /// Test that an iszero with 2 inputs fails integrity check.
     function testOpIsZeroEvalFail2Inputs() public {
         vm.expectRevert(abi.encodeWithSelector(BadOpInputsLength.selector, 2, 1, 2));
-        bytes memory bytecode = I_DEPLOYER.parse2("_: is-zero(0x00 0x00);");
+        bytes memory bytecode = I_COMPILER.parse2("_: is-zero(0x00 0x00);");
         (bytecode);
     }
 

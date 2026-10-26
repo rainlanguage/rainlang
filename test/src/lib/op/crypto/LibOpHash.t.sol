@@ -81,7 +81,7 @@ contract LibOpHashTest is OpTest {
     /// Test the eval of a hash opcode parsed from a string. Tests 2 inputs and
     /// other stack items.
     function testOpHashEval2InputsOtherStack() external view {
-        bytes memory bytecode = I_DEPLOYER.parse2("_ _ _: 5 hash(0x1234567890abcdef 0xfedcba0987654321) 9;");
+        bytes memory bytecode = I_COMPILER.parse2("_ _ _: 5 hash(0x1234567890abcdef 0xfedcba0987654321) 9;");
         (StackItem[] memory stack, bytes32[] memory kvs) = I_INTERPRETER.eval4(
             EvalV4({
                 store: I_STORE,
