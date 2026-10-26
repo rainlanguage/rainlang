@@ -389,6 +389,7 @@ library LibParse {
                     }
                     state.highwater();
                     cursor++;
+                    state.fsm |= FSM_YANG_MASK;
                 } else if (char & CMASK_WHITESPACE > 0) {
                     cursor = LibParseChar.skipMask(cursor + 1, end, CMASK_WHITESPACE);
                     // Set yin as we now open to possibilities.
@@ -396,6 +397,9 @@ library LibParse {
                 }
                 // Handle all literals.
                 else if (char & CMASK_LITERAL_HEAD > 0) {
+                    if (state.fsm & FSM_YANG_MASK > 0) {
+                        revert UnexpectedRHSChar(state.parseErrorOffset(cursor));
+                    }
                     cursor = state.pushLiteral(cursor, end);
                     state.highwater();
                     // We are yang now. Need the next char to release to
