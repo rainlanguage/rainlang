@@ -14,6 +14,18 @@ import {LibGenParseMetaSlow} from "test/src/lib/codegen/LibGenParseMetaSlow.sol"
 /// Test that we can find reasonable expansions in a reasonable number of
 /// iterations for a reasonable number of words.
 contract LibGenParseMetaFindExpanderTest is Test {
+    function buildAuthoringMeta(AuthoringMetaV2[0x20] memory source, uint256 length)
+        internal
+        pure
+        returns (AuthoringMetaV2[] memory)
+    {
+        AuthoringMetaV2[] memory authoringMeta = new AuthoringMetaV2[](length);
+        for (uint256 i = 0; i < length; i++) {
+            authoringMeta[i] = source[i];
+        }
+        return authoringMeta;
+    }
+
     /// Test that we can find an expansion for a small number of words in a
     /// single iteration.
     /// Birthday paradox says we should expect to find a collision in 256 slots
@@ -22,8 +34,8 @@ contract LibGenParseMetaFindExpanderTest is Test {
     /// The probability of finding a collision in EVERY iteration is 0.8676^256
     /// which is 1.621075e-16. I.e. we shoud expect the fuzz test to basically
     /// never fail for ~1000 runs.
-    function testFindExpanderSmall(AuthoringMetaV2[] memory authoringMeta) external pure {
-        vm.assume(authoringMeta.length <= 0x20);
+    function testFindExpanderSmall(AuthoringMetaV2[0x20] memory source, uint256 length) external pure {
+        AuthoringMetaV2[] memory authoringMeta = buildAuthoringMeta(source, bound(length, 0, 0x20));
         vm.assume(!LibBloom.bloomFindsDupes(LibAuthoringMeta.copyWordsFromAuthoringMeta(authoringMeta)));
 
         (uint8 seed, uint256 expansion, AuthoringMetaV2[] memory remaining) =
@@ -75,9 +87,8 @@ contract LibGenParseMetaFindExpanderTest is Test {
 
     /// Fuzz: findBestExpander must agree with the reference implementation
     /// that searches all 256 seeds.
-    function testFindExpanderMatchesReference(AuthoringMetaV2[] memory authoringMeta) external pure {
-        vm.assume(authoringMeta.length > 0);
-        vm.assume(authoringMeta.length <= 0x20);
+    function testFindExpanderMatchesReference(AuthoringMetaV2[0x20] memory source, uint256 length) external pure {
+        AuthoringMetaV2[] memory authoringMeta = buildAuthoringMeta(source, bound(length, 1, 0x20));
         vm.assume(!LibBloom.bloomFindsDupes(LibAuthoringMeta.copyWordsFromAuthoringMeta(authoringMeta)));
 
         (uint8 refBestSeed, uint256 refBestCt) = LibGenParseMetaSlow.findBestExpanderSlow(authoringMeta);
