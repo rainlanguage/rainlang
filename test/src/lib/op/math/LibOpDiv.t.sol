@@ -6,11 +6,11 @@ import {OpTest, IntegrityCheckState, InterpreterState, OperandV2} from "test/abs
 import {LibOpDiv} from "../../../../../src/lib/op/math/LibOpDiv.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {StackItem} from "../../../../../src/interface/IInterpreterV4.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 import {
     LibDecimalFloatImplementation,
     DivisionByZero
-} from "rain-math-float-0.3.10/src/lib/implementation/LibDecimalFloatImplementation.sol";
+} from "rain-math-float-0.3.11/src/lib/implementation/LibDecimalFloatImplementation.sol";
 
 contract LibOpDivTest is OpTest {
     using LibDecimalFloat for Float;

@@ -6,7 +6,7 @@ import {OperandV2, StackItem} from "../../../interface/IInterpreterV4.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpLessThanOrEqualTo
 /// @notice Opcode to return 1 if every item on the stack up to the inputs limit

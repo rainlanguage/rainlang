@@ -13,9 +13,9 @@ import {
     ParseDecimalPrecisionLoss,
     MalformedExponentDigits,
     MalformedDecimalPoint
-} from "rain-math-float-0.3.10/src/error/ErrParse.sol";
-import {ExponentOverflow} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+} from "rain-math-float-0.3.11/src/error/ErrParse.sol";
+import {ExponentOverflow} from "rain-math-float-0.3.11/src/error/ErrDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralDecimalParseDecimalFloatTest

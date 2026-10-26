@@ -7,7 +7,7 @@ import {StateNamespace} from "../../../src/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "../../../src/interface/IInterpreterV4.sol";
 import {LibNamespace} from "../../../src/lib/ns/LibNamespace.sol";
 import {InputsLengthMismatch} from "../../../src/error/ErrEval.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 
 contract RainlangInterpreterEvalTest is RainlangCompilerDeploymentTest {
     using LibDecimalFloat for Float;

@@ -7,7 +7,7 @@ import {UnexpectedOperandValue, UnexpectedOperand} from "../../../../../src/erro
 import {LibOpSub} from "../../../../../src/lib/op/math/LibOpSub.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {StackItem} from "../../../../../src/interface/IInterpreterV4.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 
 contract LibOpSubTest is OpTest {
     /// Directly test the integrity logic of LibOpSub. This tests the happy

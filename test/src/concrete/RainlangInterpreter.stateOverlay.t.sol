@@ -6,7 +6,7 @@ import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDepl
 import {StateNamespace} from "../../../src/interface/IInterpreterStoreV3.sol";
 import {EvalV4, SourceIndexV2, StackItem} from "../../../src/interface/IInterpreterV4.sol";
 import {LibNamespace} from "../../../src/lib/ns/LibNamespace.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 import {OddSetLength} from "../../../src/error/ErrStore.sol";
 
 contract RainlangInterpreterStateOverlayTest is RainlangCompilerDeploymentTest {
