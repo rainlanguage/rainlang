@@ -8,8 +8,8 @@ import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {LibParse, UnexpectedRHSChar, UnexpectedRightParen} from "../../../../src/lib/parse/LibParse.sol";
 import {LibBytecode} from "../../../../src/lib/bytecode/LibBytecode.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
-import {ParseDecimalPrecisionLoss} from "rain-math-float-0.3.10/src/error/ErrParse.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
+import {ParseDecimalPrecisionLoss} from "rain-math-float-0.3.11/src/error/ErrParse.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralIntegerDecimalTest

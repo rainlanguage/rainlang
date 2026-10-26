@@ -14,7 +14,7 @@ import {LibConvert} from "rain-lib-typecast-0.1.4/src/LibConvert.sol";
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 import {LibGenParseMeta} from "../../../../src/lib/codegen/LibGenParseMeta.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 
 /// @title LibParseNamedLHSTest
 /// @notice Tests for parsing named LHS items.

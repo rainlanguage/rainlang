@@ -10,8 +10,8 @@ import {
     UnconsumedRepeatDispatchBytes
 } from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
 import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
-import {LossyConversionToFloat} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
+import {LossyConversionToFloat} from "rain-math-float-0.3.11/src/error/ErrDecimalFloat.sol";
 
 contract RainlangReferenceExternRepeatTest is OpTest {
     using Strings for address;

@@ -17,7 +17,7 @@ import {
 import {OperandV2, OPCODE_EXTERN} from "../../../src/interface/IInterpreterV4.sol";
 import {LibExtern} from "../../../src/lib/extern/LibExtern.sol";
 import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 
 contract RainlangReferenceExternIntIncTest is OpTest {
     using Strings for address;

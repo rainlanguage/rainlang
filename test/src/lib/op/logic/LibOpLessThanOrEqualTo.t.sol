@@ -16,7 +16,7 @@ import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState
 import {SignedContextV2} from "../../../../../src/interface/IInterpreterCallerV5.sol";
 import {LibContext} from "../../../../../src/lib/caller/LibContext.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 import {OpcodeIOOverflow} from "../../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 

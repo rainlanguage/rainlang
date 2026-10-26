@@ -15,7 +15,7 @@ import {
 } from "../../../../../src/interface/IInterpreterV4.sol";
 import {SignedContextV2} from "../../../../../src/interface/IInterpreterCallerV5.sol";
 import {LibContext} from "../../../../../src/lib/caller/LibContext.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpPiTest
 /// @notice Tests for the mathematical constant pi opcode.

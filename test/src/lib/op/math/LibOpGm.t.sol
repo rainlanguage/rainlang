@@ -5,7 +5,7 @@ pragma solidity =0.8.25;
 import {OpTest, IntegrityCheckState, OperandV2, InterpreterState, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpGm} from "../../../../../src/lib/op/math/LibOpGm.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 import {StackItem} from "../../../../../src/interface/IInterpreterV4.sol";
 
 contract LibOpGmTest is OpTest {
@@ -55,7 +55,7 @@ contract LibOpGmTest is OpTest {
             Float.unwrap(LibDecimalFloat.packLossless(14142135623730950488016887242096980785697, -40)),
             "1 2"
         );
-        checkHappy("_: gm(2 2);", Float.unwrap(LibDecimalFloat.packLossless(2e40, -40)), "2 2");
+        checkHappy("_: gm(2 2);", Float.unwrap(LibDecimalFloat.packLossless(2, 0)), "2 2");
         checkHappy(
             "_: gm(2 3);",
             Float.unwrap(LibDecimalFloat.packLossless(24494897427831780981972840747058913919659, -40)),
@@ -70,6 +70,25 @@ contract LibOpGmTest is OpTest {
             "_: gm(4 0.5);",
             Float.unwrap(LibDecimalFloat.packLossless(14142135623730950488016887242096980785697, -40)),
             "4 0.5"
+        );
+    }
+
+    /// Products past every Float return their mean rather than reverting.
+    function testOpGmEvalProductPastEveryFloat() external view {
+        checkHappy(
+            "_: gm(max-positive-value() max-positive-value());",
+            Float.unwrap(LibDecimalFloat.FLOAT_MAX_POSITIVE_VALUE),
+            "max max"
+        );
+        checkHappy(
+            "_: gm(1e2000000000 1e2000000000);",
+            Float.unwrap(LibDecimalFloat.packLossless(1, 2000000000)),
+            "1e2000000000 1e2000000000"
+        );
+        checkHappy(
+            "_: gm(-1e2000000000 1e2000000000);",
+            Float.unwrap(LibDecimalFloat.packLossless(-1, 2000000000)),
+            "-1e2000000000 1e2000000000"
         );
     }
 
@@ -185,5 +204,49 @@ contract LibOpGmTest is OpTest {
             LibDecimalFloat.packLossless(signedCoefficientA, exponentA),
             LibDecimalFloat.packLossless(signedCoefficientB, exponentB)
         );
+    }
+
+    /// A product of exactly 1e76 is cut before the root.
+    function testOpGmRunMatchesReferenceProductAtCoefficientCeiling() external view {
+        checkRunMatchesReference(LibDecimalFloat.packLossless(1e38, 0), LibDecimalFloat.packLossless(1e38, 0));
+        checkRunMatchesReference(LibDecimalFloat.packLossless(5e37, 0), LibDecimalFloat.packLossless(2e38, 0));
+    }
+
+    /// A 76-digit product rounds on its last digit.
+    function testOpGmRunMatchesReferenceRoundsOn76DigitProduct() external view {
+        checkRunMatchesReference(
+            LibDecimalFloat.packLossless(2500000142500000000000000000000003162277750000000000000000000000001, 0),
+            LibDecimalFloat.packLossless(1000000057, 0)
+        );
+    }
+
+    /// A root equal to an input takes that input's representation.
+    function testOpGmRunMatchesReferenceRootEqualsInput() external view {
+        checkRunMatchesReference(LibDecimalFloat.packLossless(2, 0), LibDecimalFloat.packLossless(2, 0));
+        checkRunMatchesReference(LibDecimalFloat.packLossless(1, 0), LibDecimalFloat.packLossless(4, 0));
+    }
+
+    /// Equal magnitudes in different encodings order by coefficient, in both
+    /// argument orders and every sign combination.
+    function testOpGmRunMatchesReferenceEqualMagnitudesDifferentEncodings() external view {
+        int224[2] memory signs = [int224(1), int224(-1)];
+        for (uint256 i = 0; i < 2; i++) {
+            for (uint256 j = 0; j < 2; j++) {
+                checkRunMatchesReference(
+                    LibDecimalFloat.packLossless(signs[i], 0), LibDecimalFloat.packLossless(signs[j] * 10, -1)
+                );
+                checkRunMatchesReference(
+                    LibDecimalFloat.packLossless(signs[i] * 10, -1), LibDecimalFloat.packLossless(signs[j], 0)
+                );
+                checkRunMatchesReference(
+                    LibDecimalFloat.packLossless(signs[i] * (2e52 - 1), -52),
+                    LibDecimalFloat.packLossless(signs[j] * (2e53 - 10), -53)
+                );
+                checkRunMatchesReference(
+                    LibDecimalFloat.packLossless(signs[i] * (2e53 - 10), -53),
+                    LibDecimalFloat.packLossless(signs[j] * (2e52 - 1), -52)
+                );
+            }
+        }
     }
 }

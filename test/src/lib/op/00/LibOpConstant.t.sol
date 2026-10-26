@@ -19,7 +19,7 @@ import {
 import {SignedContextV2} from "../../../../../src/interface/IInterpreterCallerV5.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {BadOpOutputsLength} from "../../../../../src/error/ErrIntegrity.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpConstantTest
 /// @notice Test the runtime and integrity time logic of LibOpConstant.
