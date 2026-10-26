@@ -5,8 +5,8 @@ pragma solidity =0.8.25;
 import {OpTest} from "test/abstract/OpTest.sol";
 import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";
 import {RainlangReferenceExtern, StackItem} from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
-import {SignedContextV1} from "rainlang-interface-0.2.13/src/interface/IInterpreterCallerV4.sol";
-import {LibContext} from "rainlang-interface-0.2.13/src/lib/caller/LibContext.sol";
+import {SignedContextV2} from "../../../src/interface/IInterpreterCallerV5.sol";
+import {LibContext} from "../../../src/lib/caller/LibContext.sol";
 
 contract RainlangReferenceExternContextRainlenTest is OpTest {
     using Strings for address;
@@ -25,6 +25,6 @@ contract RainlangReferenceExternContextRainlenTest is OpTest {
         callerContext[0] = new bytes32[](1);
         callerContext[0][0] = bytes32(rainlang.length);
 
-        checkHappy(rainlang, LibContext.build(callerContext, new SignedContextV1[](0)), expectedStack, "rainlen");
+        checkHappy(rainlang, LibContext.buildV2(callerContext, new SignedContextV2[](0)), expectedStack, "rainlen");
     }
 }

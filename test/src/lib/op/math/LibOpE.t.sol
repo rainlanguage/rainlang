@@ -12,9 +12,9 @@ import {
     StackItem,
     FullyQualifiedNamespace,
     SourceIndexV2
-} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
-import {SignedContextV1} from "rainlang-interface-0.2.13/src/interface/IInterpreterCallerV4.sol";
-import {LibContext} from "rainlang-interface-0.2.13/src/lib/caller/LibContext.sol";
+} from "../../../../../src/interface/IInterpreterV4.sol";
+import {SignedContextV2} from "../../../../../src/interface/IInterpreterCallerV5.sol";
+import {LibContext} from "../../../../../src/lib/caller/LibContext.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpETest
@@ -53,7 +53,7 @@ contract LibOpETest is OpTest {
                 namespace: FullyQualifiedNamespace.wrap(0),
                 bytecode: bytecode,
                 sourceIndex: SourceIndexV2.wrap(0),
-                context: LibContext.build(new bytes32[][](0), new SignedContextV1[](0)),
+                context: LibContext.buildV2(new bytes32[][](0), new SignedContextV2[](0)),
                 inputs: new StackItem[](0),
                 stateOverlay: new bytes32[](0)
             })

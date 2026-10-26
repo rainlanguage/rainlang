@@ -7,7 +7,7 @@ import {LibOpBinaryIn} from "../../../../../src/lib/op/logic/LibOpBinaryIn.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {BinaryInNeedlesZero} from "../../../../../src/error/ErrIntegrity.sol";
 import {UnexpectedOperandValue, OperandOverflow} from "../../../../../src/error/ErrParse.sol";
-import {OperandV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {OperandV2, StackItem} from "../../../../../src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 

@@ -15,19 +15,13 @@ import {LibInterpreterState, InterpreterState} from "../../src/lib/state/LibInte
 import {LibInterpreterStateFingerprint} from "../lib/state/LibInterpreterStateFingerprint.sol";
 import {IntegrityCheckState, LibIntegrityCheck} from "../../src/lib/integrity/LibIntegrityCheck.sol";
 
-import {LibContext} from "rainlang-interface-0.2.13/src/lib/caller/LibContext.sol";
+import {LibContext} from "../../src/lib/caller/LibContext.sol";
 import {UnexpectedOperand} from "../../src/error/ErrParse.sol";
 import {BadOpInputsLength, BadOpOutputsLength} from "../../src/lib/integrity/LibIntegrityCheck.sol";
-import {
-    OperandV2,
-    SourceIndexV2,
-    IInterpreterStoreV3,
-    EvalV4,
-    StackItem
-} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
-import {FullyQualifiedNamespace, StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
-import {SignedContextV1} from "rainlang-interface-0.2.13/src/interface/IInterpreterCallerV4.sol";
-import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
+import {OperandV2, SourceIndexV2, IInterpreterStoreV3, EvalV4, StackItem} from "../../src/interface/IInterpreterV4.sol";
+import {FullyQualifiedNamespace, StateNamespace} from "../../src/interface/IInterpreterStoreV3.sol";
+import {SignedContextV2} from "../../src/interface/IInterpreterCallerV5.sol";
+import {LibNamespace} from "../../src/lib/ns/LibNamespace.sol";
 import {ExponentOverflow} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.sol";
 import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.4/src/lib/LibTOFUTokenDecimals.sol";
 
@@ -255,7 +249,7 @@ abstract contract OpTest is RainlangCompilerDeploymentTest {
     /// 90%+ of the time we don't need to pass a context. This overloads a
     /// simplified interface to parse and eval.
     function parseAndEval(bytes memory rainString) internal view returns (StackItem[] memory, bytes32[] memory) {
-        return parseAndEval(rainString, LibContext.build(new bytes32[][](0), new SignedContextV1[](0)));
+        return parseAndEval(rainString, LibContext.buildV2(new bytes32[][](0), new SignedContextV2[](0)));
     }
 
     function checkHappy(bytes memory rainString, bytes32 expectedValue, string memory errString) internal view {
@@ -268,7 +262,9 @@ abstract contract OpTest is RainlangCompilerDeploymentTest {
         internal
         view
     {
-        checkHappy(rainString, LibContext.build(new bytes32[][](0), new SignedContextV1[](0)), expectedStack, errString);
+        checkHappy(
+            rainString, LibContext.buildV2(new bytes32[][](0), new SignedContextV2[](0)), expectedStack, errString
+        );
     }
 
     function checkHappy(
@@ -325,7 +321,7 @@ abstract contract OpTest is RainlangCompilerDeploymentTest {
                 namespace: FullyQualifiedNamespace.wrap(0),
                 bytecode: bytecode,
                 sourceIndex: SourceIndexV2.wrap(0),
-                context: LibContext.build(new bytes32[][](0), new SignedContextV1[](0)),
+                context: LibContext.buildV2(new bytes32[][](0), new SignedContextV2[](0)),
                 inputs: new StackItem[](0),
                 stateOverlay: new bytes32[](0)
             })

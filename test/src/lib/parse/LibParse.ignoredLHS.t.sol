@@ -6,7 +6,7 @@ import {Test} from "forge-std-1.17.0/src/Test.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 
 import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
-import {LibBytecode} from "rainlang-interface-0.2.13/src/lib/bytecode/LibBytecode.sol";
+import {LibBytecode} from "../../../../src/lib/bytecode/LibBytecode.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 
 /// @title LibParseIgnoredLHSTest

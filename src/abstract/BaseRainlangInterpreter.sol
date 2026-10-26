@@ -9,12 +9,7 @@ import {LibEval} from "../lib/eval/LibEval.sol";
 import {LibInterpreterStateDataContract} from "../lib/state/LibInterpreterStateDataContract.sol";
 import {InterpreterState} from "../lib/state/LibInterpreterState.sol";
 import {LibAllStandardOps} from "../lib/op/LibAllStandardOps.sol";
-import {
-    IInterpreterV4,
-    SourceIndexV2,
-    EvalV4,
-    StackItem
-} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {IInterpreterV4, SourceIndexV2, EvalV4, StackItem} from "../interface/IInterpreterV4.sol";
 import {IOpcodeToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IOpcodeToolingV1.sol";
 import {OddSetLength} from "../error/ErrStore.sol";
 import {ZeroFunctionPointers} from "../error/ErrEval.sol";

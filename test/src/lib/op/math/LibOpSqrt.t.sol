@@ -7,7 +7,7 @@ import {PowNegativeBase} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.
 import {LibOpSqrt} from "../../../../../src/lib/op/math/LibOpSqrt.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
-import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {StackItem} from "../../../../../src/interface/IInterpreterV4.sol";
 
 contract LibOpSqrtTest is OpTest {
     using LibDecimalFloat for Float;

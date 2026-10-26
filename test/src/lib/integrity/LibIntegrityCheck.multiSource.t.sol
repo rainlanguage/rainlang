@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDeploymentTest.sol";
-import {LibBytecode} from "rainlang-interface-0.2.13/src/lib/bytecode/LibBytecode.sol";
+import {LibBytecode} from "../../../../src/lib/bytecode/LibBytecode.sol";
 
 contract LibIntegrityCheckMultiSourceTest is RainlangCompilerDeploymentTest {
     /// Two-source expression must pass integrity and produce correct

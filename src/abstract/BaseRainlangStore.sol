@@ -4,12 +4,8 @@ pragma solidity ^0.8.25;
 
 import {ERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/ERC165.sol";
 
-import {IInterpreterStoreV3} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
-import {
-    LibNamespace,
-    FullyQualifiedNamespace,
-    StateNamespace
-} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
+import {IInterpreterStoreV3} from "../interface/IInterpreterStoreV3.sol";
+import {LibNamespace, FullyQualifiedNamespace, StateNamespace} from "../lib/ns/LibNamespace.sol";
 import {OddSetLength} from "../error/ErrStore.sol";
 
 /// @title BaseRainlangStore

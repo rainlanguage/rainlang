@@ -6,7 +6,7 @@ import {ERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/ERC165.s
 
 import {LibParse} from "../lib/parse/LibParse.sol";
 
-import {PragmaV1} from "rainlang-interface-0.2.13/src/interface/IParserPragmaV1.sol";
+import {IParserPragmaV1, PragmaV1} from "../interface/IParserPragmaV1.sol";
 import {LibParseState, ParseState} from "../lib/parse/LibParseState.sol";
 import {LibParsePragma} from "../lib/parse/LibParsePragma.sol";
 import {LibAllStandardOps} from "../lib/op/LibAllStandardOps.sol";
@@ -28,7 +28,7 @@ uint8 constant PARSE_META_BUILD_DEPTH = 2;
 /// Everything except the parse meta and the function pointer tables, which a
 /// concrete binds by overriding `parseMeta`, `operandHandlerFunctionPointers`
 /// and `literalParserFunctionPointers`.
-abstract contract BaseRainlangParser is ERC165, IParserToolingV1 {
+abstract contract BaseRainlangParser is ERC165, IParserToolingV1, IParserPragmaV1 {
     using LibParse for ParseState;
     using LibParseState for ParseState;
     using LibParsePragma for ParseState;
@@ -59,7 +59,8 @@ abstract contract BaseRainlangParser is ERC165, IParserToolingV1 {
 
     /// @inheritdoc ERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IParserToolingV1).interfaceId || super.supportsInterface(interfaceId);
+        return interfaceId == type(IParserToolingV1).interfaceId || interfaceId == type(IParserPragmaV1).interfaceId
+            || super.supportsInterface(interfaceId);
     }
 
     /// @notice Parses only the pragma section of Rainlang source `data`. Returns the

@@ -13,7 +13,7 @@ import {
     FullyQualifiedNamespace,
     EvalV4,
     StackItem
-} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+} from "../../../../../src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 

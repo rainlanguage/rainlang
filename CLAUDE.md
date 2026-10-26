@@ -6,9 +6,10 @@ what a process means.
 
 ## What this repo is
 
-The **library half** of Rainlang: the parser, eval loop, standard ops, integrity
-checks, the `BaseRainlang*` contracts and the extern / sub-parser bases,
-published as the `rainlang` Soldeer package on every merge to main
+The **library half** of Rainlang: the interfaces (`src/interface/`, frozen once
+published; old versions under `deprecated/`), the parser, eval loop, standard
+ops, integrity checks, the `BaseRainlang*` contracts and the extern / sub-parser
+bases, published as the `rainlang` Soldeer package on every merge to main
 (`rainix-autopublish`, next-version lifecycle via `next-v*` tags). The deployed
 concretes, their generated tables and deploy records, the deploy scripts and the
 Rust crates live in `rainlang.deploy`, which consumes this package.

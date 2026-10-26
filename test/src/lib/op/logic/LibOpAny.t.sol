@@ -8,11 +8,8 @@ import {MemoryKV} from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
 
 import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpAny} from "../../../../../src/lib/op/logic/LibOpAny.sol";
-import {OperandV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
-import {
-    IInterpreterStoreV3,
-    FullyQualifiedNamespace
-} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
+import {OperandV2, StackItem} from "../../../../../src/interface/IInterpreterV4.sol";
+import {IInterpreterStoreV3, FullyQualifiedNamespace} from "../../../../../src/interface/IInterpreterStoreV3.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibInterpreterState, InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
