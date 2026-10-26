@@ -55,7 +55,6 @@ rain-sol-codegen = "0.1.39"
 "rain-solmem" = "0.1.28"
 "rain-string" = "0.3.9"
 "rain-tofu-erc20-decimals" = "0.1.4"
-"rainlang-interface" = "0.2.13"
 
 [soldeer]
 recursive_deps = false

@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {ISubParserV4} from "rainlang-interface-0.2.13/src/interface/ISubParserV4.sol";
+import {ISubParserV4} from "../../../../src/interface/ISubParserV4.sol";
 import {IERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/IERC165.sol";
 
 /// A bad sub parser that claims to know every word but returns bytecode of

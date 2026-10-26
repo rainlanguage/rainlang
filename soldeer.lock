@@ -109,10 +109,3 @@ version = "0.1.4"
 url = "https://soldeer-revisions.s3.amazonaws.com/rain-tofu-erc20-decimals/0_1_4_21-08-2026_19:26:07_rain.tofu.zip"
 checksum = "e4722c1b6e2f030263e27b20f9ab73a4f8111445945846b96f0085848288022b"
 integrity = "f10dc50978061fb2a92fb9ba907c2cbe678d24198faabf060f699d36f1e8e4a0"
-
-[[dependencies]]
-name = "rainlang-interface"
-version = "0.2.13"
-url = "https://soldeer-revisions.s3.amazonaws.com/rainlang-interface/0_2_13_11-10-2026_17:54:59_rainlang.zip"
-checksum = "8128d2d63ee9c0d83e0ec6f9a5501bdd6da5f21ce3b3374cde2e08eaa4ef1800"
-integrity = "07282d9bb019083c64273e829fa4a37016b9c4ddc67578afc7d8e14e235cf021"

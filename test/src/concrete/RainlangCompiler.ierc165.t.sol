@@ -6,8 +6,8 @@ import {Test} from "forge-std-1.17.0/src/Test.sol";
 
 import {IERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/IERC165.sol";
 import {TestRainlangCompiler} from "test/concrete/TestRainlangCompiler.sol";
-import {IParserPragmaV1} from "rainlang-interface-0.2.13/src/interface/IParserPragmaV1.sol";
-import {IParserV2} from "rainlang-interface-0.2.13/src/interface/IParserV2.sol";
+import {IParserPragmaV1} from "../../../src/interface/IParserPragmaV1.sol";
+import {IParserV2} from "../../../src/interface/IParserV2.sol";
 import {IDescribedByMetaV1} from "rain-metadata-0.1.43/src/interface/IDescribedByMetaV1.sol";
 import {IIntegrityToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IIntegrityToolingV1.sol";
 

@@ -6,7 +6,7 @@ import {ParseTest} from "test/abstract/ParseTest.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 
 import {LibParse, UnexpectedRHSChar, UnexpectedRightParen} from "../../../../src/lib/parse/LibParse.sol";
-import {LibBytecode} from "rainlang-interface-0.2.13/src/lib/bytecode/LibBytecode.sol";
+import {LibBytecode} from "../../../../src/lib/bytecode/LibBytecode.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 import {ParseDecimalPrecisionLoss} from "rain-math-float-0.3.10/src/error/ErrParse.sol";

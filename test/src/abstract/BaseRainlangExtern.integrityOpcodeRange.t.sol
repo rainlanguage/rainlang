@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.17.0/src/Test.sol";
-import {ExternDispatchV2} from "rainlang-interface-0.2.13/src/interface/IInterpreterExternV4.sol";
+import {ExternDispatchV2} from "../../../src/interface/IInterpreterExternV4.sol";
 import {ExternOpcodeOutOfRange} from "../../../src/error/ErrExtern.sol";
 import {TwoOpExtern} from "./TwoOpExtern.sol";
 

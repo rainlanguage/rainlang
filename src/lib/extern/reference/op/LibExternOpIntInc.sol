@@ -2,9 +2,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {OperandV2} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {OperandV2} from "../../../../interface/IInterpreterV4.sol";
 import {LibSubParse} from "../../../parse/LibSubParse.sol";
-import {IInterpreterExternV4, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterExternV4.sol";
+import {IInterpreterExternV4, StackItem} from "../../../../interface/IInterpreterExternV4.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 
 /// @dev Opcode index of the extern increment opcode. Needs to be manually kept

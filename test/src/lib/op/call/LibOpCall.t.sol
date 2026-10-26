@@ -8,13 +8,13 @@ import {
     SourceIndexV2,
     EvalV4,
     StackItem
-} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+} from "../../../../../src/interface/IInterpreterV4.sol";
 import {OpTest} from "test/abstract/OpTest.sol";
-import {BytecodeTest} from "rainlang-interface-0.2.13/src/../test/abstract/BytecodeTest.sol";
+import {BytecodeTest} from "test/abstract/BytecodeTest.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibOpCall} from "../../../../../src/lib/op/call/LibOpCall.sol";
 import {CallOutputsExceedSource, CallInputsMismatchSource} from "../../../../../src/error/ErrIntegrity.sol";
-import {LibBytecode, SourceIndexOutOfBounds} from "rainlang-interface-0.2.13/src/lib/bytecode/LibBytecode.sol";
+import {LibBytecode, SourceIndexOutOfBounds} from "../../../../../src/lib/bytecode/LibBytecode.sol";
 import {BadOpInputsLength} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {STACK_TRACER} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";

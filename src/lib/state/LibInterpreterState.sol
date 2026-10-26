@@ -4,11 +4,8 @@ pragma solidity ^0.8.25;
 
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 import {MemoryKV} from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
-import {
-    FullyQualifiedNamespace,
-    IInterpreterStoreV3
-} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
-import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {FullyQualifiedNamespace, IInterpreterStoreV3} from "../../interface/IInterpreterStoreV3.sol";
+import {StackItem} from "../../interface/IInterpreterV4.sol";
 
 /// @dev Deterministic address used as the `staticcall` target for stack trace
 /// emissions. Derived from a domain-specific keccak hash so it cannot collide

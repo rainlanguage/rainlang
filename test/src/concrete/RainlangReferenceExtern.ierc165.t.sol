@@ -5,8 +5,8 @@ pragma solidity =0.8.25;
 import {Test} from "forge-std-1.17.0/src/Test.sol";
 
 import {IERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/IERC165.sol";
-import {IInterpreterExternV4} from "rainlang-interface-0.2.13/src/interface/IInterpreterExternV4.sol";
-import {ISubParserV4} from "rainlang-interface-0.2.13/src/interface/ISubParserV4.sol";
+import {IInterpreterExternV4} from "../../../src/interface/IInterpreterExternV4.sol";
+import {ISubParserV4} from "../../../src/interface/ISubParserV4.sol";
 import {RainlangReferenceExtern} from "../../../src/concrete/extern/RainlangReferenceExtern.sol";
 import {IDescribedByMetaV1} from "rain-metadata-0.1.43/src/interface/IDescribedByMetaV1.sol";
 import {ISubParserToolingV1} from "rain-sol-codegen-0.1.39/src/interface/ISubParserToolingV1.sol";

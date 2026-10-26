@@ -6,7 +6,7 @@ import {ERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/ERC165.s
 
 import {LibParse} from "../lib/parse/LibParse.sol";
 
-import {PragmaV1} from "rainlang-interface-0.2.13/src/interface/IParserPragmaV1.sol";
+import {PragmaV1} from "../interface/IParserPragmaV1.sol";
 import {LibParseState, ParseState} from "../lib/parse/LibParseState.sol";
 import {LibParsePragma} from "../lib/parse/LibParsePragma.sol";
 import {LibAllStandardOps} from "../lib/op/LibAllStandardOps.sol";

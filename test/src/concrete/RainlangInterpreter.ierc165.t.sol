@@ -6,7 +6,7 @@ import {Test} from "forge-std-1.17.0/src/Test.sol";
 
 import {IERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/IERC165.sol";
 import {TestRainlangInterpreter} from "test/concrete/TestRainlangInterpreter.sol";
-import {IInterpreterV4} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {IInterpreterV4} from "../../../src/interface/IInterpreterV4.sol";
 import {IOpcodeToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IOpcodeToolingV1.sol";
 
 contract RainlangInterpreterIERC165Test is Test {

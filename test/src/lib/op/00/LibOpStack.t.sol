@@ -4,18 +4,18 @@ pragma solidity =0.8.25;
 
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 
-import {OperandV2, SourceIndexV2, EvalV4, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
-import {LibContext} from "rainlang-interface-0.2.13/src/lib/caller/LibContext.sol";
+import {OperandV2, SourceIndexV2, EvalV4, StackItem} from "../../../../../src/interface/IInterpreterV4.sol";
+import {LibContext} from "../../../../../src/lib/caller/LibContext.sol";
 import {LibOpStack} from "../../../../../src/lib/op/00/LibOpStack.sol";
 import {OutOfBoundsStackRead} from "../../../../../src/error/ErrIntegrity.sol";
 import {LibIntegrityCheck, IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {LibInterpreterState, InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibInterpreterStateFingerprint} from "test/lib/state/LibInterpreterStateFingerprint.sol";
-import {FullyQualifiedNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
+import {FullyQualifiedNamespace} from "../../../../../src/interface/IInterpreterStoreV3.sol";
 import {OpTest, PRE, POST} from "test/abstract/OpTest.sol";
-import {SignedContextV1} from "rainlang-interface-0.2.13/src/interface/IInterpreterCallerV4.sol";
+import {SignedContextV2} from "../../../../../src/interface/IInterpreterCallerV5.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {BadOpOutputsLength} from "rainlang-interface-0.2.13/src/error/ErrIntegrity.sol";
+import {BadOpOutputsLength} from "../../../../../src/error/ErrIntegrity.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 
 /// @title LibOpStackTest
@@ -163,7 +163,7 @@ contract LibOpStackTest is OpTest {
                 namespace: FullyQualifiedNamespace.wrap(0),
                 bytecode: bytecode,
                 sourceIndex: SourceIndexV2.wrap(0),
-                context: LibContext.build(new bytes32[][](0), new SignedContextV1[](0)),
+                context: LibContext.buildV2(new bytes32[][](0), new SignedContextV2[](0)),
                 inputs: new StackItem[](0),
                 stateOverlay: new bytes32[](0)
             })
@@ -185,7 +185,7 @@ contract LibOpStackTest is OpTest {
                 namespace: FullyQualifiedNamespace.wrap(0),
                 bytecode: bytecode,
                 sourceIndex: SourceIndexV2.wrap(0),
-                context: LibContext.build(new bytes32[][](0), new SignedContextV1[](0)),
+                context: LibContext.buildV2(new bytes32[][](0), new SignedContextV2[](0)),
                 inputs: new StackItem[](0),
                 stateOverlay: new bytes32[](0)
             })

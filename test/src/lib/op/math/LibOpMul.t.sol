@@ -6,7 +6,7 @@ import {console2} from "forge-std-1.17.0/src/Test.sol";
 import {LibOpMul} from "../../../../../src/lib/op/math/LibOpMul.sol";
 import {OpTest, IntegrityCheckState, OperandV2} from "test/abstract/OpTest.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {StackItem} from "../../../../../src/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 import {ExponentOverflow, ExponentUnderflow} from "rain-math-float-0.3.10/src/error/ErrDecimalFloat.sol";
 

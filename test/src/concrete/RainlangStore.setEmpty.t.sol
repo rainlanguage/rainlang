@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.17.0/src/Test.sol";
 import {TestRainlangStore} from "test/concrete/TestRainlangStore.sol";
-import {StateNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
+import {StateNamespace} from "../../../src/lib/ns/LibNamespace.sol";
 
 /// @title RainlangStoreSetEmptyArrayTest
 /// @notice Test that `set()` with an empty (zero-length) `kvs` array

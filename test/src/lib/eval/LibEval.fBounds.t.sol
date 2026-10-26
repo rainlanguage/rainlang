@@ -8,11 +8,8 @@ import {LibInterpreterState, InterpreterState} from "../../../../src/lib/state/L
 import {LibAllStandardOps} from "../../../../src/lib/op/LibAllStandardOps.sol";
 import {LibEval} from "../../../../src/lib/eval/LibEval.sol";
 import {MemoryKV} from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
-import {
-    IInterpreterStoreV3,
-    FullyQualifiedNamespace
-} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
-import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {IInterpreterStoreV3, FullyQualifiedNamespace} from "../../../../src/interface/IInterpreterStoreV3.sol";
+import {StackItem} from "../../../../src/interface/IInterpreterV4.sol";
 
 contract LibEvalFBoundsTest is Test {
     /// Due to the mod of indexes to function pointers the indexes wrap at the

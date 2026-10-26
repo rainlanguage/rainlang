@@ -10,7 +10,7 @@ import {
     UnexpectedOperandValue,
     OperandOverflow
 } from "../../error/ErrParse.sol";
-import {OperandV2} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {OperandV2} from "../../interface/IInterpreterV4.sol";
 import {LibParseLiteral} from "./literal/LibParseLiteral.sol";
 import {
     CMASK_OPERAND_END,

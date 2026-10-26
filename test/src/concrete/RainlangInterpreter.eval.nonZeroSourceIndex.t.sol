@@ -3,9 +3,9 @@
 pragma solidity =0.8.25;
 
 import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDeploymentTest.sol";
-import {StateNamespace} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
-import {EvalV4, SourceIndexV2, StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
-import {LibNamespace} from "rainlang-interface-0.2.13/src/lib/ns/LibNamespace.sol";
+import {StateNamespace} from "../../../src/interface/IInterpreterStoreV3.sol";
+import {EvalV4, SourceIndexV2, StackItem} from "../../../src/interface/IInterpreterV4.sol";
+import {LibNamespace} from "../../../src/lib/ns/LibNamespace.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.3.10/src/lib/LibDecimalFloat.sol";
 
 /// @title RainlangInterpreterEvalNonZeroSourceIndexTest

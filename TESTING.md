@@ -46,8 +46,7 @@ invalid or malformed bytecode that the parser cannot produce.
 
 ## Bytecode Inspection
 
-Use `LibBytecode` from
-`rain.interpreter.interface/lib/bytecode/LibBytecode.sol`. Do not manually index
+Use `LibBytecode` from `src/lib/bytecode/LibBytecode.sol`. Do not manually index
 into bytecode bytes.
 
 ## Opcode Testing

@@ -13,11 +13,8 @@ import {
     MemoryKVVal,
     MEMORY_KV_EMPTY
 } from "rain-lib-memkv-0.2.0/src/lib/LibMemoryKV.sol";
-import {
-    FullyQualifiedNamespace,
-    IInterpreterStoreV3
-} from "rainlang-interface-0.2.13/src/interface/IInterpreterStoreV3.sol";
-import {StackItem} from "rainlang-interface-0.2.13/src/interface/IInterpreterV4.sol";
+import {FullyQualifiedNamespace, IInterpreterStoreV3} from "../../../../src/interface/IInterpreterStoreV3.sol";
+import {StackItem} from "../../../../src/interface/IInterpreterV4.sol";
 
 contract LibInterpreterStateFingerprintTest is Test {
     using LibMemoryKV for MemoryKV;
