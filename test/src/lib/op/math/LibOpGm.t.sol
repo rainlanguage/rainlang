@@ -205,4 +205,47 @@ contract LibOpGmTest is OpTest {
             LibDecimalFloat.packLossless(signedCoefficientB, exponentB)
         );
     }
+
+    /// A product of exactly 1e76 is cut before the root.
+    function testOpGmRunMatchesReferenceProductAtCoefficientCeiling() external view {
+        checkRunMatchesReference(LibDecimalFloat.packLossless(1e38, 0), LibDecimalFloat.packLossless(1e38, 0));
+    }
+
+    /// A 76-digit product rounds on its last digit.
+    function testOpGmRunMatchesReferenceRoundsOn76DigitProduct() external view {
+        checkRunMatchesReference(
+            LibDecimalFloat.packLossless(2500000142500000000000000000000003162277750000000000000000000000001, 0),
+            LibDecimalFloat.packLossless(1000000057, 0)
+        );
+    }
+
+    /// A root equal to an input takes that input's representation.
+    function testOpGmRunMatchesReferenceRootEqualsInput() external view {
+        checkRunMatchesReference(LibDecimalFloat.packLossless(2, 0), LibDecimalFloat.packLossless(2, 0));
+        checkRunMatchesReference(LibDecimalFloat.packLossless(1, 0), LibDecimalFloat.packLossless(4, 0));
+    }
+
+    /// Equal magnitudes in different encodings order by coefficient, in both
+    /// argument orders and every sign combination.
+    function testOpGmRunMatchesReferenceEqualMagnitudesDifferentEncodings() external view {
+        int224[2] memory signs = [int224(1), int224(-1)];
+        for (uint256 i = 0; i < 2; i++) {
+            for (uint256 j = 0; j < 2; j++) {
+                checkRunMatchesReference(
+                    LibDecimalFloat.packLossless(signs[i], 0), LibDecimalFloat.packLossless(signs[j] * 10, -1)
+                );
+                checkRunMatchesReference(
+                    LibDecimalFloat.packLossless(signs[i] * 10, -1), LibDecimalFloat.packLossless(signs[j], 0)
+                );
+                checkRunMatchesReference(
+                    LibDecimalFloat.packLossless(signs[i] * (2e52 - 1), -52),
+                    LibDecimalFloat.packLossless(signs[j] * (2e53 - 10), -53)
+                );
+                checkRunMatchesReference(
+                    LibDecimalFloat.packLossless(signs[i] * (2e53 - 10), -53),
+                    LibDecimalFloat.packLossless(signs[j] * (2e52 - 1), -52)
+                );
+            }
+        }
+    }
 }
