@@ -11,6 +11,7 @@ import {
     LibDecimalFloatImplementation
 } from "rain-math-float-0.3.11/src/lib/implementation/LibDecimalFloatImplementation.sol";
 import {Math} from "@openzeppelin-contracts-5.7.0/utils/math/Math.sol";
+import {SafeCast} from "@openzeppelin-contracts-5.7.0/utils/math/SafeCast.sol";
 
 /// @title LibOpGm
 /// @notice Opcode for the signed geometric mean of two decimal floating point
@@ -66,8 +67,9 @@ library LibOpGm {
             shift++;
             product = Math.mulDiv(magnitudeA, magnitudeB, 10 ** shift);
         }
-        (int256 rootCoefficient, int256 rootExponent) =
-            LibDecimalFloatImplementation.sqrt(int256(product), exponentA + exponentB + int256(shift));
+        (int256 rootCoefficient, int256 rootExponent) = LibDecimalFloatImplementation.sqrt(
+            SafeCast.toInt256(product), exponentA + exponentB + SafeCast.toInt256(shift)
+        );
         return (rootCoefficient, rootExponent);
     }
 
@@ -94,8 +96,9 @@ library LibOpGm {
         lowCoefficient = lowCoefficient < 0 ? -lowCoefficient : lowCoefficient;
         highCoefficient = highCoefficient < 0 ? -highCoefficient : highCoefficient;
 
-        (int256 coefficient, int256 exponent) =
-            referenceRoot(uint256(lowCoefficient), lowExponent, uint256(highCoefficient), highExponent);
+        (int256 coefficient, int256 exponent) = referenceRoot(
+            SafeCast.toUint256(lowCoefficient), lowExponent, SafeCast.toUint256(highCoefficient), highExponent
+        );
 
         bool aIsLow = LibDecimalFloatImplementation.lt(lowCoefficient, lowExponent, highCoefficient, highExponent)
             || (LibDecimalFloatImplementation.eq(lowCoefficient, lowExponent, highCoefficient, highExponent)
