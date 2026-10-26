@@ -9,17 +9,17 @@ pragma solidity ^0.8.25;
 interface IRainlangV2 {
     /// @notice Returns the deterministic deploy address of the compiler.
     /// @return The compiler address.
-    function compilerAddress() external pure returns (address);
+    function compiler() external pure returns (address);
 
     /// @notice Returns the deterministic deploy address of the interpreter.
     /// @return The interpreter address.
-    function interpreterAddress() external pure returns (address);
+    function interpreter() external pure returns (address);
 
     /// @notice Returns the deterministic deploy address of the store.
     /// @return The store address.
-    function storeAddress() external pure returns (address);
+    function store() external pure returns (address);
 
     /// @notice Returns the deterministic deploy address of the parser.
     /// @return The parser address.
-    function parserAddress() external pure returns (address);
+    function parser() external pure returns (address);
 }

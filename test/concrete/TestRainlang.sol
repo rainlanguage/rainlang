@@ -18,22 +18,22 @@ import {IRainlangV2} from "../../src/interface/IRainlangV2.sol";
 /// places the test concretes at.
 contract TestRainlang is BaseRainlang {
     /// @inheritdoc IRainlangV2
-    function compilerAddress() external pure virtual override returns (address) {
+    function compiler() external pure virtual override returns (address) {
         return TEST_COMPILER_ADDRESS;
     }
 
     /// @inheritdoc IRainlangV2
-    function interpreterAddress() external pure virtual override returns (address) {
+    function interpreter() external pure virtual override returns (address) {
         return TEST_INTERPRETER_ADDRESS;
     }
 
     /// @inheritdoc IRainlangV2
-    function storeAddress() external pure virtual override returns (address) {
+    function store() external pure virtual override returns (address) {
         return TEST_STORE_ADDRESS;
     }
 
     /// @inheritdoc IRainlangV2
-    function parserAddress() external pure virtual override returns (address) {
+    function parser() external pure virtual override returns (address) {
         return TEST_PARSER_ADDRESS;
     }
 }
