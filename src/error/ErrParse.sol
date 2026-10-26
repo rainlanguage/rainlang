@@ -149,7 +149,9 @@ error NoWhitespaceAfterUsingWordsFrom(uint256 offset);
 /// @param offset The byte offset in the source where the error occurred.
 error InvalidSubParser(uint256 offset);
 
-/// @notice The parser encountered an unclosed sub parsed literal.
+/// @notice The parser encountered an unclosed sub parsed literal, e.g. it hit
+/// the end of the source or a byte that is neither printable ASCII nor
+/// whitespace before the closing bracket.
 /// @param offset The byte offset in the source where the error occurred.
 error UnclosedSubParseableLiteral(uint256 offset);
 
