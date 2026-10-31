@@ -2,7 +2,6 @@ version = 1
 
 [[annotations]]
 path = [
-  ".coderabbit.yaml",
   ".devcontainer.json",
   ".envrc",
   ".github/workflows/**/",
