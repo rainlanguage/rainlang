@@ -132,6 +132,7 @@ contract LibOpUtf8HashTest is OpTest {
 
         bytes memory s = fuzzString(badWord, 30);
         bit = bound(bit, (s.length + 1) * 8, 255);
+        //forge-lint: disable-next-line(incorrect-shift)
         bytes32 bad = bytes32(IntOrAString.unwrap(LibIntOrAString.fromStringV3(string(s))) | (1 << bit));
         inputs[index] = StackItem.wrap(bad);
 
