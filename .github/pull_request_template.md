@@ -26,7 +26,13 @@ Writing:
 
 <!-- Headline: 1 to 3 sentences, with no heading above them. What the system does after the merge, where its output goes, and why now. Link the issue. In a stack, say which part this is and what the next part adds. -->
 
-**Live effect:** <!-- none, or what changes for users, money, services, or alerts --> · **Risk:** <!-- low, medium, or high, with the triggers in parentheses: money path, keys or IAM, production config or infrastructure, stored data, hard to undo. Name them even for low risk. --> · **Ships:** <!-- on merge, next release, or after a manual step --> · **Blocks:** <!-- PRs that must merge after this one, or delete this slot -->
+**Live effect:**
+
+<!-- none, or what changes for users, money, services, or alerts --> · **Risk:**
+<!-- low, medium, or high, with the triggers in parentheses: money path, keys or IAM, production config or infrastructure, stored data, hard to undo. Name them even for low risk. -->
+
+· **Ships:** <!-- on merge, next release, or after a manual step --> ·
+**Blocks:** <!-- PRs that must merge after this one, or delete this slot -->
 
 ## Needs your call
 
@@ -51,7 +57,8 @@ Writing:
 <!-- The strongest 1 or 2 pieces of evidence, so that with the Not verified bullet the section stays within 3 bullets: the test that reproduces the bug, a staging check, the plan summary, a screenshot. Not a list of every test. -->
 
 -
-- **Not verified:** <!-- Always keep this bullet, also in a trivial PR. Name what nobody checked, human or agent. -->
+- **Not verified:**
+  <!-- Always keep this bullet, also in a trivial PR. Name what nobody checked, human or agent. -->
 
 ## Rollout
 
