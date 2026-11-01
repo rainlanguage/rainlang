@@ -1,3 +1,4 @@
+<!-- deno-fmt-ignore-file -->
 <!--
 Merge brief. AI agents and people both follow these rules. Replace every comment, and do not keep this block.
 
