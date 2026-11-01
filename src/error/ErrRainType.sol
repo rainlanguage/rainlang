@@ -10,3 +10,9 @@ contract ErrRainType {}
 /// by a non-address operation (e.g. a hash, a float, or arithmetic).
 /// @param value The invalid value that is not a valid address.
 error NotAnAddress(bytes32 value);
+
+/// @notice Thrown when a value expected to be an IntOrAString string does not
+/// have the truthy bits set or has bits set above its string bytes.
+/// @param index The position of the value among the opcode's inputs.
+/// @param value The invalid value.
+error NotAString(uint256 index, bytes32 value);

@@ -27,6 +27,7 @@ import {LibOpBitwiseShiftRight} from "./bitwise/LibOpBitwiseShiftRight.sol";
 import {LibOpCall} from "./call/LibOpCall.sol";
 
 import {LibOpHash} from "./crypto/LibOpHash.sol";
+import {LibOpUtf8Hash} from "./crypto/LibOpUtf8Hash.sol";
 
 import {LibOpERC20Allowance} from "./erc20/LibOpERC20Allowance.sol";
 import {LibOpERC20BalanceOf} from "./erc20/LibOpERC20BalanceOf.sol";
@@ -106,7 +107,7 @@ import {LibParseLiteralHex} from "../parse/literal/LibParseLiteralHex.sol";
 import {LibParseLiteralSubParseable} from "../parse/literal/LibParseLiteralSubParseable.sol";
 
 /// @dev Number of ops currently provided by `AllStandardOps`.
-uint256 constant ALL_STANDARD_OPS_LENGTH = 76;
+uint256 constant ALL_STANDARD_OPS_LENGTH = 77;
 
 /// @title LibAllStandardOps
 /// @notice Every opcode available from the core repository laid out as a single
@@ -173,6 +174,10 @@ library LibAllStandardOps {
             ),
             // crypto/
             AuthoringMetaV2("hash", "Hashes all inputs into a single 32 byte value using keccak256."),
+            AuthoringMetaV2(
+                "utf8-hash",
+                "Hashes the UTF-8 bytes of all string inputs, concatenated in order, into a single 32 byte value using keccak256. Errors if any input is not a string."
+            ),
             // erc20/
             AuthoringMetaV2(
                 "erc20-allowance",
@@ -425,6 +430,8 @@ library LibAllStandardOps {
                     LibParseOperand.handleOperandSingleFull,
                     // hash
                     LibParseOperand.handleOperandDisallowed,
+                    // utf8-hash
+                    LibParseOperand.handleOperandDisallowed,
                     // erc20-allowance
                     LibParseOperand.handleOperandDisallowed,
                     // erc20-balance-of
@@ -596,6 +603,7 @@ library LibAllStandardOps {
                     LibOpBitwiseShiftRight.integrity,
                     LibOpCall.integrity,
                     LibOpHash.integrity,
+                    LibOpUtf8Hash.integrity,
                     LibOpERC20Allowance.integrity,
                     LibOpERC20BalanceOf.integrity,
                     LibOpERC20TotalSupply.integrity,
@@ -704,6 +712,7 @@ library LibAllStandardOps {
                     LibOpBitwiseShiftRight.run,
                     LibOpCall.run,
                     LibOpHash.run,
+                    LibOpUtf8Hash.run,
                     LibOpERC20Allowance.run,
                     LibOpERC20BalanceOf.run,
                     LibOpERC20TotalSupply.run,
