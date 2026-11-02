@@ -3,7 +3,7 @@
 pragma solidity ^0.8.25;
 
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
-import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
+import {IntOrAString, LibIntOrAString, LENGTH_MASK_V3} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
 import {OperandV2, StackItem} from "../../../interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
@@ -32,18 +32,20 @@ library LibOpUtf8Hash {
     /// @return The new stack top pointer after execution.
     function run(InterpreterState memory, OperandV2 operand, Pointer stackTop) internal pure returns (Pointer) {
         uint256 inputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
-        bytes memory joined;
-        for (uint256 i = 0; i < inputs; i++) {
-            bytes32 value;
-            assembly ("memory-safe") {
-                value := mload(add(stackTop, mul(i, 0x20)))
-            }
-            joined = bytes.concat(joined, bytes(IntOrAString.wrap(uint256(value)).toStringV3()));
-        }
-        bytes32 hash = keccak256(joined);
+        uint256 lengthMask = LENGTH_MASK_V3;
         assembly ("memory-safe") {
-            stackTop := sub(add(stackTop, mul(inputs, 0x20)), 0x20)
-            mstore(stackTop, hash)
+            // Unallocated memory past the free memory pointer is scratch for the joined bytes.
+            let start := mload(0x40)
+            let cursor := start
+            let end := add(stackTop, mul(inputs, 0x20))
+            for { let item := stackTop } lt(item, end) { item := add(item, 0x20) } {
+                let value := mload(item)
+                let length := and(value, lengthMask)
+                mstore(cursor, shl(sub(256, mul(8, length)), shr(8, value)))
+                cursor := add(cursor, length)
+            }
+            stackTop := sub(end, 0x20)
+            mstore(stackTop, keccak256(start, sub(cursor, start)))
         }
         return stackTop;
     }
