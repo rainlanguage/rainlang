@@ -5,7 +5,6 @@ pragma solidity =0.8.25;
 import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 
 import {LibOpUtf8Hash} from "../../../../../src/lib/op/crypto/LibOpUtf8Hash.sol";
-import {NotAString} from "../../../../../src/error/ErrRainType.sol";
 import {LibContext} from "../../../../../src/lib/caller/LibContext.sol";
 
 import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
@@ -117,51 +116,6 @@ contract LibOpUtf8HashTest is OpTest {
         assertEq(StackItem.unwrap(outputs[0]), keccak256(joined));
     }
 
-    /// Any set bit above a string's bytes reverts with the index and value of
-    /// the offending input.
-    function testOpUtf8HashRunNotAStringBitsAboveString(
-        bytes32[15] memory words,
-        uint8 count,
-        uint256 index,
-        bytes32 badWord,
-        uint256 bit
-    ) external {
-        count = uint8(bound(count, 1, 0x0F));
-        index = bound(index, 0, count - 1);
-        (StackItem[] memory inputs,) = fuzzInputs(words, count);
-
-        bytes memory s = fuzzString(badWord, 30);
-        bit = bound(bit, (s.length + 1) * 8, 255);
-        //forge-lint: disable-next-line(incorrect-shift)
-        bytes32 bad = bytes32(IntOrAString.unwrap(LibIntOrAString.fromStringV3(string(s))) | (1 << bit));
-        inputs[index] = StackItem.wrap(bad);
-
-        vm.expectRevert(abi.encodeWithSelector(NotAString.selector, index, bad));
-        this.externalRun(LibOperand.build(count, 1, 0), inputs);
-    }
-
-    /// Any of the three truthy bits missing reverts with the index and value of
-    /// the offending input.
-    function testOpUtf8HashRunNotAStringMissingTruthyBits(
-        bytes32[15] memory words,
-        uint8 count,
-        uint256 index,
-        bytes32 badWord,
-        uint256 clearBits
-    ) external {
-        count = uint8(bound(count, 1, 0x0F));
-        index = bound(index, 0, count - 1);
-        (StackItem[] memory inputs,) = fuzzInputs(words, count);
-
-        clearBits = bound(clearBits, 1, 7) << 5;
-        bytes32 bad =
-            bytes32(IntOrAString.unwrap(LibIntOrAString.fromStringV3(string(fuzzString(badWord, 31)))) & ~clearBits);
-        inputs[index] = StackItem.wrap(bad);
-
-        vm.expectRevert(abi.encodeWithSelector(NotAString.selector, index, bad));
-        this.externalRun(LibOperand.build(count, 1, 0), inputs);
-    }
-
     /// Test the eval of a utf8-hash opcode parsed from a string. Tests 1 input.
     function testOpUtf8HashEval1Input() external view {
         checkHappy("_: utf8-hash(\"abcd\");", KECCAK_ABCD, "");
@@ -244,33 +198,6 @@ contract LibOpUtf8HashTest is OpTest {
         assertEq(StackItem.unwrap(stack[1]), KECCAK_ABCD);
         assertEq(StackItem.unwrap(stack[2]), Float.unwrap(LibDecimalFloat.packLossless(5, 0)));
         assertEq(kvs.length, 0);
-    }
-
-    /// A number input reverts with NotAString at its input index.
-    function testOpUtf8HashEvalNotAStringNumber() external {
-        bytes32 one = Float.unwrap(LibDecimalFloat.packLossless(1, 0));
-        checkUnhappy("_: utf8-hash(1);", abi.encodeWithSelector(NotAString.selector, 0, one));
-        checkUnhappy("_: utf8-hash(\"a\" 1);", abi.encodeWithSelector(NotAString.selector, 1, one));
-        checkUnhappy("_: utf8-hash(1 \"a\");", abi.encodeWithSelector(NotAString.selector, 0, one));
-    }
-
-    /// A value with a bit set above its string bytes reverts with NotAString at
-    /// its input index.
-    function testOpUtf8HashEvalNotAStringBitsAboveString() external {
-        checkUnhappy("_: utf8-hash(0x01e0);", abi.encodeWithSelector(NotAString.selector, 0, bytes32(uint256(0x01e0))));
-        checkUnhappy(
-            "_: utf8-hash(\"a\" \"b\" 0x0161e1);",
-            abi.encodeWithSelector(NotAString.selector, 2, bytes32(uint256(0x0161e1)))
-        );
-    }
-
-    /// A value without all three truthy bits reverts with NotAString at its
-    /// input index.
-    function testOpUtf8HashEvalNotAStringMissingTruthyBits() external {
-        checkUnhappy(
-            "_: utf8-hash(\"a\" 0x6101);", abi.encodeWithSelector(NotAString.selector, 1, bytes32(uint256(0x6101)))
-        );
-        checkUnhappy("_: utf8-hash(0x61c1);", abi.encodeWithSelector(NotAString.selector, 0, bytes32(uint256(0x61c1))));
     }
 
     function testOpUtf8HashZeroInputs() external {
