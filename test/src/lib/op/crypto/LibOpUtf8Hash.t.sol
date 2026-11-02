@@ -16,6 +16,7 @@ import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrity
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
+import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 
 /// @title LibOpUtf8HashTest
 /// @notice Test the runtime and integrity time logic of LibOpUtf8Hash.
@@ -127,6 +128,19 @@ contract LibOpUtf8HashTest is OpTest {
 
         assertEq(outputs.length, 1);
         assertEq(StackItem.unwrap(outputs[0]), keccak256(joined));
+    }
+
+    /// Run's scratch writes leave memory below the free memory pointer intact.
+    function testOpUtf8HashRunPreservesAllocatedMemory(bytes32[15] memory words, uint8 count) external view {
+        count = uint8(bound(count, 1, 0x0F));
+        (StackItem[] memory inputs,) = fuzzInputs(words, count);
+        InterpreterState memory state = opTestDefaultInterpreterState();
+        OperandV2 operand = LibOperand.build(count, 1, 0);
+        Pointer stackTop = opReferenceCheckPointers(inputs, 1).stackTop;
+        bytes32[] memory allocated = new bytes32[](1);
+        allocated[0] = bytes32(type(uint256).max);
+        LibOpUtf8Hash.run(state, operand, stackTop);
+        assertEq(allocated[0], bytes32(type(uint256).max));
     }
 
     /// Test the eval of a utf8-hash opcode parsed from a string. Tests 1 input.
