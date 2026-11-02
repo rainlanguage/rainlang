@@ -14,14 +14,13 @@ import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 library LibOpUtf8Hash {
     using LibIntOrAString for IntOrAString;
 
-    /// @notice `utf8-hash` integrity check. Requires at least 1 input and
-    /// produces 1 output.
+    /// @notice `utf8-hash` integrity check. Inputs count is operand-defined,
+    /// produces 1 output. 0 inputs hashes empty (0 length) bytes.
     /// @param operand The operand encoding the number of inputs.
     /// @return The number of inputs.
     /// @return The number of outputs.
     function integrity(IntegrityCheckState memory, OperandV2 operand) internal pure returns (uint256, uint256) {
         uint256 inputs = uint256(OperandV2.unwrap(operand) >> 0x10) & 0x0F;
-        inputs = inputs > 0 ? inputs : 1;
         return (inputs, 1);
     }
 
