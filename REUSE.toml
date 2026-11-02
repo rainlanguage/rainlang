@@ -4,6 +4,7 @@ version = 1
 path = [
   ".devcontainer.json",
   ".envrc",
+  ".github/pull_request_template.md",
   ".github/workflows/**/",
   ".gitignore",
   ".prettierignore",
