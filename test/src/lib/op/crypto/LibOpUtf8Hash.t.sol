@@ -82,7 +82,7 @@ contract LibOpUtf8HashTest is OpTest {
         assertEq(calcOutputs, 1);
     }
 
-    /// 0 inputs in the operand is calculated as 1 input.
+    /// 0 inputs in the operand is calculated as 0 inputs.
     function testOpUtf8HashIntegrityZeroInputs(IntegrityCheckState memory state, uint8 outputs, uint16 operandData)
         external
         pure
@@ -91,7 +91,7 @@ contract LibOpUtf8HashTest is OpTest {
         (uint256 calcInputs, uint256 calcOutputs) =
             LibOpUtf8Hash.integrity(state, LibOperand.build(0, outputs, operandData));
 
-        assertEq(calcInputs, 1);
+        assertEq(calcInputs, 0);
         assertEq(calcOutputs, 1);
     }
 
@@ -100,6 +100,19 @@ contract LibOpUtf8HashTest is OpTest {
     function testOpUtf8HashRun(bytes32[15] memory words, uint8 count) external view {
         count = uint8(bound(count, 1, 0x0F));
         (StackItem[] memory inputs,) = fuzzInputs(words, count);
+        InterpreterState memory state = opTestDefaultInterpreterState();
+        OperandV2 operand = LibOperand.build(count, 1, 0);
+        opReferenceCheck(state, operand, LibOpUtf8Hash.referenceFn, LibOpUtf8Hash.integrity, LibOpUtf8Hash.run, inputs);
+    }
+
+    /// Inputs are untyped, so run must match the reference on every word, not
+    /// only valid strings.
+    function testOpUtf8HashRunArbitraryWords(bytes32[15] memory words, uint8 count) external view {
+        count = uint8(bound(count, 0, 0x0F));
+        StackItem[] memory inputs = new StackItem[](count);
+        for (uint256 i = 0; i < count; i++) {
+            inputs[i] = StackItem.wrap(words[i]);
+        }
         InterpreterState memory state = opTestDefaultInterpreterState();
         OperandV2 operand = LibOperand.build(count, 1, 0);
         opReferenceCheck(state, operand, LibOpUtf8Hash.referenceFn, LibOpUtf8Hash.integrity, LibOpUtf8Hash.run, inputs);
@@ -200,8 +213,8 @@ contract LibOpUtf8HashTest is OpTest {
         assertEq(kvs.length, 0);
     }
 
-    function testOpUtf8HashZeroInputs() external {
-        checkBadInputs("_: utf8-hash();", 0, 1, 0);
+    function testOpUtf8HashZeroInputs() external view {
+        checkHappy("_: utf8-hash();", KECCAK_EMPTY, "");
     }
 
     function testOpUtf8HashZeroOutputs() external {
