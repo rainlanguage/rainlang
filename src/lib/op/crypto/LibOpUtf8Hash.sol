@@ -3,32 +3,16 @@
 pragma solidity ^0.8.25;
 
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
-import {
-    IntOrAString,
-    LibIntOrAString,
-    LENGTH_MASK_V3,
-    TRUTHY_BITS_V3
-} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
+import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
 import {OperandV2, StackItem} from "../../../interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
-import {NotAString} from "../../../error/ErrRainType.sol";
 
 /// @title LibOpUtf8Hash
 /// @notice `utf8-hash`: keccak256 of the UTF-8 bytes of its IntOrAString string
 /// inputs, concatenated in order.
 library LibOpUtf8Hash {
     using LibIntOrAString for IntOrAString;
-
-    /// @notice Whether `value` is an IntOrAString built by `fromStringV3`: the
-    /// truthy bits set and nothing above the string's bytes.
-    /// @param value The value to check.
-    /// @return Whether it is an IntOrAString string.
-    function isIntOrAStringV3(bytes32 value) internal pure returns (bool) {
-        uint256 raw = uint256(value);
-        uint256 length = raw & LENGTH_MASK_V3;
-        return (raw & TRUTHY_BITS_V3) == TRUTHY_BITS_V3 && (raw >> ((length + 1) * 8)) == 0;
-    }
 
     /// @notice `utf8-hash` integrity check. Requires at least 1 input and
     /// produces 1 output.
@@ -54,9 +38,6 @@ library LibOpUtf8Hash {
             assembly ("memory-safe") {
                 value := mload(add(stackTop, mul(i, 0x20)))
             }
-            if (!isIntOrAStringV3(value)) {
-                revert NotAString(i, value);
-            }
             joined = bytes.concat(joined, bytes(IntOrAString.wrap(uint256(value)).toStringV3()));
         }
         bytes32 hash = keccak256(joined);
@@ -77,11 +58,7 @@ library LibOpUtf8Hash {
     {
         string memory joined = "";
         for (uint256 i = 0; i < inputs.length; i++) {
-            bytes32 value = StackItem.unwrap(inputs[i]);
-            if (!isIntOrAStringV3(value)) {
-                revert NotAString(i, value);
-            }
-            joined = string.concat(joined, IntOrAString.wrap(uint256(value)).toStringV3());
+            joined = string.concat(joined, IntOrAString.wrap(uint256(StackItem.unwrap(inputs[i]))).toStringV3());
         }
         StackItem[] memory outputs = new StackItem[](1);
         outputs[0] = StackItem.wrap(keccak256(bytes(joined)));

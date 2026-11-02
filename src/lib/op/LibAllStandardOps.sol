@@ -176,7 +176,7 @@ library LibAllStandardOps {
             AuthoringMetaV2("hash", "Hashes all inputs into a single 32 byte value using keccak256."),
             AuthoringMetaV2(
                 "utf8-hash",
-                "Hashes the UTF-8 bytes of all string inputs, concatenated in order, into a single 32 byte value using keccak256. Errors if any input is not a string."
+                "Hashes the UTF-8 bytes of all string inputs, concatenated in order, into a single 32 byte value using keccak256."
             ),
             // erc20/
             AuthoringMetaV2(
