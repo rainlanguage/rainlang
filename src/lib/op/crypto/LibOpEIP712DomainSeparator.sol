@@ -106,7 +106,7 @@ library LibOpEIP712DomainSeparator {
         bytes memory encoded = "";
         uint256 cursor = 0;
         for (uint256 bit = 0; bit < 5; bit++) {
-            if (fields & (1 << bit) == 0) {
+            if ((fields >> bit) & 1 == 0) {
                 continue;
             }
             string memory member;
