@@ -26,6 +26,7 @@ import {LibOpBitwiseShiftRight} from "./bitwise/LibOpBitwiseShiftRight.sol";
 
 import {LibOpCall} from "./call/LibOpCall.sol";
 
+import {LibOpEIP712DomainSeparator} from "./crypto/LibOpEIP712DomainSeparator.sol";
 import {LibOpHash} from "./crypto/LibOpHash.sol";
 import {LibOpUtf8Hash} from "./crypto/LibOpUtf8Hash.sol";
 
@@ -107,7 +108,7 @@ import {LibParseLiteralHex} from "../parse/literal/LibParseLiteralHex.sol";
 import {LibParseLiteralSubParseable} from "../parse/literal/LibParseLiteralSubParseable.sol";
 
 /// @dev Number of ops currently provided by `AllStandardOps`.
-uint256 constant ALL_STANDARD_OPS_LENGTH = 77;
+uint256 constant ALL_STANDARD_OPS_LENGTH = 78;
 
 /// @title LibAllStandardOps
 /// @notice Every opcode available from the core repository laid out as a single
@@ -173,6 +174,10 @@ library LibAllStandardOps {
                 "Calls a source by index in the same Rain bytecode. The inputs to call are copied to the top of the called stack and the outputs are copied back to the calling stack according to the LHS items. The first operand is the source index."
             ),
             // crypto/
+            AuthoringMetaV2(
+                "eip712-domain-separator",
+                "The EIP-712 domain separator over the fields selected by the operand bitmask (1 name, 2 version, 4 chainId, 8 verifyingContract, 16 salt); inputs are the selected fields in that order, with name and version as their keccak256 hashes."
+            ),
             AuthoringMetaV2("hash", "Hashes all inputs into a single 32 byte value using keccak256."),
             AuthoringMetaV2(
                 "utf8-hash",
@@ -428,6 +433,8 @@ library LibAllStandardOps {
                     LibParseOperand.handleOperandSingleFull,
                     // call
                     LibParseOperand.handleOperandSingleFull,
+                    // eip712-domain-separator
+                    LibParseOperand.handleOperandSingleFullNoDefault,
                     // hash
                     LibParseOperand.handleOperandDisallowed,
                     // utf8-hash
@@ -602,6 +609,7 @@ library LibAllStandardOps {
                     LibOpBitwiseShiftLeft.integrity,
                     LibOpBitwiseShiftRight.integrity,
                     LibOpCall.integrity,
+                    LibOpEIP712DomainSeparator.integrity,
                     LibOpHash.integrity,
                     LibOpUtf8Hash.integrity,
                     LibOpERC20Allowance.integrity,
@@ -711,6 +719,7 @@ library LibAllStandardOps {
                     LibOpBitwiseShiftLeft.run,
                     LibOpBitwiseShiftRight.run,
                     LibOpCall.run,
+                    LibOpEIP712DomainSeparator.run,
                     LibOpHash.run,
                     LibOpUtf8Hash.run,
                     LibOpERC20Allowance.run,

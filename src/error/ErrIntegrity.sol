@@ -74,3 +74,8 @@ error OpcodeOutOfRange(uint256 opIndex, uint256 opcodeIndex, uint256 fsCount);
 /// would make the membership check vacuously true, which is never what an
 /// `ensure` guard wants, so it is rejected at compile time.
 error BinaryInNeedlesZero();
+
+/// @notice Thrown when the `eip712-domain-separator` operand selects no domain
+/// field or sets a bit outside the five EIP-712 domain fields.
+/// @param fields The field bitmask from the operand.
+error EIP712DomainFieldsInvalid(uint256 fields);
