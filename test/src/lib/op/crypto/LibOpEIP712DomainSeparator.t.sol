@@ -64,6 +64,16 @@ contract LibOpEIP712DomainSeparatorTest is OpTest {
         return inputs;
     }
 
+    /// A string of at most 31 bytes, the most OpenZeppelin `EIP712` accepts,
+    /// taken from the start of `word`.
+    function shortString(bytes32 word) internal pure returns (string memory) {
+        bytes memory s = new bytes(uint256(word) % 32);
+        for (uint256 i = 0; i < s.length; i++) {
+            s[i] = word[i];
+        }
+        return string(s);
+    }
+
     function wordsInputs(uint256 fields, bytes32[5] memory words) internal pure returns (StackItem[] memory) {
         StackItem[] memory inputs = new StackItem[](fieldCount(fields));
         for (uint256 i = 0; i < inputs.length; i++) {
@@ -153,13 +163,12 @@ contract LibOpEIP712DomainSeparatorTest is OpTest {
 
     /// An OpenZeppelin `EIP712` contract's ERC-5267 domain, fed through run,
     /// gives that contract's own domain separator.
-    function testOpEIP712DomainSeparatorRunMatchesEIP712Contract(
-        string memory name,
-        string memory version,
-        uint64 chainId
-    ) external {
+    function testOpEIP712DomainSeparatorRunMatchesEIP712Contract(bytes32 nameWord, bytes32 versionWord, uint64 chainId)
+        external
+    {
         vm.chainId(chainId);
-        EIP712DomainSeparatorSource source = new EIP712DomainSeparatorSource(name, version);
+        EIP712DomainSeparatorSource source =
+            new EIP712DomainSeparatorSource(shortString(nameWord), shortString(versionWord));
         (
             bytes1 fields,
             string memory domainName,
