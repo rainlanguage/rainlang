@@ -77,7 +77,7 @@ contract LibParseOperandHandleOperandTest is Test {
         values[0] = bytes32(uint256(1));
         state.operandValues = values;
 
-        // Index 4 (bitwise-and), 8 (bitwise-or), 12 (hash) all use
+        // Index 4 (bitwise-and), 8 (bitwise-or), 13 (hash) all use
         // handleOperandDisallowed.
         vm.expectRevert(abi.encodeWithSelector(UnexpectedOperand.selector));
         this.handleOperandExternal(state, 4);
@@ -86,6 +86,6 @@ contract LibParseOperandHandleOperandTest is Test {
         this.handleOperandExternal(state, 8);
 
         vm.expectRevert(abi.encodeWithSelector(UnexpectedOperand.selector));
-        this.handleOperandExternal(state, 12);
+        this.handleOperandExternal(state, 13);
     }
 }
