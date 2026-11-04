@@ -3,8 +3,8 @@
 pragma solidity =0.8.25;
 
 import {OpTest} from "test/abstract/OpTest.sol";
+import {EIP712DomainSeparatorSource} from "./EIP712DomainSeparatorSource.sol";
 
-import {EIP712} from "@openzeppelin-contracts-5.7.0/utils/cryptography/EIP712.sol";
 import {MessageHashUtils} from "@openzeppelin-contracts-5.7.0/utils/cryptography/MessageHashUtils.sol";
 
 import {LibOpEIP712DomainSeparator} from "../../../../../src/lib/op/crypto/LibOpEIP712DomainSeparator.sol";
@@ -16,16 +16,6 @@ import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
-
-/// @title EIP712DomainSeparatorSource
-/// @notice An OpenZeppelin `EIP712` contract exposing its domain separator.
-contract EIP712DomainSeparatorSource is EIP712 {
-    constructor(string memory name, string memory version) EIP712(name, version) {}
-
-    function domainSeparator() external view returns (bytes32) {
-        return _domainSeparatorV4();
-    }
-}
 
 /// @title LibOpEIP712DomainSeparatorTest
 /// @notice Test the runtime and integrity time logic of
