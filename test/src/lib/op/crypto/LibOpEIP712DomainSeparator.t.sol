@@ -238,7 +238,9 @@ contract LibOpEIP712DomainSeparatorTest is OpTest {
         );
         assertEq(
             StackItem.unwrap(word[0]),
-            MessageHashUtils.toDomainSeparator(bytes1(0x03), "example.org/a/b", "1", 0, address(0), bytes32(0))
+            MessageHashUtils.toDomainSeparator(
+                bytes1(0x03), string("example.org/a/b"), string("1"), 0, address(0), bytes32(0)
+            )
         );
         assertEq(StackItem.unwrap(word[0]), StackItem.unwrap(handBuilt[0]));
     }
@@ -251,7 +253,7 @@ contract LibOpEIP712DomainSeparatorTest is OpTest {
         assertEq(StackItem.unwrap(stack[0]), Float.unwrap(LibDecimalFloat.packLossless(9, 0)));
         assertEq(
             StackItem.unwrap(stack[1]),
-            MessageHashUtils.toDomainSeparator(bytes1(0x01), "a", "", 0, address(0), bytes32(0))
+            MessageHashUtils.toDomainSeparator(bytes1(0x01), string("a"), string(""), 0, address(0), bytes32(0))
         );
         assertEq(StackItem.unwrap(stack[2]), Float.unwrap(LibDecimalFloat.packLossless(5, 0)));
         assertEq(kvs.length, 0);
