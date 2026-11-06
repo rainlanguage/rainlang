@@ -69,8 +69,8 @@ library LibParseLiteralEIP712Domain {
         view
         returns (bytes32)
     {
-        bytes memory typeString;
-        bytes memory encoded;
+        bytes memory typeString = "";
+        bytes memory encoded = "";
         uint256 nextField = 0;
         cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
         if (cursor >= end) {
@@ -216,11 +216,13 @@ library LibParseLiteralEIP712Domain {
         if (cursor + 1 >= end || prefix != uint256(uint16(bytes2("0x")))) {
             revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
         }
+        //slither-disable-next-line unused-return
         (uint256 hexStart, uint256 hexEnd,) = state.boundHex(cursor, end);
         if (hexEnd - hexStart != digits) {
             revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
         }
-        return state.parseHex(cursor, end);
+        (uint256 valueEnd, bytes32 value) = state.parseHex(cursor, end);
+        return (valueEnd, value);
     }
 
     /// @notice Maps a field keyword region to its canonical index.
