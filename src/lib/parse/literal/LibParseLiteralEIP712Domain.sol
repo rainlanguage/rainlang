@@ -118,7 +118,7 @@ library LibParseLiteralEIP712Domain {
         if (field == EIP712_DOMAIN_FIELD_CHAIN_ID) {
             return parseDecimal(state, cursor, end);
         }
-        return parseFixedHex(state, cursor, end, field == EIP712_DOMAIN_FIELD_SALT ? 0x40 : 0x28);
+        return parseFixedHex(state, cursor, end, field == EIP712_DOMAIN_FIELD_SALT ? uint256(0x40) : uint256(0x28));
     }
 
     /// @notice Parses a `"..."` value as the keccak256 of its contents.
@@ -193,10 +193,11 @@ library LibParseLiteralEIP712Domain {
         pure
         returns (uint256, bytes32)
     {
-        if (
-            cursor + 1 >= end || charAt(cursor) != uint256(uint8(bytes1("0")))
-                || charAt(cursor + 1) != uint256(uint8(bytes1("x")))
-        ) {
+        uint256 prefix;
+        assembly ("memory-safe") {
+            prefix := shr(0xf0, mload(cursor))
+        }
+        if (cursor + 1 >= end || prefix != uint256(uint16(bytes2("0x")))) {
             revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
         }
         (uint256 hexStart, uint256 hexEnd,) = state.boundHex(cursor, end);
