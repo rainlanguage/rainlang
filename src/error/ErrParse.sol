@@ -218,3 +218,7 @@ error EIP712DomainFieldOutOfOrder(uint256 offset);
 /// malformed for its field's type.
 /// @param offset The byte offset in the source where the error occurred.
 error MalformedEIP712DomainValue(uint256 offset);
+
+/// @notice An `eip712-domain-separator` literal body has no fields.
+/// @param offset The byte offset in the source where the error occurred.
+error EIP712DomainNoFields(uint256 offset);

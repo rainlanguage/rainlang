@@ -8,7 +8,8 @@ import {LibParseLiteralHex} from "./LibParseLiteralHex.sol";
 import {
     UnknownEIP712DomainField,
     EIP712DomainFieldOutOfOrder,
-    MalformedEIP712DomainValue
+    MalformedEIP712DomainValue,
+    EIP712DomainNoFields
 } from "../../../error/ErrParse.sol";
 import {
     CMASK_WHITESPACE,
@@ -32,7 +33,7 @@ uint256 constant EIP712_DOMAIN_FIELD_UNKNOWN = 5;
 /// @notice Native `[eip712-domain-separator ...]` literal: the EIP-712 domain
 /// separator of the listed `EIP712Domain` fields, computed at parse time.
 /// The body is whitespace separated `field=value` items in canonical
-/// `EIP712Domain` order, each field at most once, any subset:
+/// `EIP712Domain` order, each field at most once, any non-empty subset:
 /// - `name="..."`, `version="..."`: printable ASCII except `"` and `]`.
 /// - `chainId=<decimal>`, or bare `chainId` for the parsing chain's
 ///   `block.chainid`.
@@ -64,6 +65,9 @@ library LibParseLiteralEIP712Domain {
         bytes memory encoded;
         uint256 nextField = 0;
         cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
+        if (cursor >= end) {
+            revert EIP712DomainNoFields(state.parseErrorOffset(cursor));
+        }
         while (cursor < end) {
             uint256 fieldStart = cursor;
             cursor = LibParseChar.skipMask(cursor, end, CMASK_LOWER_ALPHA_A_Z | CMASK_UPPER_ALPHA_A_Z);
