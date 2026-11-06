@@ -224,6 +224,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         bytes32 expected = chainIdSeparator(coefficient * 10 ** exponent);
         bytes memory c = bytes(vm.toString(coefficient));
         bytes memory e = bytes(vm.toString(exponent));
+        bytes memory eMinusOne = exponent == 0 ? bytes("-1") : bytes(vm.toString(exponent - 1));
         bytes[7] memory forms = [
             bytes(vm.toString(coefficient * 10 ** exponent)),
             bytes.concat(c, "e", e),
@@ -231,7 +232,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
             bytes.concat(c, "e+", e),
             bytes.concat("00", c, "e", e),
             bytes.concat(c, ".0e", e),
-            bytes.concat(c, "0e", bytes(vm.toString(int256(exponent) - 1)))
+            bytes.concat(c, "0e", eMinusOne)
         ];
         for (uint256 i = 0; i < forms.length; i++) {
             bytes memory body = bytes.concat("chain-id ", forms[i]);
