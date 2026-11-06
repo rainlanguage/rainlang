@@ -5,6 +5,8 @@ pragma solidity ^0.8.25;
 import {ParseState} from "../LibParseState.sol";
 import {LibParseError} from "../LibParseError.sol";
 import {LibParseLiteralHex} from "./LibParseLiteralHex.sol";
+import {LibParseLiteralDecimal} from "./LibParseLiteralDecimal.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
 import {
     UnknownEIP712DomainField,
     EIP712DomainFieldOutOfOrder,
@@ -38,15 +40,15 @@ uint256 constant EIP712_DOMAIN_FIELD_UNKNOWN = 5;
 /// separator of the listed `EIP712Domain` fields, computed at parse time.
 /// The body is whitespace separated field keywords, each followed by its
 /// value, in canonical `EIP712Domain` order, each field at most once, any
-/// non-empty subset, e.g. `[eip712-domain-separator name prices version 1]`:
-/// - `name <value>`, `version <value>`: the keccak256 of the value, which is
-///   `"..."` quoted when it contains whitespace.
-/// - `chainId <decimal>`, or bare `chainId` for the parsing chain's
-///   `block.chainid` when the next token does not start with a digit.
-/// - `verifyingContract 0x` and exactly 40 hex digits.
+/// non-empty subset, e.g.
+/// `[eip712-domain-separator name "prices" version "1" chain-id 1]`:
+/// - `name "..."`, `version "..."`: the keccak256 of a Rainlang string
+///   literal's contents.
+/// - `chain-id <decimal>`, a Rainlang decimal literal that is a non-negative
+///   integer, or bare `chain-id` for the parsing chain's `block.chainid` when
+///   the next token does not start with a digit.
+/// - `verifying-contract 0x` and exactly 40 hex digits.
 /// - `salt 0x` and exactly 64 hex digits.
-/// After every field but `chainId` the next token is its value, even if it is
-/// a field keyword.
 library LibParseLiteralEIP712Domain {
     using LibParseError for ParseState;
     using LibParseLiteralHex for ParseState;
@@ -129,73 +131,55 @@ library LibParseLiteralEIP712Domain {
             return parseStringHash(state, cursor, end);
         }
         if (field == EIP712_DOMAIN_FIELD_CHAIN_ID) {
-            return parseDecimal(state, cursor, end);
+            return parseChainId(state, cursor, end);
         }
         return parseFixedHex(state, cursor, end, field == EIP712_DOMAIN_FIELD_SALT ? uint256(0x40) : uint256(0x28));
     }
 
-    /// @notice Parses a string value as the keccak256 of its contents: the
-    /// bytes between `"` quotes if it starts with `"`, else the token.
+    /// @notice Parses a `"..."` string literal value as the keccak256 of its
+    /// contents.
     /// @param state The current parse state.
     /// @param cursor The start of the value, at a non-whitespace char.
     /// @param end The end of the body.
-    /// @return The cursor after the value.
+    /// @return The cursor after the closing quote.
     /// @return The hash of the string contents.
     function parseStringHash(ParseState memory state, uint256 cursor, uint256 end)
         internal
         pure
         returns (uint256, bytes32)
     {
-        uint256 innerStart = cursor;
-        uint256 innerEnd;
-        uint256 valueEnd;
-        if (LibParseChar.isMask(cursor, end, CMASK_STRING_LITERAL_HEAD) != 0) {
-            innerStart = cursor + 1;
-            innerEnd = LibParseChar.skipMask(innerStart, end, CMASK_STRING_LITERAL_TAIL | CMASK_WHITESPACE);
-            if (LibParseChar.isMask(innerEnd, end, CMASK_STRING_LITERAL_END) == 0) {
-                revert MalformedEIP712DomainValue(state.parseErrorOffset(innerEnd));
-            }
-            valueEnd = innerEnd + 1;
-        } else {
-            innerEnd = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
-            valueEnd = innerEnd;
+        if (LibParseChar.isMask(cursor, end, CMASK_STRING_LITERAL_HEAD) == 0) {
+            revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+        }
+        uint256 innerStart = cursor + 1;
+        uint256 innerEnd = LibParseChar.skipMask(innerStart, end, CMASK_STRING_LITERAL_TAIL);
+        if (LibParseChar.isMask(innerEnd, end, CMASK_STRING_LITERAL_END) == 0) {
+            revert MalformedEIP712DomainValue(state.parseErrorOffset(innerEnd));
         }
         bytes32 stringHash;
         assembly ("memory-safe") {
             stringHash := keccak256(innerStart, sub(innerEnd, innerStart))
         }
-        return (valueEnd, stringHash);
+        return (innerEnd + 1, stringHash);
     }
 
-    /// @notice Parses an unsigned decimal integer.
+    /// @notice Parses a decimal literal value that is a non-negative integer.
     /// @param state The current parse state.
     /// @param cursor The start of the value, at a digit.
     /// @param end The end of the body.
-    /// @return The cursor after the digits.
+    /// @return The cursor after the decimal literal.
     /// @return The integer.
-    function parseDecimal(ParseState memory state, uint256 cursor, uint256 end)
+    function parseChainId(ParseState memory state, uint256 cursor, uint256 end)
         internal
         pure
         returns (uint256, bytes32)
     {
-        uint256 start = cursor;
-        uint256 value = 0;
-        while (cursor < end) {
-            uint256 charByte = charAt(cursor);
-            //slither-disable-next-line incorrect-shift
-            //forge-lint: disable-next-line(incorrect-shift)
-            if (((uint256(1) << charByte) & CMASK_NUMERIC_0_9) == 0) {
-                break;
-            }
-            //forge-lint: disable-next-line(unsafe-typecast)
-            uint256 digit = charByte - uint256(uint8(bytes1("0")));
-            if (value > (type(uint256).max - digit) / 10) {
-                revert MalformedEIP712DomainValue(state.parseErrorOffset(start));
-            }
-            value = value * 10 + digit;
-            ++cursor;
+        (uint256 valueEnd, bytes32 packed) = LibParseLiteralDecimal.parseDecimalFloatPacked(state, cursor, end);
+        (uint256 chainId, bool lossless) = LibDecimalFloat.toFixedDecimalLossy(Float.wrap(packed), 0);
+        if (!lossless) {
+            revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
         }
-        return (cursor, bytes32(value));
+        return (valueEnd, bytes32(chainId));
     }
 
     /// @notice Parses `0x` and exactly `digits` hex digits.
@@ -238,10 +222,10 @@ library LibParseLiteralEIP712Domain {
         if (regionEquals(start, end, "version")) {
             return EIP712_DOMAIN_FIELD_VERSION;
         }
-        if (regionEquals(start, end, "chainId")) {
+        if (regionEquals(start, end, "chain-id")) {
             return EIP712_DOMAIN_FIELD_CHAIN_ID;
         }
-        if (regionEquals(start, end, "verifyingContract")) {
+        if (regionEquals(start, end, "verifying-contract")) {
             return EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT;
         }
         if (regionEquals(start, end, "salt")) {
@@ -284,16 +268,5 @@ library LibParseLiteralEIP712Domain {
             regionHash := keccak256(start, length)
         }
         return regionHash == keccak256(expected);
-    }
-
-    /// @notice The byte at `cursor`.
-    /// @param cursor The memory position.
-    /// @return The byte value.
-    function charAt(uint256 cursor) internal pure returns (uint256) {
-        uint256 charByte;
-        assembly ("memory-safe") {
-            charByte := byte(0, mload(cursor))
-        }
-        return charByte;
     }
 }
