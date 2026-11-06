@@ -203,3 +203,22 @@ error UppercaseHexPrefix(uint256 offset);
 /// items per line and per source.
 /// @param offset The byte offset in the source where the error occurred.
 error LHSItemCountOverflow(uint256 offset);
+
+/// @notice An `eip712-domain-separator` literal named a field that is not one
+/// of the five `EIP712Domain` fields.
+/// @param offset The byte offset in the source where the error occurred.
+error UnknownEIP712DomainField(uint256 offset);
+
+/// @notice An `eip712-domain-separator` literal repeated a field or listed it
+/// out of the canonical `EIP712Domain` order.
+/// @param offset The byte offset in the source where the error occurred.
+error EIP712DomainFieldOutOfOrder(uint256 offset);
+
+/// @notice An `eip712-domain-separator` literal field value is missing or
+/// malformed for its field's type.
+/// @param offset The byte offset in the source where the error occurred.
+error MalformedEIP712DomainValue(uint256 offset);
+
+/// @notice An `eip712-domain-separator` literal body has no fields.
+/// @param offset The byte offset in the source where the error occurred.
+error EIP712DomainNoFields(uint256 offset);
