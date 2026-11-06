@@ -9,6 +9,7 @@ import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 import {MalformedEIP712DomainValue} from "../../../../src/error/ErrParse.sol";
+import {MalformedDecimalPoint} from "rain-math-float-0.3.11/src/error/ErrParse.sol";
 import {ISubParserV4} from "../../../../src/interface/ISubParserV4.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {ConstantReturningSubParser} from "./ConstantReturningSubParser.sol";
@@ -34,15 +35,16 @@ contract LibParseLiteralEIP712DomainSeparatorTest is Test {
 
     /// The literal in an expression is its domain separator constant.
     function testParseEIP712DomainSeparatorLiteralIsConstant() external view {
-        (, bytes32[] memory constants) = this.externalParse("_: [eip712-domain-separator name prices version 1];");
+        (, bytes32[] memory constants) =
+            this.externalParse("_: [eip712-domain-separator name \"prices\" version \"1\"];");
         assertEq(constants.length, 1);
         assertEq(constants[0], openZeppelinSeparator(bytes1(0x03), "prices", "1", 0, address(0), 0));
     }
 
-    /// A bare `chainId` in an expression is the parsing chain's id.
+    /// A bare `chain-id` in an expression is the parsing chain's id.
     function testParseEIP712DomainSeparatorLiteralBareChainId(uint64 chainId) external {
         vm.chainId(chainId);
-        (, bytes32[] memory constants) = this.externalParse("_: [eip712-domain-separator name prices chainId];");
+        (, bytes32[] memory constants) = this.externalParse("_: [eip712-domain-separator name \"prices\" chain-id];");
         assertEq(constants.length, 1);
         assertEq(constants[0], openZeppelinSeparator(bytes1(0x05), "prices", "", chainId, address(0), 0));
     }
@@ -60,7 +62,7 @@ contract LibParseLiteralEIP712DomainSeparatorTest is Test {
             string.concat(
                 "using-words-from ",
                 address(sub).toHexString(),
-                " _ _: [eip712-domain-separator name prices version 1] [other-dispatch body];"
+                " _ _: [eip712-domain-separator name \"prices\" version \"1\"] [other-dispatch body];"
             )
         );
         bytes32 separator = openZeppelinSeparator(bytes1(0x03), "prices", "1", 0, address(0), 0);
@@ -69,9 +71,31 @@ contract LibParseLiteralEIP712DomainSeparatorTest is Test {
         assertTrue(constants[0] == bytes32(uint256(99)) || constants[1] == bytes32(uint256(99)));
     }
 
-    /// A refusal carries its offset in the whole source.
+    /// Every field in one literal, with a decimal literal `chain-id`.
+    function testParseEIP712DomainSeparatorLiteralAllFields(address verifyingContract, bytes32 salt) external view {
+        (, bytes32[] memory constants) = this.externalParse(
+            string.concat(
+                "_: [eip712-domain-separator name \"prices\" version \"1\" chain-id 1e3 verifying-contract ",
+                verifyingContract.toHexString(),
+                " salt ",
+                vm.toString(salt),
+                "];"
+            )
+        );
+        assertEq(constants.length, 1);
+        assertEq(constants[0], openZeppelinSeparator(bytes1(0x1f), "prices", "1", 1000, verifyingContract, salt));
+    }
+
+    /// Refusals carry their offset in the whole source, including the decimal
+    /// parser's own errors.
     function testParseEIP712DomainSeparatorLiteralRefusalOffset() external {
         vm.expectRevert(abi.encodeWithSelector(MalformedEIP712DomainValue.selector, LibParseError.tagErrorOffset(32)));
         this.externalParse("_: [eip712-domain-separator name];");
+        vm.expectRevert(abi.encodeWithSelector(MalformedEIP712DomainValue.selector, LibParseError.tagErrorOffset(33)));
+        this.externalParse("_: [eip712-domain-separator name prices];");
+        vm.expectRevert(abi.encodeWithSelector(MalformedEIP712DomainValue.selector, LibParseError.tagErrorOffset(37)));
+        this.externalParse("_: [eip712-domain-separator chain-id 1.5];");
+        vm.expectRevert(abi.encodeWithSelector(MalformedDecimalPoint.selector, LibParseError.tagErrorOffset(39)));
+        this.externalParse("_: [eip712-domain-separator chain-id 1.];");
     }
 }

@@ -389,7 +389,7 @@ contract LibParseLiteralSubParseableTest is Test {
         mockAcceptEveryLiteral(subParser);
         vm.expectCall(subParser, abi.encodeWithSelector(ISubParserV4.subParseLiteral2.selector), 0);
         assertEq(
-            this.externalParseWithSubParser("[eip712-domain-separator name prices version 1]", subParser),
+            this.externalParseWithSubParser("[eip712-domain-separator name \"prices\" version \"1\"]", subParser),
             openZeppelinSeparator(bytes1(0x03), "prices", "1", 0, address(0), 0)
         );
     }
@@ -409,7 +409,7 @@ contract LibParseLiteralSubParseableTest is Test {
         for (uint256 i = 0; i < dispatches.length; i++) {
             assertEq(
                 this.externalParseWithSubParser(
-                    bytes(string.concat("[", dispatches[i], " name prices version 1]")), subParser
+                    bytes(string.concat("[", dispatches[i], " name \"prices\" version \"1\"]")), subParser
                 ),
                 bytes32(uint256(99))
             );
@@ -429,5 +429,8 @@ contract LibParseLiteralSubParseableTest is Test {
         checkEIP712DomainRefusal("[eip712-domain-separator foo]", UnknownEIP712DomainField.selector, 25);
         checkEIP712DomainRefusal("[eip712-domain-separator name]", MalformedEIP712DomainValue.selector, 29);
         checkEIP712DomainRefusal("[eip712-domain-separator name ]", MalformedEIP712DomainValue.selector, 30);
+        checkEIP712DomainRefusal("[eip712-domain-separator name prices]", MalformedEIP712DomainValue.selector, 30);
+        checkEIP712DomainRefusal("[eip712-domain-separator name \"prices]", MalformedEIP712DomainValue.selector, 37);
+        checkEIP712DomainRefusal("[eip712-domain-separator chain-id 1.5]", MalformedEIP712DomainValue.selector, 34);
     }
 }
