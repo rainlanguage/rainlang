@@ -30,6 +30,17 @@ contract LibParseLiteralSubParseableTest is Test {
     using LibParseState for ParseState;
     using LibParseLiteralSubParseable for ParseState;
 
+    function openZeppelinSeparator(
+        bytes1 fields,
+        string memory name,
+        string memory version,
+        uint256 chainId,
+        address verifyingContract,
+        bytes32 salt
+    ) internal pure returns (bytes32) {
+        return MessageHashUtils.toDomainSeparator(fields, name, version, chainId, verifyingContract, salt);
+    }
+
     function checkParseSubParseable(
         string memory data,
         string memory expectedDispatch,
@@ -376,7 +387,7 @@ contract LibParseLiteralSubParseableTest is Test {
         vm.expectCall(subParser, abi.encodeWithSelector(ISubParserV4.subParseLiteral2.selector), 0);
         assertEq(
             this.externalParseWithSubParser("[eip712-domain-separator name prices version 1]", subParser),
-            MessageHashUtils.toDomainSeparator(bytes1(0x03), "prices", "1", 0, address(0), 0)
+            openZeppelinSeparator(bytes1(0x03), "prices", "1", 0, address(0), 0)
         );
     }
 

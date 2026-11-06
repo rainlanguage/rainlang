@@ -54,6 +54,17 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
     /// @dev Any body char that can be part of an unquoted token.
     uint256 constant TOKEN_MASK = CMASK_PRINTABLE & ~CMASK_WHITESPACE & ~CMASK_RIGHT_SQUARE_BRACKET;
 
+    function openZeppelinSeparator(
+        bytes1 fields,
+        string memory name,
+        string memory version,
+        uint256 chainId,
+        address verifyingContract,
+        bytes32 salt
+    ) internal pure returns (bytes32) {
+        return MessageHashUtils.toDomainSeparator(fields, name, version, chainId, verifyingContract, salt);
+    }
+
     function parseDomainSeparatorExternal(bytes memory body) external view returns (bytes32) {
         ParseState memory state = LibParseState.newState(body, "", "", "");
         uint256 cursor = Pointer.unwrap(state.data.dataPointer());
@@ -151,7 +162,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
             bytes memory body = bytes.concat(leading, domainBody(mask, spelled, separator), trailing);
             assertEq(
                 this.parseDomainSeparatorExternal(body),
-                MessageHashUtils.toDomainSeparator(
+                openZeppelinSeparator(
                     bytes1(uint8(mask)),
                     values.name,
                     values.version,
@@ -176,7 +187,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
             if (mask & 4 == 0) continue;
             assertEq(
                 this.parseDomainSeparatorExternal(domainBody(mask, spelled, " ")),
-                MessageHashUtils.toDomainSeparator(bytes1(uint8(mask)), "prices", "1", chainId, verifyingContract, salt)
+                openZeppelinSeparator(bytes1(uint8(mask)), "prices", "1", chainId, verifyingContract, salt)
             );
         }
     }
@@ -186,24 +197,24 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         vm.chainId(blockChainId);
         assertEq(
             this.parseDomainSeparatorExternal(bytes.concat("chainId ", bytes(vm.toString(chainId)))),
-            MessageHashUtils.toDomainSeparator(bytes1(0x04), "", "", chainId, address(0), 0)
+            openZeppelinSeparator(bytes1(0x04), "", "", chainId, address(0), 0)
         );
     }
 
     /// Known decimal spellings: zero, leading zeros, the uint256 max.
     function testDomainSeparatorExplicitChainIdDecimals() external view {
-        bytes32 zero = MessageHashUtils.toDomainSeparator(bytes1(0x04), "", "", 0, address(0), 0);
+        bytes32 zero = openZeppelinSeparator(bytes1(0x04), "", "", 0, address(0), 0);
         assertEq(this.parseDomainSeparatorExternal("chainId 0"), zero);
         assertEq(this.parseDomainSeparatorExternal("chainId 000"), zero);
         assertEq(
             this.parseDomainSeparatorExternal("chainId 007"),
-            MessageHashUtils.toDomainSeparator(bytes1(0x04), "", "", 7, address(0), 0)
+            openZeppelinSeparator(bytes1(0x04), "", "", 7, address(0), 0)
         );
         assertEq(
             this.parseDomainSeparatorExternal(
                 "chainId 115792089237316195423570985008687907853269984665640564039457584007913129639935"
             ),
-            MessageHashUtils.toDomainSeparator(bytes1(0x04), "", "", type(uint256).max, address(0), 0)
+            openZeppelinSeparator(bytes1(0x04), "", "", type(uint256).max, address(0), 0)
         );
     }
 
@@ -229,15 +240,15 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
     function testDomainSeparatorQuotedAndUnquotedKnown() external view {
         assertEq(
             this.parseDomainSeparatorExternal("name \"two words\" version \"\""),
-            MessageHashUtils.toDomainSeparator(bytes1(0x03), "two words", "", 0, address(0), 0)
+            openZeppelinSeparator(bytes1(0x03), "two words", "", 0, address(0), 0)
         );
         assertEq(
             this.parseDomainSeparatorExternal("name \" \t\n\r\""),
-            MessageHashUtils.toDomainSeparator(bytes1(0x01), " \t\n\r", "", 0, address(0), 0)
+            openZeppelinSeparator(bytes1(0x01), " \t\n\r", "", 0, address(0), 0)
         );
         assertEq(
             this.parseDomainSeparatorExternal("name a\"b\" version 1"),
-            MessageHashUtils.toDomainSeparator(bytes1(0x03), "a\"b\"", "1", 0, address(0), 0)
+            openZeppelinSeparator(bytes1(0x03), "a\"b\"", "1", 0, address(0), 0)
         );
     }
 
@@ -248,15 +259,15 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         bytes memory value = spellString(string(keyword(field)), quoted);
         assertEq(
             this.parseDomainSeparatorExternal(bytes.concat("name ", value)),
-            MessageHashUtils.toDomainSeparator(bytes1(0x01), string(keyword(field)), "", 0, address(0), 0)
+            openZeppelinSeparator(bytes1(0x01), string(keyword(field)), "", 0, address(0), 0)
         );
         assertEq(
             this.parseDomainSeparatorExternal(bytes.concat("version ", value)),
-            MessageHashUtils.toDomainSeparator(bytes1(0x02), "", string(keyword(field)), 0, address(0), 0)
+            openZeppelinSeparator(bytes1(0x02), "", string(keyword(field)), 0, address(0), 0)
         );
         assertEq(
             this.parseDomainSeparatorExternal(bytes.concat("name ", value, " version ", value, " chainId")),
-            MessageHashUtils.toDomainSeparator(
+            openZeppelinSeparator(
                 bytes1(0x07), string(keyword(field)), string(keyword(field)), block.chainid, address(0), 0
             )
         );
@@ -424,7 +435,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
                     "verifyingContract 0xABCDEFABCDEFABCDEFABCDEFABCDEFABCDEFABCD salt 0x", saltZeros, "ABCDEF"
                 )
             ),
-            MessageHashUtils.toDomainSeparator(
+            openZeppelinSeparator(
                     bytes1(0x18),
                     "",
                     "",

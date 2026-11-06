@@ -17,6 +17,17 @@ contract LibParseLiteralEIP712DomainSeparatorTest is Test {
     using LibParse for ParseState;
     using Strings for address;
 
+    function openZeppelinSeparator(
+        bytes1 fields,
+        string memory name,
+        string memory version,
+        uint256 chainId,
+        address verifyingContract,
+        bytes32 salt
+    ) internal pure returns (bytes32) {
+        return MessageHashUtils.toDomainSeparator(fields, name, version, chainId, verifyingContract, salt);
+    }
+
     function externalParse(string memory src) external view returns (bytes memory, bytes32[] memory) {
         return LibMetaFixture.newState(src).parse();
     }
@@ -25,7 +36,7 @@ contract LibParseLiteralEIP712DomainSeparatorTest is Test {
     function testParseEIP712DomainSeparatorLiteralIsConstant() external view {
         (, bytes32[] memory constants) = this.externalParse("_: [eip712-domain-separator name prices version 1];");
         assertEq(constants.length, 1);
-        assertEq(constants[0], MessageHashUtils.toDomainSeparator(bytes1(0x03), "prices", "1", 0, address(0), 0));
+        assertEq(constants[0], openZeppelinSeparator(bytes1(0x03), "prices", "1", 0, address(0), 0));
     }
 
     /// A bare `chainId` in an expression is the parsing chain's id.
@@ -33,7 +44,7 @@ contract LibParseLiteralEIP712DomainSeparatorTest is Test {
         vm.chainId(chainId);
         (, bytes32[] memory constants) = this.externalParse("_: [eip712-domain-separator name prices chainId];");
         assertEq(constants.length, 1);
-        assertEq(constants[0], MessageHashUtils.toDomainSeparator(bytes1(0x05), "prices", "", chainId, address(0), 0));
+        assertEq(constants[0], openZeppelinSeparator(bytes1(0x05), "prices", "", chainId, address(0), 0));
     }
 
     /// Under `using-words-from` a sub-parser that accepts every literal
@@ -52,7 +63,7 @@ contract LibParseLiteralEIP712DomainSeparatorTest is Test {
                 " _ _: [eip712-domain-separator name prices version 1] [other-dispatch body];"
             )
         );
-        bytes32 separator = MessageHashUtils.toDomainSeparator(bytes1(0x03), "prices", "1", 0, address(0), 0);
+        bytes32 separator = openZeppelinSeparator(bytes1(0x03), "prices", "1", 0, address(0), 0);
         assertEq(constants.length, 2);
         assertTrue(constants[0] == separator || constants[1] == separator);
         assertTrue(constants[0] == bytes32(uint256(99)) || constants[1] == bytes32(uint256(99)));
