@@ -121,6 +121,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
     {
         bytes memory body;
         for (uint256 field = 0; field < 5; field++) {
+            //forge-lint: disable-next-line(incorrect-shift)
             if (mask & (1 << field) == 0) continue;
             if (body.length > 0) {
                 body = bytes.concat(body, separator);
@@ -163,6 +164,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
             assertEq(
                 this.parseDomainSeparatorExternal(body),
                 openZeppelinSeparator(
+                    //forge-lint: disable-next-line(unsafe-typecast)
                     bytes1(uint8(mask)),
                     values.name,
                     values.version,
@@ -187,6 +189,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
             if (mask & 4 == 0) continue;
             assertEq(
                 this.parseDomainSeparatorExternal(domainBody(mask, spelled, " ")),
+                //forge-lint: disable-next-line(unsafe-typecast)
                 openZeppelinSeparator(bytes1(uint8(mask)), "prices", "1", chainId, verifyingContract, salt)
             );
         }
