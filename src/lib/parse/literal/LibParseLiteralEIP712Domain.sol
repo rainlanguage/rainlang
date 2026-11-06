@@ -13,14 +13,18 @@ import {
 } from "../../../error/ErrParse.sol";
 import {
     CMASK_WHITESPACE,
-    CMASK_LOWER_ALPHA_A_Z,
-    CMASK_UPPER_ALPHA_A_Z,
+    CMASK_PRINTABLE,
     CMASK_NUMERIC_0_9,
-    CMASK_STRING_LITERAL_TAIL
+    CMASK_STRING_LITERAL_HEAD,
+    CMASK_STRING_LITERAL_TAIL,
+    CMASK_STRING_LITERAL_END
 } from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
 
 bytes constant EIP712_DOMAIN_SEPARATOR_DISPATCH = "eip712-domain-separator";
+
+/// @dev A field keyword or unquoted value: printable ASCII except whitespace.
+uint256 constant CMASK_EIP712_DOMAIN_TOKEN = CMASK_PRINTABLE & ~CMASK_WHITESPACE;
 
 uint256 constant EIP712_DOMAIN_FIELD_NAME = 0;
 uint256 constant EIP712_DOMAIN_FIELD_VERSION = 1;
@@ -32,13 +36,17 @@ uint256 constant EIP712_DOMAIN_FIELD_UNKNOWN = 5;
 /// @title LibParseLiteralEIP712Domain
 /// @notice Native `[eip712-domain-separator ...]` literal: the EIP-712 domain
 /// separator of the listed `EIP712Domain` fields, computed at parse time.
-/// The body is whitespace separated `field=value` items in canonical
-/// `EIP712Domain` order, each field at most once, any non-empty subset:
-/// - `name="..."`, `version="..."`: printable ASCII except `"` and `]`.
-/// - `chainId=<decimal>`, or bare `chainId` for the parsing chain's
-///   `block.chainid`.
-/// - `verifyingContract=0x` and exactly 40 hex digits.
-/// - `salt=0x` and exactly 64 hex digits.
+/// The body is whitespace separated field keywords, each followed by its
+/// value, in canonical `EIP712Domain` order, each field at most once, any
+/// non-empty subset, e.g. `[eip712-domain-separator name prices version 1]`:
+/// - `name <value>`, `version <value>`: the keccak256 of the value, which is
+///   `"..."` quoted when it contains whitespace.
+/// - `chainId <decimal>`, or bare `chainId` for the parsing chain's
+///   `block.chainid` when the next token does not start with a digit.
+/// - `verifyingContract 0x` and exactly 40 hex digits.
+/// - `salt 0x` and exactly 64 hex digits.
+/// After every field but `chainId` the next token is its value, even if it is
+/// a field keyword.
 library LibParseLiteralEIP712Domain {
     using LibParseError for ParseState;
     using LibParseLiteralHex for ParseState;
@@ -70,7 +78,7 @@ library LibParseLiteralEIP712Domain {
         }
         while (cursor < end) {
             uint256 fieldStart = cursor;
-            cursor = LibParseChar.skipMask(cursor, end, CMASK_LOWER_ALPHA_A_Z | CMASK_UPPER_ALPHA_A_Z);
+            cursor = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
             uint256 field = fieldIndex(fieldStart, cursor);
             if (field == EIP712_DOMAIN_FIELD_UNKNOWN) {
                 revert UnknownEIP712DomainField(state.parseErrorOffset(fieldStart));
@@ -79,20 +87,21 @@ library LibParseLiteralEIP712Domain {
                 revert EIP712DomainFieldOutOfOrder(state.parseErrorOffset(fieldStart));
             }
             nextField = field + 1;
+            cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
 
             bytes32 value;
-            if (cursor < end && charAt(cursor) == uint256(uint8(bytes1("=")))) {
-                (cursor, value) = parseValue(state, field, cursor + 1, end);
-            } else if (field == EIP712_DOMAIN_FIELD_CHAIN_ID) {
+            if (field == EIP712_DOMAIN_FIELD_CHAIN_ID && LibParseChar.isMask(cursor, end, CMASK_NUMERIC_0_9) == 0) {
                 value = bytes32(block.chainid);
             } else {
-                revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
-            }
-
-            uint256 valueEnd = cursor;
-            cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
-            if (cursor == valueEnd && cursor < end) {
-                revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+                if (cursor >= end) {
+                    revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+                }
+                (cursor, value) = parseValue(state, field, cursor, end);
+                uint256 valueEnd = cursor;
+                cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
+                if (cursor == valueEnd && cursor < end) {
+                    revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+                }
             }
 
             if (typeString.length > 0) {
@@ -107,7 +116,7 @@ library LibParseLiteralEIP712Domain {
     /// @notice Parses one field value as its 32 byte ABI encoding.
     /// @param state The current parse state.
     /// @param field The field index.
-    /// @param cursor The start of the value, after `=`.
+    /// @param cursor The start of the value, before `end`.
     /// @param end The end of the body.
     /// @return The cursor after the value.
     /// @return The encoded value.
@@ -125,36 +134,42 @@ library LibParseLiteralEIP712Domain {
         return parseFixedHex(state, cursor, end, field == EIP712_DOMAIN_FIELD_SALT ? uint256(0x40) : uint256(0x28));
     }
 
-    /// @notice Parses a `"..."` value as the keccak256 of its contents.
+    /// @notice Parses a string value as the keccak256 of its contents: the
+    /// bytes between `"` quotes if it starts with `"`, else the token.
     /// @param state The current parse state.
-    /// @param cursor The start of the value.
+    /// @param cursor The start of the value, at a non-whitespace char.
     /// @param end The end of the body.
-    /// @return The cursor after the closing quote.
+    /// @return The cursor after the value.
     /// @return The hash of the string contents.
     function parseStringHash(ParseState memory state, uint256 cursor, uint256 end)
         internal
         pure
         returns (uint256, bytes32)
     {
-        uint256 quote = uint256(uint8(bytes1("\"")));
-        if (cursor >= end || charAt(cursor) != quote) {
-            revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
-        }
-        uint256 innerStart = cursor + 1;
-        uint256 innerEnd = LibParseChar.skipMask(innerStart, end, CMASK_STRING_LITERAL_TAIL);
-        if (innerEnd >= end || charAt(innerEnd) != quote) {
-            revert MalformedEIP712DomainValue(state.parseErrorOffset(innerEnd));
+        uint256 innerStart = cursor;
+        uint256 innerEnd;
+        uint256 valueEnd;
+        if (LibParseChar.isMask(cursor, end, CMASK_STRING_LITERAL_HEAD) != 0) {
+            innerStart = cursor + 1;
+            innerEnd = LibParseChar.skipMask(innerStart, end, CMASK_STRING_LITERAL_TAIL | CMASK_WHITESPACE);
+            if (LibParseChar.isMask(innerEnd, end, CMASK_STRING_LITERAL_END) == 0) {
+                revert MalformedEIP712DomainValue(state.parseErrorOffset(innerEnd));
+            }
+            valueEnd = innerEnd + 1;
+        } else {
+            innerEnd = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
+            valueEnd = innerEnd;
         }
         bytes32 stringHash;
         assembly ("memory-safe") {
             stringHash := keccak256(innerStart, sub(innerEnd, innerStart))
         }
-        return (innerEnd + 1, stringHash);
+        return (valueEnd, stringHash);
     }
 
     /// @notice Parses an unsigned decimal integer.
     /// @param state The current parse state.
-    /// @param cursor The start of the value.
+    /// @param cursor The start of the value, at a digit.
     /// @param end The end of the body.
     /// @return The cursor after the digits.
     /// @return The integer.
@@ -178,9 +193,6 @@ library LibParseLiteralEIP712Domain {
             }
             value = value * 10 + digit;
             ++cursor;
-        }
-        if (cursor == start) {
-            revert MalformedEIP712DomainValue(state.parseErrorOffset(start));
         }
         return (cursor, bytes32(value));
     }
@@ -211,9 +223,9 @@ library LibParseLiteralEIP712Domain {
         return state.parseHex(cursor, end);
     }
 
-    /// @notice Maps a field name region to its canonical index.
-    /// @param start The start of the field name.
-    /// @param end The end of the field name.
+    /// @notice Maps a field keyword region to its canonical index.
+    /// @param start The start of the field keyword.
+    /// @param end The end of the field keyword.
     /// @return The field index, or `EIP712_DOMAIN_FIELD_UNKNOWN`.
     function fieldIndex(uint256 start, uint256 end) internal pure returns (uint256) {
         if (regionEquals(start, end, "name")) {
