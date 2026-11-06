@@ -187,6 +187,7 @@ library LibParseLiteralEIP712Domain {
             if (((uint256(1) << charByte) & CMASK_NUMERIC_0_9) == 0) {
                 break;
             }
+            //forge-lint: disable-next-line(unsafe-typecast)
             uint256 digit = charByte - uint256(uint8(bytes1("0")));
             if (value > (type(uint256).max - digit) / 10) {
                 revert MalformedEIP712DomainValue(state.parseErrorOffset(start));
@@ -213,6 +214,7 @@ library LibParseLiteralEIP712Domain {
         assembly ("memory-safe") {
             prefix := shr(0xf0, mload(cursor))
         }
+        //forge-lint: disable-next-line(unsafe-typecast)
         if (cursor + 1 >= end || prefix != uint256(uint16(bytes2("0x")))) {
             revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
         }
