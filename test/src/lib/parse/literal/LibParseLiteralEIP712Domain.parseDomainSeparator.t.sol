@@ -224,9 +224,11 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         assertEq(this.parseDomainSeparatorExternal("name \"prices\" version \"1\""), PRICES_V1_DOMAIN_SEPARATOR);
     }
 
-    /// An unquoted token and the same token quoted are the same value.
+    /// An unquoted token without `"` and the same token quoted are the same
+    /// value.
     function testDomainSeparatorQuotedEqualsUnquoted(string memory value) external view {
-        value = conformStringValue(value, false);
+        vm.assume(bytes(value).length > 0);
+        LibConformString.conformStringToMask(value, TOKEN_MASK & ~CMASK_QUOTATION_MARK);
         assertEq(
             this.parseDomainSeparatorExternal(bytes.concat("name ", bytes(value), " version ", bytes(value))),
             this.parseDomainSeparatorExternal(

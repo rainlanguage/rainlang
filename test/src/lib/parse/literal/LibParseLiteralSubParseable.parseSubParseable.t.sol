@@ -24,6 +24,7 @@ import {
 } from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
 import {MessageHashUtils} from "@openzeppelin-contracts-5.7.0/utils/cryptography/MessageHashUtils.sol";
+import {EIP712_DOMAIN_SEPARATOR_DISPATCH} from "../../../../../src/lib/parse/literal/LibParseLiteralEIP712Domain.sol";
 
 contract LibParseLiteralSubParseableTest is Test {
     using LibBytes for bytes;
@@ -180,6 +181,8 @@ contract LibParseLiteralSubParseableTest is Test {
         LibConformString.conformStringToMask(
             dispatch, ~(CMASK_WHITESPACE | CMASK_SUB_PARSEABLE_LITERAL_END) & CMASK_PRINTABLE
         );
+        // The native dispatch never reaches a sub-parser.
+        vm.assume(keccak256(bytes(dispatch)) != keccak256(EIP712_DOMAIN_SEPARATOR_DISPATCH));
         // Whitespace can be any standard rainlang whitespace.
         LibConformString.conformStringToWhitespace(whitespace);
         // Body can be any printable ASCII or whitespace other than the literal
