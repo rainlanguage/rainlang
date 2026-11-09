@@ -149,6 +149,8 @@ contract LibDotrainComposeRefusalsTest is Test {
     function testDuplicateBindingReverts() external {
         vm.expectRevert(abi.encodeWithSelector(DotrainDuplicateBinding.selector, "x"));
         this.externalCompose("---\n#x 1\n#e _: 1;\n#x 2", "e", noBindings());
+        vm.expectRevert(abi.encodeWithSelector(DotrainDuplicateBinding.selector, "x"));
+        this.externalCompose("---\n#x 1\n#x 2\n#e _: 1;", "e", noBindings());
     }
 
     function testUnknownBoundNameReverts() external {
