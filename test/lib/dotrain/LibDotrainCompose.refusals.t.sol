@@ -52,6 +52,8 @@ contract LibDotrainComposeRefusalsTest is Test {
     function testMissingEntrypointReverts() external {
         vm.expectRevert(abi.encodeWithSelector(DotrainEntrypointNotFound.selector, "f"));
         this.externalCompose("---\n#e _: 1;", "f", noBindings());
+        vm.expectRevert(abi.encodeWithSelector(DotrainEntrypointNotFound.selector, "e"));
+        this.externalCompose("#e _: 1;\n---", "e", noBindings());
     }
 
     function testLiteralEntrypointReverts() external {
