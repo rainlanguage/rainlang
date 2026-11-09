@@ -217,7 +217,7 @@ library LibParseLiteralEIP712Domain {
     {
         if (LibParseChar.isMask(cursor, end, CMASK_NUMERIC_0_9) == 0) {
             uint256 tokenEnd = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
-            if (!regionEquals(cursor, tokenEnd, EIP712_DOMAIN_CHAIN_ID_CURRENT)) {
+            if (!regionEqualsSprite(EIP712_DOMAIN_SPRITE, cursor, tokenEnd, EIP712_DOMAIN_SPRITE_CHAIN_ID_CURRENT)) {
                 revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
             }
             return (tokenEnd, bytes32(block.chainid));
