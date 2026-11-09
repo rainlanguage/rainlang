@@ -176,7 +176,7 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         return kind != KIND_ABSENT && kind != KIND_EXPRESSION;
     }
 
-    function reference(Rng memory rng, uint256[NAME_COUNT] memory kinds) internal pure returns (string memory) {
+    function bindingReference(Rng memory rng, uint256[NAME_COUNT] memory kinds) internal pure returns (string memory) {
         uint256 start = draw(rng, NAME_COUNT);
         for (uint256 j = 0; j < NAME_COUNT; j++) {
             uint256 i = (start + j) % NAME_COUNT;
@@ -191,7 +191,7 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         returns (string memory)
     {
         uint256 k = draw(rng, depth < 2 ? 6 : 4);
-        if (k == 0) return reference(rng, kinds);
+        if (k == 0) return bindingReference(rng, kinds);
         if (k == 1) return numericLiteral(rng);
         if (k == 2) return string.concat("\"", text(rng), "\"");
         if (k == 3) return string.concat("[", text(rng), "]");
@@ -241,7 +241,7 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
             uint256 tokens = 1 + draw(rng, 2);
             for (uint256 i = 0; i < tokens; i++) {
                 string memory token = draw(rng, 2) == 0
-                    ? reference(rng, kinds)
+                    ? bindingReference(rng, kinds)
                     : vm.toString(address(uint160(uint256(keccak256(abi.encode(rng.state))))));
                 out = string.concat(out, " ", token);
             }
