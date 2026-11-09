@@ -137,7 +137,7 @@ contract LibDotrainComposeRefusalsTest is Test {
     }
 
     function testNamespacePathInOperandReverts() external {
-        checkUnsupported("---\n#x 1\n#e _: foo<", ".x>();", 1);
+        checkUnsupported("---\n#x 1\n#e _: foo<", ".x>();", 0);
         checkUnsupported("---\n#x 1\n#e _: foo<", "x.y>();", 0);
     }
 
