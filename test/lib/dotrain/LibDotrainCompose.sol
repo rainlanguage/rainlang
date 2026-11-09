@@ -17,6 +17,7 @@ import {
     CMASK_SEMICOLON,
     CMASK_COLON
 } from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
+import {PRAGMA_KEYWORD_BYTES} from "../../../src/lib/parse/LibParsePragma.sol";
 
 /// @dev Rust `str::trim` whitespace within the ASCII dotrain accepts.
 uint256 constant CMASK_TRIM = CMASK_WHITESPACE | CMASK_VERTICAL_TAB | CMASK_FORM_FEED;
@@ -28,6 +29,10 @@ uint256 constant CMASK_WORD_DELIMITER = CMASK_WHITESPACE | CMASK_LEFT_PAREN | CM
 uint256 constant DOTRAIN_KIND_EXPRESSION = 0;
 uint256 constant DOTRAIN_KIND_LITERAL = 1;
 uint256 constant DOTRAIN_KIND_ELIDED = 2;
+
+/// @dev Wraps the entrypoint name in the header `rain dotrain compose` emits.
+string constant DOTRAIN_COMPOSE_HEADER_OPEN = "/* 0. ";
+string constant DOTRAIN_COMPOSE_HEADER_CLOSE = " */ \n";
 
 /// A binding found in the dotrain, as offsets into the source.
 struct DotrainParsedBinding {
@@ -307,9 +312,9 @@ library LibDotrainCompose {
         DotrainParsedBinding memory entry = bindings[entryIndex];
         if (entry.kind != DOTRAIN_KIND_EXPRESSION) revert DotrainEntrypointNotExpression(entrypoint);
         return string.concat(
-            "/* 0. ",
+            DOTRAIN_COMPOSE_HEADER_OPEN,
             entrypoint,
-            " */ \n",
+            DOTRAIN_COMPOSE_HEADER_CLOSE,
             string(transform(source, blanked, bindings, entry.contentStart, entry.contentEnd))
         );
     }
@@ -345,7 +350,7 @@ library LibDotrainCompose {
     {
         bytes memory blanked = state.blanked;
         uint256 cursor = skipWhitespace(blanked, start, end);
-        bytes memory keyword = "using-words-from";
+        bytes memory keyword = PRAGMA_KEYWORD_BYTES;
         uint256 keywordEnd = cursor + keyword.length;
         if (
             keywordEnd > end || keccak256(slice(blanked, cursor, keywordEnd)) != keccak256(keyword)
