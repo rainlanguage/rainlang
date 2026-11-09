@@ -115,6 +115,11 @@ contract LibDotrainComposeRefusalsTest is Test {
         checkUnsupported("---\n#e _: ", "a.b;", 1);
     }
 
+    function testVerticalTabInsideWordReverts() external {
+        checkUnsupported("---\n#x 0x01\n#e _: ", "x\x0by;", 1);
+        checkUnsupported("---\n#x 0x01\n#e _: ", "1\x0bx;", 1);
+    }
+
     function testIdentifierInOperandReverts() external {
         checkUnsupported("---\n#x 1\n#e _: foo<", "0 x>();", 2);
         checkUnsupported("---\n#x 1\n#e _: foo<", "x>();", 0);
