@@ -482,14 +482,14 @@ library LibDotrainCompose {
         while (cursor < end) {
             uint256 argStart = cursor;
             bytes1 head = blanked[cursor];
-            uint256 argEnd = tokenEnd(blanked, cursor, end);
+            uint256 argEnd = skipNonWhitespace(blanked, cursor, end);
             if (head == "\"" || head == "[") {
                 bytes1 closer = head == "[" ? bytes1("]") : head;
                 bool closed = argEnd - cursor > 1 && blanked[argEnd - 1] == closer;
                 while (!closed) {
                     cursor = skipWhitespace(blanked, argEnd, end);
                     if (cursor == end) revert DotrainUnsupported(argStart);
-                    argEnd = tokenEnd(blanked, cursor, end);
+                    argEnd = skipNonWhitespace(blanked, cursor, end);
                     closed = blanked[argEnd - 1] == closer;
                 }
             } else if (charMask(blanked, cursor) & CMASK_NUMERIC_0_9 == 0) {
@@ -499,7 +499,7 @@ library LibDotrainCompose {
         }
     }
 
-    function tokenEnd(bytes memory s, uint256 cursor, uint256 end) internal pure returns (uint256) {
+    function skipNonWhitespace(bytes memory s, uint256 cursor, uint256 end) internal pure returns (uint256) {
         while (cursor < end && charMask(s, cursor) & CMASK_TRIM == 0) {
             cursor++;
         }
