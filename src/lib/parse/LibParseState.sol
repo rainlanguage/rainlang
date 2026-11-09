@@ -492,9 +492,11 @@ library LibParseState {
             for (uint256 offset = 0x20; offset < end; offset += 0x10) {
                 uint256 itemSourceHead = (state.lineTracker >> offset) & 0xFFFF;
                 uint256 opsDepth;
-                uint256 topLevel0Offset = PARSE_STATE_TOP_LEVEL0_OFFSET;
-                assembly ("memory-safe") {
-                    opsDepth := byte(0, mload(add(state, add(topLevel0Offset, topLevelOffset))))
+                {
+                    uint256 topLevel0Offset = PARSE_STATE_TOP_LEVEL0_OFFSET;
+                    assembly ("memory-safe") {
+                        opsDepth := byte(0, mload(add(state, add(topLevel0Offset, topLevelOffset))))
+                    }
                 }
                 for (uint256 i = 1; i <= opsDepth; i++) {
                     {
