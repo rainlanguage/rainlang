@@ -25,6 +25,26 @@ import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
 
 bytes constant EIP712_DOMAIN_SEPARATOR_DISPATCH = "eip712-domain-separator";
 
+bytes constant EIP712_DOMAIN_KEYWORD_NAME = "name";
+bytes constant EIP712_DOMAIN_KEYWORD_VERSION = "version";
+bytes constant EIP712_DOMAIN_KEYWORD_CHAIN_ID = "chain-id";
+bytes constant EIP712_DOMAIN_KEYWORD_VERIFYING_CONTRACT = "verifying-contract";
+bytes constant EIP712_DOMAIN_KEYWORD_SALT = "salt";
+
+bytes constant EIP712_DOMAIN_CHAIN_ID_CURRENT = "current";
+
+bytes constant EIP712_DOMAIN_TYPE_PREFIX = "EIP712Domain(";
+bytes constant EIP712_DOMAIN_TYPE_SUFFIX = ")";
+
+bytes constant EIP712_DOMAIN_MEMBER_NAME = "string name";
+bytes constant EIP712_DOMAIN_MEMBER_VERSION = "string version";
+bytes constant EIP712_DOMAIN_MEMBER_CHAIN_ID = "uint256 chainId";
+bytes constant EIP712_DOMAIN_MEMBER_VERIFYING_CONTRACT = "address verifyingContract";
+bytes constant EIP712_DOMAIN_MEMBER_SALT = "bytes32 salt";
+
+uint256 constant EIP712_DOMAIN_VERIFYING_CONTRACT_HEX_DIGITS = 0x28;
+uint256 constant EIP712_DOMAIN_SALT_HEX_DIGITS = 0x40;
+
 /// @dev A field keyword or the `current` chain id: printable ASCII except
 /// whitespace.
 uint256 constant CMASK_EIP712_DOMAIN_TOKEN = CMASK_PRINTABLE & ~CMASK_WHITESPACE;
@@ -106,7 +126,8 @@ library LibParseLiteralEIP712Domain {
             typeString = bytes.concat(typeString, fieldType(field));
             encoded = bytes.concat(encoded, value);
         }
-        return keccak256(bytes.concat(keccak256(bytes.concat("EIP712Domain(", typeString, ")")), encoded));
+        bytes32 typeHash = keccak256(bytes.concat(EIP712_DOMAIN_TYPE_PREFIX, typeString, EIP712_DOMAIN_TYPE_SUFFIX));
+        return keccak256(bytes.concat(typeHash, encoded));
     }
 
     /// @notice Parses one field value as its 32 byte ABI encoding.
@@ -127,7 +148,10 @@ library LibParseLiteralEIP712Domain {
         if (field == EIP712_DOMAIN_FIELD_CHAIN_ID) {
             return parseChainId(state, cursor, end);
         }
-        return parseFixedHex(state, cursor, end, field == EIP712_DOMAIN_FIELD_SALT ? uint256(0x40) : uint256(0x28));
+        if (field == EIP712_DOMAIN_FIELD_SALT) {
+            return parseFixedHex(state, cursor, end, EIP712_DOMAIN_SALT_HEX_DIGITS);
+        }
+        return parseFixedHex(state, cursor, end, EIP712_DOMAIN_VERIFYING_CONTRACT_HEX_DIGITS);
     }
 
     /// @notice Parses a `"..."` string literal value as the keccak256 of its
@@ -171,7 +195,7 @@ library LibParseLiteralEIP712Domain {
     {
         if (LibParseChar.isMask(cursor, end, CMASK_NUMERIC_0_9) == 0) {
             uint256 tokenEnd = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
-            if (!regionEquals(cursor, tokenEnd, "current")) {
+            if (!regionEquals(cursor, tokenEnd, EIP712_DOMAIN_CHAIN_ID_CURRENT)) {
                 revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
             }
             return (tokenEnd, bytes32(block.chainid));
@@ -218,19 +242,19 @@ library LibParseLiteralEIP712Domain {
     /// @param end The end of the field keyword.
     /// @return The field index, or `EIP712_DOMAIN_FIELD_UNKNOWN`.
     function fieldIndex(uint256 start, uint256 end) internal pure returns (uint256) {
-        if (regionEquals(start, end, "name")) {
+        if (regionEquals(start, end, EIP712_DOMAIN_KEYWORD_NAME)) {
             return EIP712_DOMAIN_FIELD_NAME;
         }
-        if (regionEquals(start, end, "version")) {
+        if (regionEquals(start, end, EIP712_DOMAIN_KEYWORD_VERSION)) {
             return EIP712_DOMAIN_FIELD_VERSION;
         }
-        if (regionEquals(start, end, "chain-id")) {
+        if (regionEquals(start, end, EIP712_DOMAIN_KEYWORD_CHAIN_ID)) {
             return EIP712_DOMAIN_FIELD_CHAIN_ID;
         }
-        if (regionEquals(start, end, "verifying-contract")) {
+        if (regionEquals(start, end, EIP712_DOMAIN_KEYWORD_VERIFYING_CONTRACT)) {
             return EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT;
         }
-        if (regionEquals(start, end, "salt")) {
+        if (regionEquals(start, end, EIP712_DOMAIN_KEYWORD_SALT)) {
             return EIP712_DOMAIN_FIELD_SALT;
         }
         return EIP712_DOMAIN_FIELD_UNKNOWN;
@@ -241,18 +265,18 @@ library LibParseLiteralEIP712Domain {
     /// @return The member, e.g. `string name`.
     function fieldType(uint256 field) internal pure returns (bytes memory) {
         if (field == EIP712_DOMAIN_FIELD_NAME) {
-            return "string name";
+            return EIP712_DOMAIN_MEMBER_NAME;
         }
         if (field == EIP712_DOMAIN_FIELD_VERSION) {
-            return "string version";
+            return EIP712_DOMAIN_MEMBER_VERSION;
         }
         if (field == EIP712_DOMAIN_FIELD_CHAIN_ID) {
-            return "uint256 chainId";
+            return EIP712_DOMAIN_MEMBER_CHAIN_ID;
         }
         if (field == EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT) {
-            return "address verifyingContract";
+            return EIP712_DOMAIN_MEMBER_VERIFYING_CONTRACT;
         }
-        return "bytes32 salt";
+        return EIP712_DOMAIN_MEMBER_SALT;
     }
 
     /// @notice Whether the memory region `[start, end)` equals `expected`.
