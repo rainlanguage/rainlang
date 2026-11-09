@@ -101,7 +101,7 @@ library LibParseLiteralEIP712Domain {
     /// @param dispatchEnd The end of the dispatch.
     /// @return True if the dispatch matches.
     function isDispatch(uint256 dispatchStart, uint256 dispatchEnd) internal pure returns (bool) {
-        return regionEquals(dispatchStart, dispatchEnd, EIP712_DOMAIN_SEPARATOR_DISPATCH);
+        return regionEqualsSprite(EIP712_DOMAIN_SPRITE, dispatchStart, dispatchEnd, EIP712_DOMAIN_SPRITE_DISPATCH);
     }
 
     /// @notice Computes the domain separator from a literal body.
