@@ -62,12 +62,22 @@ library LibParseError {
     /// zero for no error.
     function handleErrorSelector(ParseState memory state, uint256 cursor, bytes4 errorSelector) internal pure {
         if (errorSelector != 0) {
-            uint256 errorOffset = parseErrorOffset(state, cursor);
-            assembly ("memory-safe") {
-                mstore(0, errorSelector)
-                mstore(4, errorOffset)
-                revert(0, 0x24)
-            }
+            revertParseError(state, cursor, errorSelector);
+        }
+    }
+
+    /// @notice Reverts with `errorSelector` and the cursor's error offset,
+    /// the same revert data as `revert Error(state.parseErrorOffset(cursor))`
+    /// for an error with a single `uint256` offset parameter.
+    /// @param state The parser state for error offset calculation.
+    /// @param cursor The cursor position for the error offset.
+    /// @param errorSelector The 4-byte error selector to revert with.
+    function revertParseError(ParseState memory state, uint256 cursor, bytes4 errorSelector) internal pure {
+        uint256 errorOffset = parseErrorOffset(state, cursor);
+        assembly ("memory-safe") {
+            mstore(0, errorSelector)
+            mstore(4, errorOffset)
+            revert(0, 0x24)
         }
     }
 }

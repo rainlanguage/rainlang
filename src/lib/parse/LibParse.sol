@@ -153,7 +153,7 @@ library LibParse {
                 if (char & CMASK_LHS_STACK_HEAD > 0) {
                     // if yang we can't start new stack item
                     if (state.fsm & FSM_YANG_MASK > 0) {
-                        revert UnexpectedLHSChar(state.parseErrorOffset(cursor));
+                        state.revertParseError(cursor, UnexpectedLHSChar.selector);
                     }
 
                     // Named stack item.
@@ -164,7 +164,7 @@ library LibParse {
                         // If the stack name already exists, then we
                         // revert as shadowing is not allowed.
                         if (exists) {
-                            revert DuplicateLHSItem(state.parseErrorOffset(cursor));
+                            state.revertParseError(cursor, DuplicateLHSItem.selector);
                         }
                     }
                     // Anon stack item.
@@ -181,7 +181,7 @@ library LibParse {
                     // / endLine), so reading via `& 0xFF` reliably gives
                     // the true count at this point.
                     if ((state.topLevel1 & 0xFF) == 0xFF || (state.lineTracker & 0xFF) == 0xFF) {
-                        revert LHSItemCountOverflow(state.parseErrorOffset(cursor));
+                        state.revertParseError(cursor, LHSItemCountOverflow.selector);
                     }
                     state.topLevel1++;
                     state.lineTracker++;
@@ -199,9 +199,9 @@ library LibParse {
                     break;
                 } else {
                     if (char & CMASK_COMMENT_HEAD != 0) {
-                        revert UnexpectedComment(state.parseErrorOffset(cursor));
+                        state.revertParseError(cursor, UnexpectedComment.selector);
                     } else {
-                        revert UnexpectedLHSChar(state.parseErrorOffset(cursor));
+                        state.revertParseError(cursor, UnexpectedLHSChar.selector);
                     }
                 }
             }
@@ -231,7 +231,7 @@ library LibParse {
                 if (char & CMASK_RHS_WORD_HEAD > 0) {
                     // If yang we can't start a new word.
                     if (state.fsm & FSM_YANG_MASK > 0) {
-                        revert UnexpectedRHSChar(state.parseErrorOffset(cursor));
+                        state.revertParseError(cursor, UnexpectedRHSChar.selector);
                     }
 
                     // If the word is unknown we need the cursor at the start
@@ -333,7 +333,7 @@ library LibParse {
                 // If this is the end of a word we MUST start a paren.
                 else if (state.fsm & FSM_WORD_END_MASK > 0) {
                     if (char & CMASK_LEFT_PAREN == 0) {
-                        revert ExpectedLeftParen(state.parseErrorOffset(cursor));
+                        state.revertParseError(cursor, ExpectedLeftParen.selector);
                     }
                     // Increase the paren depth by 1.
                     // i.e. move the byte offset by 3
@@ -364,7 +364,7 @@ library LibParse {
                         parenOffset := byte(0, mload(add(state, parenTracker0Offset)))
                     }
                     if (parenOffset == 0) {
-                        revert UnexpectedRightParen(state.parseErrorOffset(cursor));
+                        state.revertParseError(cursor, UnexpectedRightParen.selector);
                     }
                     // Decrease the paren depth by 1.
                     // i.e. move the byte offset by -3.
@@ -398,7 +398,7 @@ library LibParse {
                 // Handle all literals.
                 else if (char & CMASK_LITERAL_HEAD > 0) {
                     if (state.fsm & FSM_YANG_MASK > 0) {
-                        revert UnexpectedRHSChar(state.parseErrorOffset(cursor));
+                        state.revertParseError(cursor, UnexpectedRHSChar.selector);
                     }
                     cursor = state.pushLiteral(cursor, end);
                     state.highwater();
@@ -422,9 +422,9 @@ library LibParse {
                 // Comments aren't allowed in the RHS but we can give a
                 // nicer error message than the default.
                 else if (char & CMASK_COMMENT_HEAD != 0) {
-                    revert UnexpectedComment(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, UnexpectedComment.selector);
                 } else {
-                    revert UnexpectedRHSChar(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, UnexpectedRHSChar.selector);
                 }
             }
             return cursor;
@@ -453,7 +453,7 @@ library LibParse {
                     revert ParserOutOfBounds();
                 }
                 if (state.fsm & FSM_ACTIVE_SOURCE_MASK != 0) {
-                    revert MissingFinalSemi(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, MissingFinalSemi.selector);
                 }
             }
             //slither-disable-next-line unused-return

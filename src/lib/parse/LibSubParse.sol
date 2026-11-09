@@ -401,7 +401,7 @@ library LibSubParse {
                 }
             }
 
-            revert UnsupportedLiteralType(state.parseErrorOffset(dispatchStart));
+            state.revertParseError(dispatchStart, UnsupportedLiteralType.selector);
         }
     }
 
