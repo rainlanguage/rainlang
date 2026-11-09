@@ -43,10 +43,7 @@ contract LibOpStringStripPrefixTest is OpTest {
     }
 
     /// Run matches the reference on independent strings of up to 31 bytes.
-    function testOpStringStripPrefixRun(bytes32 sWord, uint256 sLength, bytes32 pWord, uint256 pLength)
-        external
-        view
-    {
+    function testOpStringStripPrefixRun(bytes32 sWord, uint256 sLength, bytes32 pWord, uint256 pLength) external view {
         referenceCheck(
             LibFuzzString.stackItem(LibFuzzString.leading(sWord, bound(sLength, 0, 31))),
             LibFuzzString.stackItem(LibFuzzString.leading(pWord, bound(pLength, 0, 31)))
@@ -60,10 +57,7 @@ contract LibOpStringStripPrefixTest is OpTest {
     }
 
     /// Stripping a leading slice leaves the rest of the string.
-    function testOpStringStripPrefixRunLeadingSlice(bytes32 word, uint256 length, uint256 prefixLength)
-        external
-        view
-    {
+    function testOpStringStripPrefixRunLeadingSlice(bytes32 word, uint256 length, uint256 prefixLength) external view {
         length = bound(length, 0, 31);
         prefixLength = bound(prefixLength, 0, length);
         bytes memory s = LibFuzzString.leading(word, length);
@@ -94,10 +88,7 @@ contract LibOpStringStripPrefixTest is OpTest {
 
     /// A prefix longer than the string leaves the string unchanged, even when
     /// the string is a prefix of it.
-    function testOpStringStripPrefixRunLongerPrefix(bytes32 word, uint256 length, uint256 prefixLength)
-        external
-        view
-    {
+    function testOpStringStripPrefixRunLongerPrefix(bytes32 word, uint256 length, uint256 prefixLength) external view {
         length = bound(length, 0, 30);
         bytes memory s = LibFuzzString.leading(word, length);
         bytes memory p = LibFuzzString.leading(word, bound(prefixLength, length + 1, 31));
@@ -187,8 +178,6 @@ contract LibOpStringStripPrefixTest is OpTest {
     }
 
     function testOpStringStripPrefixEvalOperandDisallowed() external {
-        checkUnhappyParse(
-            "_: string-strip-prefix<0>(\"a\" \"b\");", abi.encodeWithSelector(UnexpectedOperand.selector)
-        );
+        checkUnhappyParse("_: string-strip-prefix<0>(\"a\" \"b\");", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }

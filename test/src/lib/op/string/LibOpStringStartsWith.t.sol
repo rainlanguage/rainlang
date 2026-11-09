@@ -39,10 +39,7 @@ contract LibOpStringStartsWithTest is OpTest {
     }
 
     /// Run matches the reference on independent strings of up to 31 bytes.
-    function testOpStringStartsWithRun(bytes32 sWord, uint256 sLength, bytes32 pWord, uint256 pLength)
-        external
-        view
-    {
+    function testOpStringStartsWithRun(bytes32 sWord, uint256 sLength, bytes32 pWord, uint256 pLength) external view {
         referenceCheck(
             LibFuzzString.stackItem(LibFuzzString.leading(sWord, bound(sLength, 0, 31))),
             LibFuzzString.stackItem(LibFuzzString.leading(pWord, bound(pLength, 0, 31)))
@@ -57,10 +54,7 @@ contract LibOpStringStartsWithTest is OpTest {
 
     /// Every leading slice of a string, the empty and the whole string
     /// included, is a prefix of it.
-    function testOpStringStartsWithRunLeadingSlice(bytes32 word, uint256 length, uint256 prefixLength)
-        external
-        view
-    {
+    function testOpStringStartsWithRunLeadingSlice(bytes32 word, uint256 length, uint256 prefixLength) external view {
         length = bound(length, 0, 31);
         bytes memory s = LibFuzzString.leading(word, length);
         bytes memory p = LibFuzzString.leading(word, bound(prefixLength, 0, length));
@@ -88,10 +82,7 @@ contract LibOpStringStartsWithTest is OpTest {
 
     /// A prefix longer than the string is not a prefix, even when the string
     /// is a prefix of it.
-    function testOpStringStartsWithRunLongerPrefix(bytes32 word, uint256 length, uint256 prefixLength)
-        external
-        view
-    {
+    function testOpStringStartsWithRunLongerPrefix(bytes32 word, uint256 length, uint256 prefixLength) external view {
         length = bound(length, 0, 30);
         bytes memory s = LibFuzzString.leading(word, length);
         bytes memory p = LibFuzzString.leading(word, bound(prefixLength, length + 1, 31));
@@ -170,8 +161,6 @@ contract LibOpStringStartsWithTest is OpTest {
     }
 
     function testOpStringStartsWithEvalOperandDisallowed() external {
-        checkUnhappyParse(
-            "_: string-starts-with<0>(\"a\" \"b\");", abi.encodeWithSelector(UnexpectedOperand.selector)
-        );
+        checkUnhappyParse("_: string-starts-with<0>(\"a\" \"b\");", abi.encodeWithSelector(UnexpectedOperand.selector));
     }
 }
