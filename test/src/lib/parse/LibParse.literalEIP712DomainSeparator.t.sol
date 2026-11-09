@@ -41,10 +41,11 @@ contract LibParseLiteralEIP712DomainSeparatorTest is Test {
         assertEq(constants[0], openZeppelinSeparator(bytes1(0x03), "prices", "1", 0, address(0), 0));
     }
 
-    /// A bare `chain-id` in an expression is the parsing chain's id.
-    function testParseEIP712DomainSeparatorLiteralBareChainId(uint64 chainId) external {
+    /// `chain-id current` in an expression is the parsing chain's id.
+    function testParseEIP712DomainSeparatorLiteralChainIdCurrent(uint64 chainId) external {
         vm.chainId(chainId);
-        (, bytes32[] memory constants) = this.externalParse("_: [eip712-domain-separator name \"prices\" chain-id];");
+        (, bytes32[] memory constants) =
+            this.externalParse("_: [eip712-domain-separator name \"prices\" chain-id current];");
         assertEq(constants.length, 1);
         assertEq(constants[0], openZeppelinSeparator(bytes1(0x05), "prices", "", chainId, address(0), 0));
     }
@@ -93,6 +94,10 @@ contract LibParseLiteralEIP712DomainSeparatorTest is Test {
         this.externalParse("_: [eip712-domain-separator name];");
         vm.expectRevert(abi.encodeWithSelector(MalformedEIP712DomainValue.selector, LibParseError.tagErrorOffset(33)));
         this.externalParse("_: [eip712-domain-separator name prices];");
+        vm.expectRevert(abi.encodeWithSelector(MalformedEIP712DomainValue.selector, LibParseError.tagErrorOffset(36)));
+        this.externalParse("_: [eip712-domain-separator chain-id];");
+        vm.expectRevert(abi.encodeWithSelector(MalformedEIP712DomainValue.selector, LibParseError.tagErrorOffset(37)));
+        this.externalParse("_: [eip712-domain-separator chain-id currentx];");
         vm.expectRevert(abi.encodeWithSelector(MalformedEIP712DomainValue.selector, LibParseError.tagErrorOffset(37)));
         this.externalParse("_: [eip712-domain-separator chain-id 1.5];");
         vm.expectRevert(abi.encodeWithSelector(MalformedDecimalPoint.selector, LibParseError.tagErrorOffset(39)));

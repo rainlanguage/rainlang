@@ -432,5 +432,7 @@ contract LibParseLiteralSubParseableTest is Test {
         checkEIP712DomainRefusal("[eip712-domain-separator name prices]", MalformedEIP712DomainValue.selector, 30);
         checkEIP712DomainRefusal("[eip712-domain-separator name \"prices]", MalformedEIP712DomainValue.selector, 37);
         checkEIP712DomainRefusal("[eip712-domain-separator chain-id 1.5]", MalformedEIP712DomainValue.selector, 34);
+        checkEIP712DomainRefusal("[eip712-domain-separator chain-id]", MalformedEIP712DomainValue.selector, 33);
+        checkEIP712DomainRefusal("[eip712-domain-separator chain-id Current]", MalformedEIP712DomainValue.selector, 34);
     }
 }

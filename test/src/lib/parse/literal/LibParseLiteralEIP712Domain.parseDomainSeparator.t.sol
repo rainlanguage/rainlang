@@ -114,8 +114,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         return uint256(int256(type(int224).max));
     }
 
-    /// The body text of every field in `mask`, in canonical order. An empty
-    /// value spells the field bare.
+    /// The body text of every field in `mask`, in canonical order.
     function domainBody(uint256 mask, bytes[5] memory values, bytes memory separator)
         internal
         pure
@@ -128,12 +127,19 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
             if (body.length > 0) {
                 body = bytes.concat(body, separator);
             }
-            body = bytes.concat(body, keyword(field));
-            if (values[field].length > 0) {
-                body = bytes.concat(body, separator, values[field]);
-            }
+            body = bytes.concat(body, keyword(field), separator, values[field]);
         }
         return body;
+    }
+
+    function validValues() internal pure returns (bytes[5] memory) {
+        return [
+            bytes("\"x\""),
+            bytes("\"x\""),
+            bytes("1"),
+            bytes("0x0000000000000000000000000000000000000000"),
+            bytes("0x0000000000000000000000000000000000000000000000000000000000000000")
+        ];
     }
 
     /// Every one of the 31 non-empty field masks hashes to OpenZeppelin's
@@ -181,26 +187,34 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         }
     }
 
-    /// Every non-empty mask with a bare `chain-id` uses the parsing chain's
-    /// id, whether `chain-id` ends the body or a later field keyword follows
-    /// it.
-    function testDomainSeparatorBareChainIdIsBlockChainId(uint64 chainId, address verifyingContract, bytes32 salt)
-        external
-    {
+    /// Every non-empty mask with `chain-id current` uses the parsing chain's
+    /// id, whether `current` ends the body or whitespace and a later field
+    /// follow it.
+    function testDomainSeparatorChainIdCurrentIsBlockChainId(
+        uint64 chainId,
+        address verifyingContract,
+        bytes32 salt,
+        string memory separator,
+        string memory trailing
+    ) external {
         vm.chainId(chainId);
+        bytes memory sep = conformWhitespace(separator, true);
+        bytes memory trail = conformWhitespace(trailing, false);
         bytes[5] memory spelled = [
             bytes("\"prices\""),
             bytes("\"1\""),
-            bytes(""),
+            bytes("current"),
             bytes(vm.toString(verifyingContract)),
             bytes(vm.toString(salt))
         ];
         for (uint256 mask = 4; mask < 32; mask++) {
             if (mask & 4 == 0) continue;
+            bytes memory body = bytes.concat(domainBody(mask, spelled, sep), trail);
             assertEq(
-                this.parseDomainSeparatorExternal(domainBody(mask, spelled, " ")),
+                this.parseDomainSeparatorExternal(body),
                 //forge-lint: disable-next-line(unsafe-typecast)
-                openZeppelinSeparator(bytes1(uint8(mask)), "prices", "1", chainId, verifyingContract, salt)
+                openZeppelinSeparator(bytes1(uint8(mask)), "prices", "1", chainId, verifyingContract, salt),
+                string(body)
             );
         }
     }
@@ -339,15 +353,63 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         checkRefusal("chain-id 1e3x", MalformedEIP712DomainValue.selector, 12);
     }
 
-    /// `chain-id` is bare unless the next token starts with a digit, so a
-    /// negative, quoted or dotted number is the next field keyword.
-    function testDomainSeparatorChainIdNonDigitTokenIsNextField() external {
-        checkRefusal("chain-id -1", UnknownEIP712DomainField.selector, 9);
-        checkRefusal("chain-id \"1\"", UnknownEIP712DomainField.selector, 9);
-        checkRefusal("chain-id .5", UnknownEIP712DomainField.selector, 9);
-        checkRefusal("chain-id foo", UnknownEIP712DomainField.selector, 9);
+    /// A `chain-id` value that does not start with a digit and is not
+    /// exactly `current` refuses at its start.
+    function testDomainSeparatorChainIdNonDigitNonCurrentRefuses(string memory token) external {
+        LibConformString.conformStringToMask(token, TOKEN_MASK);
+        if (bytes(token).length == 0) {
+            token = "x";
+        }
+        if (bytes(token)[0] >= "0" && bytes(token)[0] <= "9") {
+            bytes(token)[0] = "x";
+        }
+        vm.assume(keccak256(bytes(token)) != keccak256("current"));
+        checkRefusal(bytes.concat("chain-id ", bytes(token)), MalformedEIP712DomainValue.selector, 9);
+        checkRefusal(
+            bytes.concat("name \"x\" chain-id ", bytes(token), " ", validValues()[4]),
+            MalformedEIP712DomainValue.selector,
+            18
+        );
+    }
+
+    /// `chain-id` followed by a field keyword refuses at that keyword, with
+    /// or without the keyword's own value after it.
+    function testDomainSeparatorChainIdKeywordAsValueRefuses() external {
+        bytes[5] memory values = validValues();
+        for (uint256 field = 0; field < 5; field++) {
+            checkRefusal(bytes.concat("chain-id ", keyword(field)), MalformedEIP712DomainValue.selector, 9);
+            checkRefusal(
+                bytes.concat("chain-id ", keyword(field), " ", values[field]), MalformedEIP712DomainValue.selector, 9
+            );
+            checkRefusal(
+                bytes.concat("name \"x\" chain-id ", keyword(field), " ", values[field]),
+                MalformedEIP712DomainValue.selector,
+                18
+            );
+        }
+    }
+
+    /// A bare `chain-id`, near misses of `current`, and negative, quoted or
+    /// dotted numbers refuse at the value offset; `current` is the whole
+    /// value, so a token after it is the next field keyword.
+    function testDomainSeparatorChainIdNotCurrentKnown() external {
+        checkRefusal("chain-id", MalformedEIP712DomainValue.selector, 8);
+        checkRefusal("chain-id \t\n", MalformedEIP712DomainValue.selector, 11);
+        checkRefusal("name \"x\" chain-id", MalformedEIP712DomainValue.selector, 17);
+        checkRefusal("chain-id currentx", MalformedEIP712DomainValue.selector, 9);
+        checkRefusal("chain-id Current", MalformedEIP712DomainValue.selector, 9);
+        checkRefusal("chain-id current\"", MalformedEIP712DomainValue.selector, 9);
+        checkRefusal("chain-id CURRENT", MalformedEIP712DomainValue.selector, 9);
+        checkRefusal("chain-id curren", MalformedEIP712DomainValue.selector, 9);
+        checkRefusal("chain-id current1", MalformedEIP712DomainValue.selector, 9);
+        checkRefusal("chain-id current-id", MalformedEIP712DomainValue.selector, 9);
+        checkRefusal("chain-id \"current\"", MalformedEIP712DomainValue.selector, 9);
+        checkRefusal("chain-id -1", MalformedEIP712DomainValue.selector, 9);
+        checkRefusal("chain-id \"1\"", MalformedEIP712DomainValue.selector, 9);
+        checkRefusal("chain-id .5", MalformedEIP712DomainValue.selector, 9);
+        checkRefusal("chain-id current current", UnknownEIP712DomainField.selector, 17);
+        checkRefusal("chain-id current 1", UnknownEIP712DomainField.selector, 17);
         checkRefusal("chain-id 1 2", UnknownEIP712DomainField.selector, 11);
-        checkRefusal("chain-id name \"x\"", EIP712DomainFieldOutOfOrder.selector, 9);
     }
 
     /// The st0x price domain.
@@ -425,7 +487,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
             openZeppelinSeparator(bytes1(0x02), "", string(keyword(field)), 0, address(0), 0)
         );
         assertEq(
-            this.parseDomainSeparatorExternal(bytes.concat("name ", value, " version ", value, " chain-id")),
+            this.parseDomainSeparatorExternal(bytes.concat("name ", value, " version ", value, " chain-id current")),
             openZeppelinSeparator(
                 bytes1(0x07), string(keyword(field)), string(keyword(field)), block.chainid, address(0), 0
             )
@@ -442,12 +504,9 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         checkRefusal(bytes.concat("salt ", keyword(field)), MalformedEIP712DomainValue.selector, 5);
     }
 
-    /// A field other than `chain-id` with no value refuses at the body end.
+    /// A field with no value refuses at the body end.
     function testDomainSeparatorValuelessFieldRefuses(uint256 field, string memory trailing) external {
-        field = bound(field, 0, 3);
-        if (field >= 2) {
-            field++;
-        }
+        field = bound(field, 0, 4);
         bytes memory body = bytes.concat(keyword(field), conformWhitespace(trailing, false));
         checkRefusal(body, MalformedEIP712DomainValue.selector, body.length);
         body = bytes.concat("name \"x\" ", body);
@@ -503,13 +562,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
 
     /// Every repeated or out of order pair refuses at the second keyword.
     function testDomainSeparatorFieldOutOfOrderRefuses() external {
-        bytes[5] memory values = [
-            bytes("\"x\""),
-            bytes("\"x\""),
-            bytes("1"),
-            bytes("0x0000000000000000000000000000000000000000"),
-            bytes("0x0000000000000000000000000000000000000000000000000000000000000000")
-        ];
+        bytes[5] memory values = validValues();
         for (uint256 first = 0; first < 5; first++) {
             for (uint256 second = 0; second <= first; second++) {
                 bytes memory head = bytes.concat(keyword(first), " ", values[first], " ");
@@ -520,7 +573,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
                 );
             }
         }
-        checkRefusal("chain-id chain-id", EIP712DomainFieldOutOfOrder.selector, 9);
+        checkRefusal("chain-id current chain-id current", EIP712DomainFieldOutOfOrder.selector, 17);
     }
 
     /// Unterminated quotes refuse at the body end; chars straight after a
