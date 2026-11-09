@@ -93,6 +93,8 @@ contract LibDotrainComposeRefusalsTest is Test {
         this.externalCompose("---\n#x 1\n#e x: 2;", "e", noBindings());
         vm.expectRevert(abi.encodeWithSelector(DotrainAliasShadowsBinding.selector, "x"));
         this.externalCompose("---\n#x 1\n#e _: 1, _ x: 2 3;", "e", noBindings());
+        vm.expectRevert(abi.encodeWithSelector(DotrainAliasShadowsBinding.selector, "x"));
+        this.externalCompose("---\n#x 1\n#e _: 1; x: 2;", "e", noBindings());
     }
 
     function testImportReverts() external {
