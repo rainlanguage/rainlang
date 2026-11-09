@@ -9,7 +9,10 @@ import {LibParseLiteralSubParseable} from "../../../../../src/lib/parse/literal/
 import {
     UnclosedSubParseableLiteral,
     SubParseableMissingDispatch,
-    UnsupportedLiteralType
+    UnsupportedLiteralType,
+    UnknownEIP712DomainField,
+    MalformedEIP712DomainValue,
+    EIP712DomainNoFields
 } from "../../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {ISubParserV4} from "../../../../../src/interface/ISubParserV4.sol";
@@ -20,11 +23,24 @@ import {
     CMASK_PRINTABLE
 } from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
+import {MessageHashUtils} from "@openzeppelin-contracts-5.7.0/utils/cryptography/MessageHashUtils.sol";
+import {EIP712_DOMAIN_SEPARATOR_DISPATCH} from "../../../../../src/lib/parse/literal/LibParseLiteralEIP712Domain.sol";
 
 contract LibParseLiteralSubParseableTest is Test {
     using LibBytes for bytes;
     using LibParseState for ParseState;
     using LibParseLiteralSubParseable for ParseState;
+
+    function openZeppelinSeparator(
+        bytes1 fields,
+        string memory name,
+        string memory version,
+        uint256 chainId,
+        address verifyingContract,
+        bytes32 salt
+    ) internal pure returns (bytes32) {
+        return MessageHashUtils.toDomainSeparator(fields, name, version, chainId, verifyingContract, salt);
+    }
 
     function checkParseSubParseable(
         string memory data,
@@ -165,6 +181,8 @@ contract LibParseLiteralSubParseableTest is Test {
         LibConformString.conformStringToMask(
             dispatch, ~(CMASK_WHITESPACE | CMASK_SUB_PARSEABLE_LITERAL_END) & CMASK_PRINTABLE
         );
+        // The native dispatch never reaches a sub-parser.
+        vm.assume(keccak256(bytes(dispatch)) != keccak256(EIP712_DOMAIN_SEPARATOR_DISPATCH));
         // Whitespace can be any standard rainlang whitespace.
         LibConformString.conformStringToWhitespace(whitespace);
         // Body can be any printable ASCII or whitespace other than the literal
@@ -344,5 +362,77 @@ contract LibParseLiteralSubParseableTest is Test {
 
         vm.expectRevert(abi.encodeWithSelector(UnsupportedLiteralType.selector, LibParseError.tagErrorOffset(1)));
         this.externalParseWithTwoSubParsers(bytes("[foo]"), first, second);
+    }
+
+    function externalParseWithSubParser(bytes memory data, address subParser) external view returns (bytes32) {
+        ParseState memory state = LibParseState.newState(data, "", "", "");
+        state.pushSubParser(0, bytes32(uint256(uint160(subParser))));
+        (, bytes32 value) = state.parseSubParseable(
+            Pointer.unwrap(state.data.dataPointer()), Pointer.unwrap(state.data.endDataPointer())
+        );
+        return value;
+    }
+
+    function mockAcceptEveryLiteral(address subParser) internal {
+        vm.mockCall(
+            subParser,
+            abi.encodeWithSelector(ISubParserV4.subParseLiteral2.selector),
+            abi.encode(true, bytes32(uint256(99)))
+        );
+    }
+
+    /// `eip712-domain-separator` is resolved by the core even when a
+    /// registered sub-parser accepts every literal; that sub-parser is never
+    /// called.
+    function testParseLiteralSubParseableEIP712DomainNativeBeatsSubParser() external {
+        address subParser = makeAddr("subParser");
+        mockAcceptEveryLiteral(subParser);
+        vm.expectCall(subParser, abi.encodeWithSelector(ISubParserV4.subParseLiteral2.selector), 0);
+        assertEq(
+            this.externalParseWithSubParser("[eip712-domain-separator name \"prices\" version \"1\"]", subParser),
+            openZeppelinSeparator(bytes1(0x03), "prices", "1", 0, address(0), 0)
+        );
+    }
+
+    /// Dispatches that only resemble `eip712-domain-separator` still go to the
+    /// sub-parser.
+    function testParseLiteralSubParseableEIP712DomainNearMissDelegates() external {
+        address subParser = makeAddr("subParser");
+        mockAcceptEveryLiteral(subParser);
+        string[5] memory dispatches = [
+            "eip712-domain-separatorx",
+            "eip712-domain-separato",
+            "EIP712-domain-separator",
+            "eip712_domain_separator",
+            "xeip712-domain-separator"
+        ];
+        for (uint256 i = 0; i < dispatches.length; i++) {
+            assertEq(
+                this.externalParseWithSubParser(
+                    bytes(string.concat("[", dispatches[i], " name \"prices\" version \"1\"]")), subParser
+                ),
+                bytes32(uint256(99))
+            );
+        }
+    }
+
+    function checkEIP712DomainRefusal(bytes memory data, bytes4 selector, uint256 offset) internal {
+        vm.expectRevert(abi.encodeWithSelector(selector, LibParseError.tagErrorOffset(offset)));
+        this.externalParseWithSubParser(data, address(0));
+    }
+
+    /// Native refusals carry their offset in the whole literal, including an
+    /// empty body right at the closing bracket.
+    function testParseLiteralSubParseableEIP712DomainRefusalOffsets() external {
+        checkEIP712DomainRefusal("[eip712-domain-separator]", EIP712DomainNoFields.selector, 24);
+        checkEIP712DomainRefusal("[eip712-domain-separator   ]", EIP712DomainNoFields.selector, 27);
+        checkEIP712DomainRefusal("[eip712-domain-separator foo]", UnknownEIP712DomainField.selector, 25);
+        checkEIP712DomainRefusal("[eip712-domain-separator name]", MalformedEIP712DomainValue.selector, 29);
+        checkEIP712DomainRefusal("[eip712-domain-separator name ]", MalformedEIP712DomainValue.selector, 30);
+        checkEIP712DomainRefusal("[eip712-domain-separator name prices]", MalformedEIP712DomainValue.selector, 30);
+        checkEIP712DomainRefusal("[eip712-domain-separator name \"prices]", MalformedEIP712DomainValue.selector, 37);
+        checkEIP712DomainRefusal("[eip712-domain-separator chain-id 1.5]", MalformedEIP712DomainValue.selector, 34);
+        checkEIP712DomainRefusal("[eip712-domain-separator chain-id]", MalformedEIP712DomainValue.selector, 33);
+        checkEIP712DomainRefusal("[eip712-domain-separator chain-id Current]", MalformedEIP712DomainValue.selector, 34);
     }
 }

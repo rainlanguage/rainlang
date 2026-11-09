@@ -14,10 +14,12 @@ import {LibParseInterstitial} from "../LibParseInterstitial.sol";
 import {LibParseError} from "../LibParseError.sol";
 import {LibSubParse} from "../LibSubParse.sol";
 import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
+import {LibParseLiteralEIP712Domain} from "./LibParseLiteralEIP712Domain.sol";
 
 /// @title LibParseLiteralSubParseable
 /// @notice Parses sub-parseable literals delimited by `[` and `]` by
-/// delegating to registered sub-parser contracts.
+/// resolving native dispatches in the core, else delegating to registered
+/// sub-parser contracts.
 library LibParseLiteralSubParseable {
     using LibParse for ParseState;
     using LibParseInterstitial for ParseState;
@@ -91,6 +93,11 @@ library LibParseLiteralSubParseable {
 
             // Move cursor past closing bracket.
             ++cursor;
+
+            // Native dispatches win over sub-parsers so their meaning is fixed by the core.
+            if (LibParseLiteralEIP712Domain.isDispatch(dispatchStart, dispatchEnd)) {
+                return (cursor, LibParseLiteralEIP712Domain.parseDomainSeparator(state, bodyStart, bodyEnd));
+            }
 
             return (cursor, state.subParseLiteral(dispatchStart, dispatchEnd, bodyStart, bodyEnd));
         }
