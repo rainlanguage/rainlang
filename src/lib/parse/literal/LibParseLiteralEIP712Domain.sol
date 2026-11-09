@@ -19,7 +19,8 @@ import {
     CMASK_NUMERIC_0_9,
     CMASK_STRING_LITERAL_HEAD,
     CMASK_STRING_LITERAL_TAIL,
-    CMASK_STRING_LITERAL_END
+    CMASK_STRING_LITERAL_END,
+    CMASK_LITERAL_HEX_DISPATCH
 } from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
 
@@ -35,6 +36,7 @@ bytes constant EIP712_DOMAIN_CHAIN_ID_CURRENT = "current";
 
 bytes constant EIP712_DOMAIN_TYPE_PREFIX = "EIP712Domain(";
 bytes constant EIP712_DOMAIN_TYPE_SUFFIX = ")";
+bytes constant EIP712_DOMAIN_TYPE_MEMBER_SEPARATOR = ",";
 
 bytes constant EIP712_DOMAIN_MEMBER_NAME = "string name";
 bytes constant EIP712_DOMAIN_MEMBER_VERSION = "string version";
@@ -121,7 +123,7 @@ library LibParseLiteralEIP712Domain {
             }
 
             if (typeString.length > 0) {
-                typeString = bytes.concat(typeString, ",");
+                typeString = bytes.concat(typeString, EIP712_DOMAIN_TYPE_MEMBER_SEPARATOR);
             }
             typeString = bytes.concat(typeString, fieldType(field));
             encoded = bytes.concat(encoded, value);
@@ -220,12 +222,17 @@ library LibParseLiteralEIP712Domain {
         pure
         returns (uint256, bytes32)
     {
-        uint256 prefix;
+        uint256 head;
+        uint256 disambiguate;
         assembly ("memory-safe") {
-            prefix := shr(0xf0, mload(cursor))
+            let word := mload(cursor)
+            //slither-disable-next-line incorrect-shift
+            head := shl(byte(0, word), 1)
+            //slither-disable-next-line incorrect-shift
+            disambiguate := shl(byte(1, word), 1)
         }
-        //forge-lint: disable-next-line(unsafe-typecast)
-        if (cursor + 1 >= end || prefix != uint256(uint16(bytes2("0x")))) {
+        bool hexDispatch = (head & CMASK_NUMERIC_0_9) != 0 && (head | disambiguate) == CMASK_LITERAL_HEX_DISPATCH;
+        if (cursor + 1 >= end || !hexDispatch) {
             revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
         }
         //slither-disable-next-line unused-return
