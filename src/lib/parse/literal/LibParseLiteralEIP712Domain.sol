@@ -44,6 +44,26 @@ bytes constant EIP712_DOMAIN_MEMBER_CHAIN_ID = "uint256 chainId";
 bytes constant EIP712_DOMAIN_MEMBER_VERIFYING_CONTRACT = "address verifyingContract";
 bytes constant EIP712_DOMAIN_MEMBER_SALT = "bytes32 salt";
 
+bytes constant EIP712_DOMAIN_SPRITE =
+    "eip712-domain-separatorchain-idverifying-contractcurrentEIP712Domain(string namestring versionuint256 chainIdaddress verifyingContractbytes32 salt,)";
+
+/// @dev Sprite entries: `(offset << 8) | length`.
+uint256 constant EIP712_DOMAIN_SPRITE_DISPATCH = 23;
+uint256 constant EIP712_DOMAIN_SPRITE_KEYWORD_CHAIN_ID = (23 << 8) | 8;
+uint256 constant EIP712_DOMAIN_SPRITE_KEYWORD_VERIFYING_CONTRACT = (31 << 8) | 18;
+uint256 constant EIP712_DOMAIN_SPRITE_CHAIN_ID_CURRENT = (49 << 8) | 7;
+uint256 constant EIP712_DOMAIN_SPRITE_TYPE_PREFIX = (56 << 8) | 13;
+uint256 constant EIP712_DOMAIN_SPRITE_MEMBER_NAME = (69 << 8) | 11;
+uint256 constant EIP712_DOMAIN_SPRITE_KEYWORD_NAME = (76 << 8) | 4;
+uint256 constant EIP712_DOMAIN_SPRITE_MEMBER_VERSION = (80 << 8) | 14;
+uint256 constant EIP712_DOMAIN_SPRITE_KEYWORD_VERSION = (87 << 8) | 7;
+uint256 constant EIP712_DOMAIN_SPRITE_MEMBER_CHAIN_ID = (94 << 8) | 15;
+uint256 constant EIP712_DOMAIN_SPRITE_MEMBER_VERIFYING_CONTRACT = (109 << 8) | 25;
+uint256 constant EIP712_DOMAIN_SPRITE_MEMBER_SALT = (134 << 8) | 12;
+uint256 constant EIP712_DOMAIN_SPRITE_KEYWORD_SALT = (142 << 8) | 4;
+uint256 constant EIP712_DOMAIN_SPRITE_TYPE_MEMBER_SEPARATOR = (146 << 8) | 1;
+uint256 constant EIP712_DOMAIN_SPRITE_TYPE_SUFFIX = (147 << 8) | 1;
+
 uint256 constant EIP712_DOMAIN_VERIFYING_CONTRACT_HEX_DIGITS = 0x28;
 uint256 constant EIP712_DOMAIN_SALT_HEX_DIGITS = 0x40;
 
