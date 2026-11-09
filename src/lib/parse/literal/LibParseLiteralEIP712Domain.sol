@@ -135,14 +135,17 @@ library LibParseLiteralEIP712Domain {
             state.revertParseError(cursor, EIP712DomainNoFields.selector);
         }
         while (cursor < end) {
-            uint256 fieldStart = cursor;
-            cursor = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
-            uint256 field = fieldIndex(sprite, fieldStart, cursor);
-            if (field == EIP712_DOMAIN_FIELD_UNKNOWN) {
-                state.revertParseError(fieldStart, UnknownEIP712DomainField.selector);
-            }
-            if (field < nextField) {
-                state.revertParseError(fieldStart, EIP712DomainFieldOutOfOrder.selector);
+            uint256 field;
+            {
+                uint256 fieldStart = cursor;
+                cursor = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
+                field = fieldIndex(sprite, fieldStart, cursor);
+                if (field == EIP712_DOMAIN_FIELD_UNKNOWN) {
+                    state.revertParseError(fieldStart, UnknownEIP712DomainField.selector);
+                }
+                if (field < nextField) {
+                    state.revertParseError(fieldStart, EIP712DomainFieldOutOfOrder.selector);
+                }
             }
             nextField = field + 1;
             cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
