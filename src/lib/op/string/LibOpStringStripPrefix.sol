@@ -14,10 +14,19 @@ import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
 library LibOpStringStripPrefix {
     using LibIntOrAString for IntOrAString;
 
+    /// @notice `string-strip-prefix` integrity check. Requires exactly 2 inputs
+    /// and produces 1 output.
+    /// @return The number of inputs.
+    /// @return The number of outputs.
     function integrity(IntegrityCheckState memory, OperandV2) internal pure returns (uint256, uint256) {
         return (2, 1);
     }
 
+    /// @notice `string-strip-prefix` opcode. Replaces the string and prefix on
+    /// the stack with the string without the prefix, or the string unchanged
+    /// when it does not start with the prefix.
+    /// @param stackTop Pointer to the top of the stack.
+    /// @return The new stack top pointer after execution.
     function run(InterpreterState memory, OperandV2, Pointer stackTop) internal pure returns (Pointer) {
         uint256 lengthMask = LENGTH_MASK_V3;
         assembly ("memory-safe") {
@@ -36,6 +45,9 @@ library LibOpStringStripPrefix {
         return stackTop;
     }
 
+    /// @notice Reference implementation of `string-strip-prefix` for testing.
+    /// @param inputs The input values from the stack.
+    /// @return The output values to push onto the stack.
     function referenceFn(InterpreterState memory, OperandV2, StackItem[] memory inputs)
         internal
         pure
