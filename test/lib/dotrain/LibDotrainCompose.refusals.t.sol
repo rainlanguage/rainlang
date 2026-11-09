@@ -77,6 +77,8 @@ contract LibDotrainComposeRefusalsTest is Test {
     function testExpressionReferenceReverts() external {
         vm.expectRevert(abi.encodeWithSelector(DotrainNotALiteralBinding.selector, "y"));
         this.externalCompose("---\n#y _: 1;\n#e _: y;", "e", noBindings());
+        vm.expectRevert(abi.encodeWithSelector(DotrainNotALiteralBinding.selector, "y"));
+        this.externalCompose("---\n#y 1 2\n#e _: y;", "e", noBindings());
     }
 
     function testExpressionPragmaReverts() external {
