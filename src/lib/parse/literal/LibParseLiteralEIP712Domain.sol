@@ -149,9 +149,6 @@ library LibParseLiteralEIP712Domain {
             }
             nextField = field + 1;
             cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
-            if (cursor >= end) {
-                state.revertParseError(cursor, MalformedEIP712DomainValue.selector);
-            }
             (uint256 valueEnd, bytes32 value) = parseValue(state, sprite, field, cursor, end);
             cursor = LibParseChar.skipMask(valueEnd, end, CMASK_WHITESPACE);
             if (cursor == valueEnd && cursor < end) {
@@ -180,7 +177,7 @@ library LibParseLiteralEIP712Domain {
     /// @param state The current parse state.
     /// @param sprite `PARSE_SPRITE` in memory.
     /// @param field The field index.
-    /// @param cursor The start of the value, before `end`.
+    /// @param cursor The start of the value.
     /// @param end The end of the body.
     /// @return The cursor after the value.
     /// @return The encoded value.
@@ -204,7 +201,7 @@ library LibParseLiteralEIP712Domain {
     /// @notice Parses a `"..."` string literal value as the keccak256 of its
     /// contents.
     /// @param state The current parse state.
-    /// @param cursor The start of the value, at a non-whitespace char.
+    /// @param cursor The start of the value.
     /// @param end The end of the body.
     /// @return The cursor after the closing quote.
     /// @return The hash of the string contents.
@@ -232,7 +229,7 @@ library LibParseLiteralEIP712Domain {
     /// decimal literal value that is a non-negative integer.
     /// @param state The current parse state.
     /// @param sprite `PARSE_SPRITE` in memory.
-    /// @param cursor The start of the value, at a non-whitespace char.
+    /// @param cursor The start of the value.
     /// @param end The end of the body.
     /// @return The cursor after the value.
     /// @return The chain id.
