@@ -25,7 +25,8 @@ import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
 
 bytes constant EIP712_DOMAIN_SEPARATOR_DISPATCH = "eip712-domain-separator";
 
-/// @dev A field keyword or unquoted value: printable ASCII except whitespace.
+/// @dev A field keyword or the `current` chain id: printable ASCII except
+/// whitespace.
 uint256 constant CMASK_EIP712_DOMAIN_TOKEN = CMASK_PRINTABLE & ~CMASK_WHITESPACE;
 
 uint256 constant EIP712_DOMAIN_FIELD_NAME = 0;
@@ -44,9 +45,9 @@ uint256 constant EIP712_DOMAIN_FIELD_UNKNOWN = 5;
 /// `[eip712-domain-separator name "prices" version "1" chain-id 1]`:
 /// - `name "..."`, `version "..."`: the keccak256 of a Rainlang string
 ///   literal's contents.
-/// - `chain-id <decimal>`, a Rainlang decimal literal that is a non-negative
-///   integer, or bare `chain-id` for the parsing chain's `block.chainid` when
-///   the next token does not start with a digit.
+/// - `chain-id current`: the parsing chain's `block.chainid`.
+/// - `chain-id <decimal>`: a Rainlang decimal literal that is a non-negative
+///   integer.
 /// - `verifying-contract 0x` and exactly 40 hex digits.
 /// - `salt 0x` and exactly 64 hex digits.
 library LibParseLiteralEIP712Domain {
@@ -90,20 +91,13 @@ library LibParseLiteralEIP712Domain {
             }
             nextField = field + 1;
             cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
-
-            bytes32 value;
-            if (field == EIP712_DOMAIN_FIELD_CHAIN_ID && LibParseChar.isMask(cursor, end, CMASK_NUMERIC_0_9) == 0) {
-                value = bytes32(block.chainid);
-            } else {
-                if (cursor >= end) {
-                    revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
-                }
-                (cursor, value) = parseValue(state, field, cursor, end);
-                uint256 valueEnd = cursor;
-                cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
-                if (cursor == valueEnd && cursor < end) {
-                    revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
-                }
+            if (cursor >= end) {
+                revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+            }
+            (uint256 valueEnd, bytes32 value) = parseValue(state, field, cursor, end);
+            cursor = LibParseChar.skipMask(valueEnd, end, CMASK_WHITESPACE);
+            if (cursor == valueEnd && cursor < end) {
+                revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
             }
 
             if (typeString.length > 0) {
@@ -124,7 +118,7 @@ library LibParseLiteralEIP712Domain {
     /// @return The encoded value.
     function parseValue(ParseState memory state, uint256 field, uint256 cursor, uint256 end)
         internal
-        pure
+        view
         returns (uint256, bytes32)
     {
         if (field == EIP712_DOMAIN_FIELD_NAME || field == EIP712_DOMAIN_FIELD_VERSION) {
@@ -163,17 +157,25 @@ library LibParseLiteralEIP712Domain {
         return (innerEnd + 1, stringHash);
     }
 
-    /// @notice Parses a decimal literal value that is a non-negative integer.
+    /// @notice Parses `current` as the parsing chain's `block.chainid`, or a
+    /// decimal literal value that is a non-negative integer.
     /// @param state The current parse state.
-    /// @param cursor The start of the value, at a digit.
+    /// @param cursor The start of the value, at a non-whitespace char.
     /// @param end The end of the body.
-    /// @return The cursor after the decimal literal.
-    /// @return The integer.
+    /// @return The cursor after the value.
+    /// @return The chain id.
     function parseChainId(ParseState memory state, uint256 cursor, uint256 end)
         internal
-        pure
+        view
         returns (uint256, bytes32)
     {
+        if (LibParseChar.isMask(cursor, end, CMASK_NUMERIC_0_9) == 0) {
+            uint256 tokenEnd = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
+            if (!regionEquals(cursor, tokenEnd, "current")) {
+                revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+            }
+            return (tokenEnd, bytes32(block.chainid));
+        }
         (uint256 valueEnd, bytes32 packed) = LibParseLiteralDecimal.parseDecimalFloatPacked(state, cursor, end);
         (uint256 chainId, bool lossless) = LibDecimalFloat.toFixedDecimalLossy(Float.wrap(packed), 0);
         if (!lossless) {
