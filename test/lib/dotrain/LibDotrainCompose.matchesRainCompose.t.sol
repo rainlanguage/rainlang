@@ -48,8 +48,7 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         vm.writeFile(input, dotrain);
         string memory command = string.concat(sRain, " dotrain compose -i ", input, " -e ", entrypoint);
         for (uint256 i = 0; i < bound.length; i++) {
-            command =
-                string.concat(command, " -b ", bound[i].name, "=", LibDotrainCompose.hexLiteral(bound[i].value));
+            command = string.concat(command, " -b ", bound[i].name, "=", LibDotrainCompose.hexLiteral(bound[i].value));
         }
         string[] memory cmd = new string[](3);
         cmd[0] = "bash";
@@ -77,12 +76,13 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         bytes32 maxPrice,
         bool bindMaxPrice
     ) external {
-        string memory dotrain = "# SPDX-License-Identifier: LicenseRef-DCL-1.0\n" "# Front matter # with @ is dropped.\n"
-            "---\n" "#sub-parser !Sub parser address.\n\n" "#signer !Signer.\n" "#source \"alpaca\"\n"
-            "#x !A value also called as a word.\n" "#max-price 1000\n\n" "#helper _: 1;\n\n" "#weighting\n"
-            "using-words-from sub-parser\n\n" "/* x signer */\n" ":ensure(\n" "  binary-equal-to(lead() signer)\n"
-            "  \"x signer\"\n" "),\n\n" "_ _: x(x) x<0 0x1f>(max-price) [x signer],\n" "price: max-price;\n\n"
-            "/* second source */\n" "_: source x;\n";
+        string memory dotrain = "# SPDX-License-Identifier: LicenseRef-DCL-1.0\n"
+            "# Front matter # with @ is dropped.\n" "---\n" "#sub-parser !Sub parser address.\n\n" "#signer !Signer.\n"
+            "#source \"alpaca\"\n" "#x !A value also called as a word.\n" "#max-price 1000\n\n" "#helper _: 1;\n\n"
+            "#weighting\n" "using-words-from sub-parser\n\n" "/* x signer */\n" ":ensure(\n"
+            "  binary-equal-to(lead() signer)\n" "  \"x signer\"\n" "),\n\n"
+            "_ _: x(x) x<0 0x1f>(max-price) [x signer],\n" "price: max-price;\n\n" "/* second source */\n"
+            "_: source x;\n";
         DotrainBinding[] memory bound = new DotrainBinding[](bindMaxPrice ? 4 : 3);
         bound[0] = DotrainBinding("sub-parser", subParser);
         bound[1] = DotrainBinding("signer", signer);
@@ -131,9 +131,10 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
     }
 
     function comment(Rng memory rng) internal pure returns (string memory) {
-        return string.concat(
-            "/* ", pick(rng, [string("x"), "add max-price", "# @ , ; : '", "lead-signer", "*/ /*"]), " */"
-        );
+        return
+            string.concat(
+                "/* ", pick(rng, [string("x"), "add max-price", "# @ , ; : '", "lead-signer", "*/ /*"]), " */"
+            );
     }
 
     function numericLiteral(Rng memory rng) internal pure returns (string memory) {
@@ -149,8 +150,14 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         return out;
     }
 
-    function literalText(Rng memory rng, string memory open, string memory close) internal pure returns (string memory) {
-        string memory inner = draw(rng, 3) == 0 ? string.concat(text(rng), " ", comment(rng), " ", text(rng)) : text(rng);
+    function literalText(Rng memory rng, string memory open, string memory close)
+        internal
+        pure
+        returns (string memory)
+    {
+        string memory inner = draw(rng, 3) == 0
+            ? string.concat(text(rng), " ", comment(rng), " ", text(rng))
+            : text(rng);
         return string.concat(open, inner, close);
     }
 
