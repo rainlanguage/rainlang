@@ -40,6 +40,15 @@ struct DotrainParsedBinding {
     bytes32 value;
 }
 
+/// An entrypoint being composed: `source` before `copied` is already in `out`.
+struct DotrainComposeState {
+    bytes source;
+    bytes blanked;
+    DotrainParsedBinding[] bindings;
+    bytes out;
+    uint256 copied;
+}
+
 /// A `-b name=value` binding as passed to `rain dotrain compose`.
 /// @param name The dotrain binding name to rebind.
 /// @param value The value, rendered as a 64 digit hex literal.
@@ -160,36 +169,50 @@ library LibDotrainCompose {
             cursor++;
         }
         for (uint256 b = 0; b < count; b++) {
-            uint256 nameStart = cursor + 1;
-            uint256 end = nameStart;
-            while (end < blanked.length && blanked[end] != "#") {
-                end++;
-            }
-            uint256 nameEnd = nameStart;
-            while (nameEnd < end && charMask(blanked, nameEnd) & CMASK_WHITESPACE == 0) {
-                nameEnd++;
-            }
-            if (nameEnd == nameStart || charMask(blanked, nameStart) & CMASK_IDENTIFIER_HEAD == 0) {
-                revert DotrainInvalidBindingName(nameStart);
-            }
-            for (uint256 i = nameStart + 1; i < nameEnd; i++) {
-                if (charMask(blanked, i) & CMASK_IDENTIFIER_TAIL == 0) revert DotrainInvalidBindingName(i);
-            }
-            DotrainParsedBinding memory binding = bindings[b];
-            binding.nameStart = nameStart;
-            binding.nameEnd = nameEnd;
-            (binding.contentStart, binding.contentEnd) = trim(source, nameEnd, end);
-            (uint256 classStart, uint256 classEnd) = trim(blanked, nameEnd, end);
-            if (classStart == classEnd) revert DotrainUnsupported(nameEnd);
-            binding.kind = classify(blanked, classStart, classEnd);
+            cursor = parseBinding(source, blanked, cursor + 1, bindings[b]);
+            bytes memory name = slice(source, bindings[b].nameStart, bindings[b].nameEnd);
             for (uint256 i = 0; i < b; i++) {
-                if (sameName(source, bindings[i], source, nameStart, nameEnd)) {
-                    revert DotrainDuplicateBinding(string(slice(source, nameStart, nameEnd)));
-                }
+                if (sameName(source, bindings[i], name, 0, name.length)) revert DotrainDuplicateBinding(string(name));
             }
-            cursor = end;
         }
         return bindings;
+    }
+
+    /// @notice Parses the binding whose name starts at `nameStart` into `binding`.
+    /// @param source The dotrain.
+    /// @param blanked `source` with front matter and comments blanked.
+    /// @param nameStart Offset of the first byte after the binding's `#`.
+    /// @param binding Receives the binding's offsets and kind.
+    /// @return Offset of the next `#`, or the end of the source.
+    function parseBinding(
+        bytes memory source,
+        bytes memory blanked,
+        uint256 nameStart,
+        DotrainParsedBinding memory binding
+    ) internal pure returns (uint256) {
+        uint256 end = nameStart;
+        while (end < blanked.length && blanked[end] != "#") {
+            end++;
+        }
+        uint256 nameEnd = nameStart;
+        while (nameEnd < end && charMask(blanked, nameEnd) & CMASK_WHITESPACE == 0) {
+            nameEnd++;
+        }
+        if (nameEnd == nameStart || charMask(blanked, nameStart) & CMASK_IDENTIFIER_HEAD == 0) {
+            revert DotrainInvalidBindingName(nameStart);
+        }
+        for (uint256 i = nameStart + 1; i < nameEnd; i++) {
+            if (charMask(blanked, i) & CMASK_IDENTIFIER_TAIL == 0) revert DotrainInvalidBindingName(i);
+        }
+        binding.nameStart = nameStart;
+        binding.nameEnd = nameEnd;
+        (uint256 contentStart, uint256 contentEnd) = trim(source, nameEnd, end);
+        binding.contentStart = contentStart;
+        binding.contentEnd = contentEnd;
+        (uint256 classStart, uint256 classEnd) = trim(blanked, nameEnd, end);
+        if (classStart == classEnd) revert DotrainUnsupported(nameEnd);
+        binding.kind = classify(blanked, classStart, classEnd);
+        return end;
     }
 
     /// Classifies a binding by its comment-blanked, trimmed content.
@@ -306,39 +329,52 @@ library LibDotrainCompose {
         uint256 start,
         uint256 end
     ) internal pure returns (bytes memory) {
-        bytes memory out = "";
-        uint256 copied = start;
+        DotrainComposeState memory state = DotrainComposeState(source, blanked, bindings, new bytes(0), start);
+        transformLines(state, transformPragma(state, start, end), end);
+        return bytes.concat(state.out, slice(source, state.copied, end));
+    }
+
+    /// @notice Substitutes binding values into a leading `using-words-from` pragma.
+    /// @return Offset where the lines after the pragma start.
+    function transformPragma(DotrainComposeState memory state, uint256 start, uint256 end)
+        internal
+        pure
+        returns (uint256)
+    {
+        bytes memory blanked = state.blanked;
         uint256 cursor = skipWhitespace(blanked, start, end);
         bytes memory keyword = "using-words-from";
+        uint256 keywordEnd = cursor + keyword.length;
         if (
-            cursor + keyword.length <= end
-                && keccak256(slice(blanked, cursor, cursor + keyword.length)) == keccak256(keyword)
-                && (cursor + keyword.length == end || charMask(blanked, cursor + keyword.length) & CMASK_WHITESPACE != 0)
-        ) {
-            cursor += keyword.length;
-            while (true) {
-                cursor = skipWhitespace(blanked, cursor, end);
-                if (cursor == end) break;
-                uint256 tokenEnd = cursor;
-                while (tokenEnd < end && charMask(blanked, tokenEnd) & CMASK_WHITESPACE == 0) {
-                    tokenEnd++;
-                }
-                bytes memory token = slice(blanked, cursor, tokenEnd);
-                (bool found, uint256 index) = findBinding(source, bindings, token);
-                if (found) {
-                    out = bytes.concat(out, slice(source, copied, cursor), resolve(source, bindings[index], token));
-                    copied = tokenEnd;
-                } else if (charMask(blanked, cursor) & CMASK_NUMERIC_0_9 == 0) {
-                    break;
-                }
-                cursor = tokenEnd;
+            keywordEnd > end || keccak256(slice(blanked, cursor, keywordEnd)) != keccak256(keyword)
+                || (keywordEnd < end && charMask(blanked, keywordEnd) & CMASK_WHITESPACE == 0)
+        ) return cursor;
+        cursor = keywordEnd;
+        while (true) {
+            cursor = skipWhitespace(blanked, cursor, end);
+            if (cursor == end) break;
+            uint256 tokenEnd = cursor;
+            while (tokenEnd < end && charMask(blanked, tokenEnd) & CMASK_WHITESPACE == 0) {
+                tokenEnd++;
             }
+            bytes memory token = slice(blanked, cursor, tokenEnd);
+            (bool found, uint256 index) = findBinding(state.source, state.bindings, token);
+            if (found) {
+                substitute(state, cursor, tokenEnd, index, token);
+            } else if (charMask(blanked, cursor) & CMASK_NUMERIC_0_9 == 0) {
+                break;
+            }
+            cursor = tokenEnd;
         }
+        return cursor;
+    }
 
+    /// Substitutes binding values into bare RHS words from `cursor` to `end`.
+    function transformLines(DotrainComposeState memory state, uint256 cursor, uint256 end) internal pure {
+        bytes memory blanked = state.blanked;
         bool rhs = false;
         while (cursor < end) {
             bytes1 c = blanked[cursor];
-            uint256 mask = charMask(blanked, cursor);
             if (c == ":") {
                 rhs = true;
                 cursor++;
@@ -358,34 +394,50 @@ library LibDotrainCompose {
                 cursor = close + 1;
             } else if (c == "'") {
                 revert DotrainUnsupported(cursor);
-            } else if (mask & (CMASK_IDENTIFIER_HEAD | CMASK_NUMERIC_0_9) != 0) {
-                uint256 tokenEnd = cursor;
-                while (tokenEnd < end && charMask(blanked, tokenEnd) & CMASK_WORD_DELIMITER == 0) {
-                    tokenEnd++;
-                }
-                if (mask & CMASK_IDENTIFIER_HEAD != 0) {
-                    for (uint256 i = cursor; i < tokenEnd; i++) {
-                        if (blanked[i] == ".") revert DotrainUnsupported(i);
-                    }
-                    bytes memory token = slice(blanked, cursor, tokenEnd);
-                    (bool found, uint256 index) = findBinding(source, bindings, token);
-                    if (found) {
-                        if (!rhs) revert DotrainAliasShadowsBinding(string(token));
-                        // Opcodes share the namespace but are never substituted.
-                        bool opcode = tokenEnd < end && (blanked[tokenEnd] == "(" || blanked[tokenEnd] == "<");
-                        if (!opcode) {
-                            out =
-                                bytes.concat(out, slice(source, copied, cursor), resolve(source, bindings[index], token));
-                            copied = tokenEnd;
-                        }
-                    }
-                }
-                cursor = tokenEnd;
+            } else if (charMask(blanked, cursor) & (CMASK_IDENTIFIER_HEAD | CMASK_NUMERIC_0_9) != 0) {
+                cursor = transformWord(state, cursor, end, rhs);
             } else {
                 cursor++;
             }
         }
-        return bytes.concat(out, slice(source, copied, end));
+    }
+
+    /// @notice Substitutes the value of the binding a bare word at `cursor` names.
+    /// @return Offset of the end of the word.
+    function transformWord(DotrainComposeState memory state, uint256 cursor, uint256 end, bool rhs)
+        internal
+        pure
+        returns (uint256)
+    {
+        bytes memory blanked = state.blanked;
+        uint256 tokenEnd = cursor;
+        while (tokenEnd < end && charMask(blanked, tokenEnd) & CMASK_WORD_DELIMITER == 0) {
+            tokenEnd++;
+        }
+        if (charMask(blanked, cursor) & CMASK_IDENTIFIER_HEAD == 0) return tokenEnd;
+        for (uint256 i = cursor; i < tokenEnd; i++) {
+            if (blanked[i] == ".") revert DotrainUnsupported(i);
+        }
+        bytes memory token = slice(blanked, cursor, tokenEnd);
+        (bool found, uint256 index) = findBinding(state.source, state.bindings, token);
+        if (!found) return tokenEnd;
+        if (!rhs) revert DotrainAliasShadowsBinding(string(token));
+        // Opcodes share the namespace but are never substituted.
+        if (tokenEnd < end && (blanked[tokenEnd] == "(" || blanked[tokenEnd] == "<")) return tokenEnd;
+        substitute(state, cursor, tokenEnd, index, token);
+        return tokenEnd;
+    }
+
+    /// Appends `source[copied:start]` and the value of `bindings[index]` to
+    /// the output and resumes copying at `end`.
+    function substitute(DotrainComposeState memory state, uint256 start, uint256 end, uint256 index, bytes memory name)
+        internal
+        pure
+    {
+        state.out = bytes.concat(
+            state.out, slice(state.source, state.copied, start), resolve(state.source, state.bindings[index], name)
+        );
+        state.copied = end;
     }
 
     /// The text a reference to `binding` composes to.
