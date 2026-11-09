@@ -42,9 +42,8 @@ library LibOpStringCount {
         returns (StackItem[] memory)
     {
         StackItem[] memory outputs = new StackItem[](1);
-        outputs[0] = StackItem.wrap(
-            bytes32(bytes(IntOrAString.wrap(uint256(StackItem.unwrap(inputs[0]))).toStringV3()).length)
-        );
+        outputs[0] =
+            StackItem.wrap(bytes32(bytes(IntOrAString.wrap(uint256(StackItem.unwrap(inputs[0]))).toStringV3()).length));
         return outputs;
     }
 }
