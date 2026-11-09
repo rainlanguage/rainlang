@@ -269,19 +269,20 @@ library LibParseLiteralEIP712Domain {
     /// @param end The end of the field keyword.
     /// @return The field index, or `EIP712_DOMAIN_FIELD_UNKNOWN`.
     function fieldIndex(uint256 start, uint256 end) internal pure returns (uint256) {
-        if (regionEquals(start, end, EIP712_DOMAIN_KEYWORD_NAME)) {
+        bytes memory sprite = EIP712_DOMAIN_SPRITE;
+        if (regionEqualsSprite(sprite, start, end, EIP712_DOMAIN_SPRITE_KEYWORD_NAME)) {
             return EIP712_DOMAIN_FIELD_NAME;
         }
-        if (regionEquals(start, end, EIP712_DOMAIN_KEYWORD_VERSION)) {
+        if (regionEqualsSprite(sprite, start, end, EIP712_DOMAIN_SPRITE_KEYWORD_VERSION)) {
             return EIP712_DOMAIN_FIELD_VERSION;
         }
-        if (regionEquals(start, end, EIP712_DOMAIN_KEYWORD_CHAIN_ID)) {
+        if (regionEqualsSprite(sprite, start, end, EIP712_DOMAIN_SPRITE_KEYWORD_CHAIN_ID)) {
             return EIP712_DOMAIN_FIELD_CHAIN_ID;
         }
-        if (regionEquals(start, end, EIP712_DOMAIN_KEYWORD_VERIFYING_CONTRACT)) {
+        if (regionEqualsSprite(sprite, start, end, EIP712_DOMAIN_SPRITE_KEYWORD_VERIFYING_CONTRACT)) {
             return EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT;
         }
-        if (regionEquals(start, end, EIP712_DOMAIN_KEYWORD_SALT)) {
+        if (regionEqualsSprite(sprite, start, end, EIP712_DOMAIN_SPRITE_KEYWORD_SALT)) {
             return EIP712_DOMAIN_FIELD_SALT;
         }
         return EIP712_DOMAIN_FIELD_UNKNOWN;
@@ -321,5 +322,27 @@ library LibParseLiteralEIP712Domain {
             regionHash := keccak256(start, length)
         }
         return regionHash == keccak256(expected);
+    }
+
+    /// @notice Whether the memory region `[start, end)` equals a sprite entry.
+    /// @param sprite `EIP712_DOMAIN_SPRITE` in memory.
+    /// @param start The start of the region.
+    /// @param end The end of the region.
+    /// @param entry The sprite entry, `(offset << 8) | length`.
+    /// @return True if equal.
+    function regionEqualsSprite(bytes memory sprite, uint256 start, uint256 end, uint256 entry)
+        internal
+        pure
+        returns (bool)
+    {
+        uint256 length = entry & 0xFF;
+        if (end - start != length) {
+            return false;
+        }
+        bool equal;
+        assembly ("memory-safe") {
+            equal := eq(keccak256(start, length), keccak256(add(add(sprite, 0x20), shr(8, entry)), length))
+        }
+        return equal;
     }
 }
