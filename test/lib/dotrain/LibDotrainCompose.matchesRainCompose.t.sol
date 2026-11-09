@@ -76,13 +76,12 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         bytes32 maxPrice,
         bool bindMaxPrice
     ) external {
-        string memory dotrain = "# SPDX-License-Identifier: LicenseRef-DCL-1.0\n"
-            "# Front matter # with @ is dropped.\n" "---\n" "#sub-parser !Sub parser address.\n\n" "#signer !Signer.\n"
-            "#source \"alpaca\"\n" "#x !A value also called as a word.\n" "#max-price 1000\n\n" "#helper _: 1;\n\n"
-            "#weighting\n" "using-words-from sub-parser\n\n" "/* x signer */\n" ":ensure(\n"
-            "  binary-equal-to(lead() signer)\n" "  \"x signer\"\n" "),\n\n"
-            "_ _: x(x) x<0 0x1f>(max-price) [x signer],\n" "price: max-price;\n\n" "/* second source */\n"
-            "_: source x;\n";
+        string memory dotrain = "# License: LicenseRef-DCL-1.0\n" "# Front matter # with @ is dropped.\n" "---\n"
+            "#sub-parser !Sub parser address.\n\n" "#signer !Signer.\n" "#source \"alpaca\"\n"
+            "#x !A value also called as a word.\n" "#max-price 1000\n\n" "#helper _: 1;\n\n" "#weighting\n"
+            "using-words-from sub-parser\n\n" "/* x signer */\n" ":ensure(\n" "  binary-equal-to(lead() signer)\n"
+            "  \"x signer\"\n" "),\n\n" "_ _: x(x) x<0 0x1f>(max-price) [x signer],\n" "price: max-price;\n\n"
+            "/* second source */\n" "_: source x;\n";
         DotrainBinding[] memory bound = new DotrainBinding[](bindMaxPrice ? 4 : 3);
         bound[0] = DotrainBinding("sub-parser", subParser);
         bound[1] = DotrainBinding("signer", signer);
@@ -241,7 +240,7 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         return (out, aliases);
     }
 
-    function entrypoint(Rng memory rng, uint256[NAME_COUNT] memory kinds) internal pure returns (string memory) {
+    function entrypointBody(Rng memory rng, uint256[NAME_COUNT] memory kinds) internal pure returns (string memory) {
         string memory out = draw(rng, 4) == 0 ? string.concat(comment(rng), "\n") : "";
         if (draw(rng, 2) == 0) {
             out = string.concat(out, "using-words-from");
@@ -284,7 +283,7 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         uint256 entryAt = draw(rng, NAME_COUNT + 1);
         for (uint256 i = 0; i <= NAME_COUNT; i++) {
             if (i == entryAt) {
-                dotrain = string.concat(dotrain, "#weighting", space(rng), entrypoint(rng, kinds), space(rng));
+                dotrain = string.concat(dotrain, "#weighting", space(rng), entrypointBody(rng, kinds), space(rng));
             }
             if (i < NAME_COUNT && kinds[i] != KIND_ABSENT) {
                 dotrain = string.concat(
