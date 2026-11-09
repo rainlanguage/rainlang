@@ -120,6 +120,12 @@ contract LibDotrainComposeRefusalsTest is Test {
         checkUnsupported("---\n#x 0x01\n#e _: ", "1\x0bx;", 1);
     }
 
+    function testFormFeedOrVerticalTabBeforeWordOrParenReverts() external {
+        checkUnsupported("---\n#x 0x01\n#e _ _: ", "x\x0c y;", 1);
+        checkUnsupported("---\n#x 0x01\n#e _ _: ", "1\x0c x;", 1);
+        checkUnsupported("---\n#x 0x01\n#e _: ", "x\x0b(1);", 1);
+    }
+
     function testIdentifierInOperandReverts() external {
         checkUnsupported("---\n#x 1\n#e _: foo<", "0 x>();", 2);
         checkUnsupported("---\n#x 1\n#e _: foo<", "x>();", 0);
