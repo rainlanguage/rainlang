@@ -149,7 +149,7 @@ library LibParseLiteralEIP712Domain {
             if (cursor >= end) {
                 revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
             }
-            (uint256 valueEnd, bytes32 value) = parseValue(state, field, cursor, end);
+            (uint256 valueEnd, bytes32 value) = parseValue(state, sprite, field, cursor, end);
             cursor = LibParseChar.skipMask(valueEnd, end, CMASK_WHITESPACE);
             if (cursor == valueEnd && cursor < end) {
                 revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
@@ -175,12 +175,13 @@ library LibParseLiteralEIP712Domain {
 
     /// @notice Parses one field value as its 32 byte ABI encoding.
     /// @param state The current parse state.
+    /// @param sprite `EIP712_DOMAIN_SPRITE` in memory.
     /// @param field The field index.
     /// @param cursor The start of the value, before `end`.
     /// @param end The end of the body.
     /// @return The cursor after the value.
     /// @return The encoded value.
-    function parseValue(ParseState memory state, uint256 field, uint256 cursor, uint256 end)
+    function parseValue(ParseState memory state, bytes memory sprite, uint256 field, uint256 cursor, uint256 end)
         internal
         view
         returns (uint256, bytes32)
@@ -189,7 +190,7 @@ library LibParseLiteralEIP712Domain {
             return parseStringHash(state, cursor, end);
         }
         if (field == EIP712_DOMAIN_FIELD_CHAIN_ID) {
-            return parseChainId(state, cursor, end);
+            return parseChainId(state, sprite, cursor, end);
         }
         if (field == EIP712_DOMAIN_FIELD_SALT) {
             return parseFixedHex(state, cursor, end, EIP712_DOMAIN_SALT_HEX_DIGITS);
@@ -227,18 +228,19 @@ library LibParseLiteralEIP712Domain {
     /// @notice Parses `current` as the parsing chain's `block.chainid`, or a
     /// decimal literal value that is a non-negative integer.
     /// @param state The current parse state.
+    /// @param sprite `EIP712_DOMAIN_SPRITE` in memory.
     /// @param cursor The start of the value, at a non-whitespace char.
     /// @param end The end of the body.
     /// @return The cursor after the value.
     /// @return The chain id.
-    function parseChainId(ParseState memory state, uint256 cursor, uint256 end)
+    function parseChainId(ParseState memory state, bytes memory sprite, uint256 cursor, uint256 end)
         internal
         view
         returns (uint256, bytes32)
     {
         if (LibParseChar.isMask(cursor, end, CMASK_NUMERIC_0_9) == 0) {
             uint256 tokenEnd = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
-            if (!regionEqualsSprite(EIP712_DOMAIN_SPRITE, cursor, tokenEnd, EIP712_DOMAIN_SPRITE_CHAIN_ID_CURRENT)) {
+            if (!regionEqualsSprite(sprite, cursor, tokenEnd, EIP712_DOMAIN_SPRITE_CHAIN_ID_CURRENT)) {
                 revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
             }
             return (tokenEnd, bytes32(block.chainid));
