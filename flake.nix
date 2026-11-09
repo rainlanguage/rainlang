@@ -24,6 +24,9 @@
       in
       rec {
         packages = rec {
+          # Resolved by test/lib/dotrain tests as the `rain dotrain compose` oracle.
+          rain-cli = rain.defaultPackage.${system};
+
           rainlang-prelude = rainix.mkTask.${system} {
             name = "rainlang-prelude";
             body = ''
