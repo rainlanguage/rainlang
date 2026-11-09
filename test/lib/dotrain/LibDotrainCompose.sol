@@ -394,16 +394,7 @@ library LibDotrainCompose {
                 cursor = closeAt(blanked, cursor + 1, end, "]") + 1;
             } else if (c == "<") {
                 uint256 close = closeAt(blanked, cursor + 1, end, ">");
-                for (uint256 i = cursor + 1; i < close; i++) {
-                    bytes1 prev = blanked[i - 1];
-                    if (
-                        blanked[i] == "'"
-                            || (charMask(blanked, i) & CMASK_IDENTIFIER_HEAD != 0
-                                && charMask(blanked, i - 1) & (CMASK_IDENTIFIER_TAIL | CMASK_NUMERIC_0_9) == 0
-                                && prev != "\""
-                                && prev != "[")
-                    ) revert DotrainUnsupported(i);
-                }
+                checkOperandArgs(blanked, cursor + 1, close);
                 cursor = close + 1;
             } else if (c == "'") {
                 revert DotrainUnsupported(cursor);
@@ -481,6 +472,38 @@ library LibDotrainCompose {
         if (binding.kind == DOTRAIN_KIND_LITERAL) return slice(blanked, binding.contentStart, binding.contentEnd);
         if (binding.kind == DOTRAIN_KIND_ELIDED) revert DotrainElidedBinding(string(name));
         revert DotrainNotALiteralBinding(string(name));
+    }
+
+    /// Reverts unless every operand arg in `[cursor, end)` is a literal: dotrain
+    /// splits args on whitespace, keeps `"…"` and `[…]` whole and copies an
+    /// arg only when it starts with a digit, `"` or `[`.
+    function checkOperandArgs(bytes memory blanked, uint256 cursor, uint256 end) internal pure {
+        cursor = skipWhitespace(blanked, cursor, end);
+        while (cursor < end) {
+            uint256 argStart = cursor;
+            bytes1 head = blanked[cursor];
+            uint256 argEnd = tokenEnd(blanked, cursor, end);
+            if (head == "\"" || head == "[") {
+                bytes1 closer = head == "[" ? bytes1("]") : head;
+                bool closed = argEnd - cursor > 1 && blanked[argEnd - 1] == closer;
+                while (!closed) {
+                    cursor = skipWhitespace(blanked, argEnd, end);
+                    if (cursor == end) revert DotrainUnsupported(argStart);
+                    argEnd = tokenEnd(blanked, cursor, end);
+                    closed = blanked[argEnd - 1] == closer;
+                }
+            } else if (charMask(blanked, cursor) & CMASK_NUMERIC_0_9 == 0) {
+                revert DotrainUnsupported(argStart);
+            }
+            cursor = skipWhitespace(blanked, argEnd, end);
+        }
+    }
+
+    function tokenEnd(bytes memory s, uint256 cursor, uint256 end) internal pure returns (uint256) {
+        while (cursor < end && charMask(s, cursor) & CMASK_TRIM == 0) {
+            cursor++;
+        }
+        return cursor;
     }
 
     function skipWhitespace(bytes memory s, uint256 cursor, uint256 end) internal pure returns (uint256) {
