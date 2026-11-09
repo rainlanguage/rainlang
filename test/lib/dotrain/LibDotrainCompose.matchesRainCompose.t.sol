@@ -34,38 +34,36 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         VmSafe.FfiResult memory result = vm.tryFfi(cmd);
         assertEq(result.exitCode, 0, string(result.stderr));
         sRain = string.concat(string(result.stdout), "/bin/rain");
-        vm.createDir("out/test/dotrain", true);
     }
 
-    function rainCompose(
-        string memory file,
-        string memory dotrain,
-        string memory entrypoint,
-        DotrainBinding[] memory bound
-    ) internal returns (string memory) {
-        string memory input = string.concat("out/test/dotrain/", file, ".rain");
-        string memory output = string.concat("out/test/dotrain/", file, ".rl");
-        vm.writeFile(input, dotrain);
-        string memory command = string.concat(sRain, " dotrain compose -i ", input, " -e ", entrypoint);
+    /// A temp dir per call as fuzz cases run in parallel; hex output so ffi cannot trim it.
+    function rainCompose(string memory dotrain, string memory entrypoint, DotrainBinding[] memory bound)
+        internal
+        returns (string memory)
+    {
+        string memory command = string.concat(sRain, " dotrain compose -i \"$d/in.rain\" -e ", entrypoint);
         for (uint256 i = 0; i < bound.length; i++) {
             command = string.concat(command, " -b ", bound[i].name, "=", LibDotrainCompose.hexLiteral(bound[i].value));
         }
-        string[] memory cmd = new string[](3);
+        string[] memory cmd = new string[](5);
         cmd[0] = "bash";
         cmd[1] = "-c";
-        cmd[2] = string.concat(command, " > ", output);
+        cmd[2] = string.concat(
+            "set -e; d=$(mktemp -d); trap 'rm -rf \"$d\"' EXIT; printf %s \"$1\" > \"$d/in.rain\"; ",
+            command,
+            " > \"$d/out.rl\"; printf 0x; od -An -v -tx1 \"$d/out.rl\" | tr -d ' \\n'"
+        );
+        cmd[3] = "rain-compose";
+        cmd[4] = dotrain;
         VmSafe.FfiResult memory result = vm.tryFfi(cmd);
         assertEq(result.exitCode, 0, string.concat(dotrain, "\n", string(result.stderr)));
-        return vm.readFile(output);
+        return string(result.stdout);
     }
 
-    function checkMatchesRainCompose(
-        string memory file,
-        string memory dotrain,
-        string memory entrypoint,
-        DotrainBinding[] memory bound
-    ) internal {
-        string memory expected = rainCompose(file, dotrain, entrypoint, bound);
+    function checkMatchesRainCompose(string memory dotrain, string memory entrypoint, DotrainBinding[] memory bound)
+        internal
+    {
+        string memory expected = rainCompose(dotrain, entrypoint, bound);
         assertEq(string.concat(LibDotrainCompose.compose(dotrain, entrypoint, bound), "\n"), expected, dotrain);
     }
 
@@ -87,19 +85,18 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         bound[1] = DotrainBinding("signer", signer);
         bound[2] = DotrainBinding("x", x);
         if (bindMaxPrice) bound[3] = DotrainBinding("max-price", maxPrice);
-        checkMatchesRainCompose("fixed-shape", dotrain, "weighting", bound);
+        checkMatchesRainCompose(dotrain, "weighting", bound);
     }
 
     function testRepeatedBindingLastWinsMatchesRainCompose(bytes32 first, bytes32 last) external {
         DotrainBinding[] memory bound = new DotrainBinding[](2);
         bound[0] = DotrainBinding("x", first);
         bound[1] = DotrainBinding("x", last);
-        checkMatchesRainCompose("repeated-binding", "---\n#x 5\n#e\n_: x;", "e", bound);
+        checkMatchesRainCompose("---\n#x 5\n#e\n_: x;", "e", bound);
     }
 
     function testCommentedLiteralBindingMatchesRainCompose() external {
         checkMatchesRainCompose(
-            "commented-literal",
             "---\n#x /* a */ 5 /* b */\n#y \"a /* c */ b\"\n#z [s /* d */ t]\n#e\n_ _ _: x y z;",
             "e",
             new DotrainBinding[](0)
@@ -108,7 +105,7 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
 
     function testGeneratedDotrainMatchesRainCompose(uint256 seed) external {
         (string memory dotrain, DotrainBinding[] memory bound) = generate(seed);
-        checkMatchesRainCompose("generated", dotrain, "weighting", bound);
+        checkMatchesRainCompose(dotrain, "weighting", bound);
     }
 
     function draw(Rng memory rng, uint256 n) internal pure returns (uint256) {
