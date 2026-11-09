@@ -397,7 +397,7 @@ library LibDotrainCompose {
                 for (uint256 i = cursor + 1; i < close; i++) {
                     if (
                         charMask(blanked, i) & CMASK_IDENTIFIER_HEAD != 0
-                            && charMask(blanked, i - 1) & (CMASK_WHITESPACE | CMASK_LESS_THAN_SIGN) != 0
+                            && charMask(blanked, i - 1) & (CMASK_TRIM | CMASK_LESS_THAN_SIGN) != 0
                     ) revert DotrainUnsupported(i);
                 }
                 cursor = close + 1;
@@ -423,6 +423,7 @@ library LibDotrainCompose {
         while (tokenEnd < end && charMask(blanked, tokenEnd) & CMASK_WORD_DELIMITER == 0) {
             tokenEnd++;
         }
+        tokenEnd = trimItemEnd(blanked, cursor, tokenEnd, end);
         if (charMask(blanked, cursor) & CMASK_IDENTIFIER_HEAD == 0) return tokenEnd;
         for (uint256 i = cursor; i < tokenEnd; i++) {
             if (blanked[i] == ".") revert DotrainUnsupported(i);
@@ -435,6 +436,23 @@ library LibDotrainCompose {
         if (tokenEnd < end && (blanked[tokenEnd] == "(" || blanked[tokenEnd] == "<")) return tokenEnd;
         substitute(state, cursor, tokenEnd, index, token);
         return tokenEnd;
+    }
+
+    /// End of the word at `[cursor, tokenEnd)`: dotrain trims a VT/FF run that
+    /// reaches `,`, `;` or `end`; rain refuses any other VT/FF in a word.
+    function trimItemEnd(bytes memory blanked, uint256 cursor, uint256 tokenEnd, uint256 end)
+        internal
+        pure
+        returns (uint256)
+    {
+        uint256 i = cursor;
+        while (i < tokenEnd && charMask(blanked, i) & CMASK_TRIM == 0) {
+            i++;
+        }
+        if (i == tokenEnd) return tokenEnd;
+        uint256 next = skipWhitespace(blanked, i, end);
+        if (next < end && charMask(blanked, next) & (CMASK_COMMA | CMASK_SEMICOLON) == 0) revert DotrainUnsupported(i);
+        return i;
     }
 
     /// Appends `source[copied:start]` and the value of `bindings[index]` to
