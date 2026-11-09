@@ -272,10 +272,11 @@ library LibDotrainCompose {
         pure
         returns (bool, uint256)
     {
-        for (uint256 i = 0; i < bindings.length; i++) {
-            if (sameName(source, bindings[i], name, 0, name.length)) return (true, i);
+        uint256 i = 0;
+        while (i < bindings.length && !sameName(source, bindings[i], name, 0, name.length)) {
+            i++;
         }
-        return (false, 0);
+        return (i < bindings.length, i);
     }
 
     /// Composes `entrypoint` of `dotrain` with `bound` applied as `-b`
@@ -382,8 +383,10 @@ library LibDotrainCompose {
             } else if (c == "," || c == ";") {
                 rhs = false;
                 cursor++;
-            } else if (c == "\"" || c == "[") {
-                cursor = closeAt(blanked, cursor + 1, end, c == "\"" ? bytes1("\"") : bytes1("]")) + 1;
+            } else if (c == "\"") {
+                cursor = closeAt(blanked, cursor + 1, end, "\"") + 1;
+            } else if (c == "[") {
+                cursor = closeAt(blanked, cursor + 1, end, "]") + 1;
             } else if (c == "<") {
                 uint256 close = closeAt(blanked, cursor + 1, end, ">");
                 for (uint256 i = cursor + 1; i < close; i++) {
