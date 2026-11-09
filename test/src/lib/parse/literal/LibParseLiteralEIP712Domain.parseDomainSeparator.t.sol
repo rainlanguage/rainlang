@@ -178,7 +178,9 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         spelled[EIP712_DOMAIN_FIELD_VERSION] = quote(bytes(values.version));
         spelled[EIP712_DOMAIN_FIELD_CHAIN_ID] = bytes(vm.toString(values.chainId));
         spelled[EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT] = bytes(
-            layout.checksumAddress ? vm.toString(values.verifyingContract) : Strings.toHexString(values.verifyingContract)
+            layout.checksumAddress
+                ? vm.toString(values.verifyingContract)
+                : Strings.toHexString(values.verifyingContract)
         );
         spelled[EIP712_DOMAIN_FIELD_SALT] = bytes(vm.toString(values.salt));
 
@@ -655,7 +657,9 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         }
         assertEq(
             this.parseDomainSeparatorExternal(
-                bytes.concat("verifying-contract 0xABCDEFABCDEFABCDEFABCDEFABCDEFABCDEFABCD salt 0x", saltZeros, saltTail)
+                bytes.concat(
+                    "verifying-contract 0xABCDEFABCDEFABCDEFABCDEFABCDEFABCDEFABCD salt 0x", saltZeros, saltTail
+                )
             ),
             openZeppelinSeparator(
                 bytes1(0x18),
