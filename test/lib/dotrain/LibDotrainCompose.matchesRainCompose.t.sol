@@ -153,6 +153,9 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         checkMatchesRainCompose("---\n#x 0x01\n#e18 2\n#e _: foo<1e18>(x);", "e", new DotrainBinding[](0));
         checkMatchesRainCompose("---\n#x 0x01\n#ab 2\n#e _: foo<\"x\" \"ab-c\">(x);", "e", new DotrainBinding[](0));
         checkMatchesRainCompose("---\n#x 0x01\n#ab 2\n#e _: foo<[x] [ab]>(x);", "e", new DotrainBinding[](0));
+        checkMatchesRainCompose("---\n#e _: foo<0xABcd>();", "e", new DotrainBinding[](0));
+        checkMatchesRainCompose("---\n#e _: foo<1e18 \"a b\">();", "e", new DotrainBinding[](0));
+        checkMatchesRainCompose("---\n#e _: foo<[a b]>();", "e", new DotrainBinding[](0));
     }
 
     function testGeneratedDotrainMatchesRainCompose(uint256 seed) external {
