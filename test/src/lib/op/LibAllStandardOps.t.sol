@@ -239,5 +239,12 @@ contract LibAllStandardOpsTest is Test {
         assertEq(words[75].word, bytes32("get"));
         //forge-lint: disable-next-line(unsafe-typecast)
         assertEq(words[76].word, bytes32("set"));
+        // string/
+        //forge-lint: disable-next-line(unsafe-typecast)
+        assertEq(words[77].word, bytes32("string-count"));
+        //forge-lint: disable-next-line(unsafe-typecast)
+        assertEq(words[78].word, bytes32("string-starts-with"));
+        //forge-lint: disable-next-line(unsafe-typecast)
+        assertEq(words[79].word, bytes32("string-strip-prefix"));
     }
 }
