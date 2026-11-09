@@ -8,11 +8,22 @@ import {
     CMASK_FORM_FEED,
     CMASK_IDENTIFIER_HEAD,
     CMASK_IDENTIFIER_TAIL,
-    CMASK_NUMERIC_0_9
+    CMASK_NUMERIC_0_9,
+    CMASK_LESS_THAN_SIGN,
+    CMASK_GREATER_THAN_SIGN,
+    CMASK_LEFT_PAREN,
+    CMASK_RIGHT_PAREN,
+    CMASK_COMMA,
+    CMASK_SEMICOLON,
+    CMASK_COLON
 } from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 
 /// @dev Rust `str::trim` whitespace within the ASCII dotrain accepts.
 uint256 constant CMASK_TRIM = CMASK_WHITESPACE | CMASK_VERTICAL_TAB | CMASK_FORM_FEED;
+
+/// @dev Ends a bare word: dotrain splits on `( ) < >` and whitespace within a line.
+uint256 constant CMASK_WORD_DELIMITER = CMASK_WHITESPACE | CMASK_LEFT_PAREN | CMASK_RIGHT_PAREN | CMASK_LESS_THAN_SIGN
+    | CMASK_GREATER_THAN_SIGN | CMASK_COMMA | CMASK_SEMICOLON | CMASK_COLON;
 
 uint256 constant DOTRAIN_KIND_EXPRESSION = 0;
 uint256 constant DOTRAIN_KIND_LITERAL = 1;
@@ -241,5 +252,167 @@ library LibDotrainCompose {
             if (sameName(source, bindings[i], name, 0, name.length)) return (true, i);
         }
         return (false, 0);
+    }
+
+    /// Composes `entrypoint` of `dotrain` with `bound` applied as `-b`
+    /// bindings. Returns exactly the stdout of `rain dotrain compose`, minus
+    /// its trailing newline.
+    /// @param dotrain The dotrain source.
+    /// @param entrypoint The expression binding to compose.
+    /// @param bound Values for literal or elided bindings; the last wins.
+    /// @return The composed rainlang.
+    function compose(string memory dotrain, string memory entrypoint, DotrainBinding[] memory bound)
+        internal
+        pure
+        returns (string memory)
+    {
+        bytes memory source = bytes(dotrain);
+        uint256 bodyStart = frontMatterEnd(source);
+        bytes memory blanked = blankComments(source, bodyStart);
+        DotrainParsedBinding[] memory bindings = parseBindings(source, blanked, bodyStart);
+        for (uint256 i = 0; i < bound.length; i++) {
+            (bool found, uint256 index) = findBinding(source, bindings, bytes(bound[i].name));
+            if (!found) revert DotrainBindingNotFound(bound[i].name);
+            if (bindings[index].kind == DOTRAIN_KIND_EXPRESSION) revert DotrainBindingNotRebindable(bound[i].name);
+            bindings[index].bound = true;
+            bindings[index].value = bound[i].value;
+        }
+        (bool entryFound, uint256 entryIndex) = findBinding(source, bindings, bytes(entrypoint));
+        if (!entryFound) revert DotrainEntrypointNotFound(entrypoint);
+        DotrainParsedBinding memory entry = bindings[entryIndex];
+        if (entry.kind != DOTRAIN_KIND_EXPRESSION) revert DotrainEntrypointNotExpression(entrypoint);
+        return string.concat(
+            "/* 0. ",
+            entrypoint,
+            " */ \n",
+            string(transform(source, blanked, bindings, entry.contentStart, entry.contentEnd))
+        );
+    }
+
+    /// Offset of the first byte after the first `---` anywhere in `source`.
+    function frontMatterEnd(bytes memory source) internal pure returns (uint256) {
+        for (uint256 i = 0; i + 2 < source.length; i++) {
+            if (source[i] == "-" && source[i + 1] == "-" && source[i + 2] == "-") return i + 3;
+        }
+        revert DotrainMissingFrontMatter();
+    }
+
+    /// Copies the entrypoint content, substituting binding values into the
+    /// pragma and bare RHS words.
+    function transform(
+        bytes memory source,
+        bytes memory blanked,
+        DotrainParsedBinding[] memory bindings,
+        uint256 start,
+        uint256 end
+    ) internal pure returns (bytes memory) {
+        bytes memory out = "";
+        uint256 copied = start;
+        uint256 cursor = skipWhitespace(blanked, start, end);
+        bytes memory keyword = "using-words-from";
+        if (
+            cursor + keyword.length <= end
+                && keccak256(slice(blanked, cursor, cursor + keyword.length)) == keccak256(keyword)
+                && (cursor + keyword.length == end || charMask(blanked, cursor + keyword.length) & CMASK_WHITESPACE != 0)
+        ) {
+            cursor += keyword.length;
+            while (true) {
+                cursor = skipWhitespace(blanked, cursor, end);
+                if (cursor == end) break;
+                uint256 tokenEnd = cursor;
+                while (tokenEnd < end && charMask(blanked, tokenEnd) & CMASK_WHITESPACE == 0) {
+                    tokenEnd++;
+                }
+                bytes memory token = slice(blanked, cursor, tokenEnd);
+                (bool found, uint256 index) = findBinding(source, bindings, token);
+                if (found) {
+                    out = bytes.concat(out, slice(source, copied, cursor), resolve(source, bindings[index], token));
+                    copied = tokenEnd;
+                } else if (charMask(blanked, cursor) & CMASK_NUMERIC_0_9 == 0) {
+                    break;
+                }
+                cursor = tokenEnd;
+            }
+        }
+
+        bool rhs = false;
+        while (cursor < end) {
+            bytes1 c = blanked[cursor];
+            uint256 mask = charMask(blanked, cursor);
+            if (c == ":") {
+                rhs = true;
+                cursor++;
+            } else if (c == "," || c == ";") {
+                rhs = false;
+                cursor++;
+            } else if (c == "\"" || c == "[") {
+                cursor = closeAt(blanked, cursor + 1, end, c == "\"" ? bytes1("\"") : bytes1("]")) + 1;
+            } else if (c == "<") {
+                uint256 close = closeAt(blanked, cursor + 1, end, ">");
+                for (uint256 i = cursor + 1; i < close; i++) {
+                    if (
+                        charMask(blanked, i) & CMASK_IDENTIFIER_HEAD != 0
+                            && charMask(blanked, i - 1) & (CMASK_WHITESPACE | CMASK_LESS_THAN_SIGN) != 0
+                    ) revert DotrainUnsupported(i);
+                }
+                cursor = close + 1;
+            } else if (c == "'") {
+                revert DotrainUnsupported(cursor);
+            } else if (mask & (CMASK_IDENTIFIER_HEAD | CMASK_NUMERIC_0_9) != 0) {
+                uint256 tokenEnd = cursor;
+                while (tokenEnd < end && charMask(blanked, tokenEnd) & CMASK_WORD_DELIMITER == 0) {
+                    tokenEnd++;
+                }
+                if (mask & CMASK_IDENTIFIER_HEAD != 0) {
+                    for (uint256 i = cursor; i < tokenEnd; i++) {
+                        if (blanked[i] == ".") revert DotrainUnsupported(i);
+                    }
+                    bytes memory token = slice(blanked, cursor, tokenEnd);
+                    (bool found, uint256 index) = findBinding(source, bindings, token);
+                    if (found) {
+                        if (!rhs) revert DotrainAliasShadowsBinding(string(token));
+                        // Opcodes share the namespace but are never substituted.
+                        bool opcode = tokenEnd < end && (blanked[tokenEnd] == "(" || blanked[tokenEnd] == "<");
+                        if (!opcode) {
+                            out =
+                                bytes.concat(out, slice(source, copied, cursor), resolve(source, bindings[index], token));
+                            copied = tokenEnd;
+                        }
+                    }
+                }
+                cursor = tokenEnd;
+            } else {
+                cursor++;
+            }
+        }
+        return bytes.concat(out, slice(source, copied, end));
+    }
+
+    /// The text a reference to `binding` composes to.
+    function resolve(bytes memory source, DotrainParsedBinding memory binding, bytes memory name)
+        internal
+        pure
+        returns (bytes memory)
+    {
+        if (binding.bound) return bytes(hexLiteral(binding.value));
+        if (binding.kind == DOTRAIN_KIND_LITERAL) return slice(source, binding.contentStart, binding.contentEnd);
+        if (binding.kind == DOTRAIN_KIND_ELIDED) revert DotrainElidedBinding(string(name));
+        revert DotrainNotALiteralBinding(string(name));
+    }
+
+    function skipWhitespace(bytes memory s, uint256 cursor, uint256 end) internal pure returns (uint256) {
+        while (cursor < end && charMask(s, cursor) & CMASK_TRIM != 0) {
+            cursor++;
+        }
+        return cursor;
+    }
+
+    /// Offset of the first `close` at or after `cursor`.
+    function closeAt(bytes memory s, uint256 cursor, uint256 end, bytes1 close) internal pure returns (uint256) {
+        while (cursor < end && s[cursor] != close) {
+            cursor++;
+        }
+        if (cursor == end) revert DotrainUnsupported(cursor);
+        return cursor;
     }
 }
