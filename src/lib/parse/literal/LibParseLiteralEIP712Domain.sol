@@ -64,6 +64,11 @@ uint256 constant EIP712_DOMAIN_SPRITE_KEYWORD_SALT = (142 << 8) | 4;
 uint256 constant EIP712_DOMAIN_SPRITE_TYPE_MEMBER_SEPARATOR = (146 << 8) | 1;
 uint256 constant EIP712_DOMAIN_SPRITE_TYPE_SUFFIX = (147 << 8) | 1;
 
+/// @dev Longest type string (95 bytes) plus a word of `copySprite` overrun.
+uint256 constant EIP712_DOMAIN_TYPE_BUFFER_LENGTH = 0x80;
+/// @dev The type hash and the five encoded field values.
+uint256 constant EIP712_DOMAIN_ENCODED_BUFFER_LENGTH = 0xC0;
+
 uint256 constant EIP712_DOMAIN_VERIFYING_CONTRACT_HEX_DIGITS = 0x28;
 uint256 constant EIP712_DOMAIN_SALT_HEX_DIGITS = 0x40;
 
@@ -114,8 +119,16 @@ library LibParseLiteralEIP712Domain {
         view
         returns (bytes32)
     {
-        bytes memory typeString = "";
-        bytes memory encoded = "";
+        bytes memory sprite = EIP712_DOMAIN_SPRITE;
+        uint256 typeStart;
+        uint256 encodedStart;
+        assembly ("memory-safe") {
+            typeStart := mload(0x40)
+            encodedStart := add(typeStart, EIP712_DOMAIN_TYPE_BUFFER_LENGTH)
+            mstore(0x40, add(encodedStart, EIP712_DOMAIN_ENCODED_BUFFER_LENGTH))
+        }
+        uint256 typeCursor = copySprite(sprite, typeStart, EIP712_DOMAIN_SPRITE_TYPE_PREFIX);
+        uint256 encodedCursor = encodedStart + 0x20;
         uint256 nextField = 0;
         cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
         if (cursor >= end) {
@@ -124,7 +137,7 @@ library LibParseLiteralEIP712Domain {
         while (cursor < end) {
             uint256 fieldStart = cursor;
             cursor = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
-            uint256 field = fieldIndex(fieldStart, cursor);
+            uint256 field = fieldIndex(sprite, fieldStart, cursor);
             if (field == EIP712_DOMAIN_FIELD_UNKNOWN) {
                 revert UnknownEIP712DomainField(state.parseErrorOffset(fieldStart));
             }
@@ -142,14 +155,22 @@ library LibParseLiteralEIP712Domain {
                 revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
             }
 
-            if (typeString.length > 0) {
-                typeString = bytes.concat(typeString, EIP712_DOMAIN_TYPE_MEMBER_SEPARATOR);
+            if (encodedCursor > encodedStart + 0x20) {
+                typeCursor = copySprite(sprite, typeCursor, EIP712_DOMAIN_SPRITE_TYPE_MEMBER_SEPARATOR);
             }
-            typeString = bytes.concat(typeString, fieldType(field));
-            encoded = bytes.concat(encoded, value);
+            typeCursor = copySprite(sprite, typeCursor, fieldType(field));
+            assembly ("memory-safe") {
+                mstore(encodedCursor, value)
+            }
+            encodedCursor += 0x20;
         }
-        bytes32 typeHash = keccak256(bytes.concat(EIP712_DOMAIN_TYPE_PREFIX, typeString, EIP712_DOMAIN_TYPE_SUFFIX));
-        return keccak256(bytes.concat(typeHash, encoded));
+        typeCursor = copySprite(sprite, typeCursor, EIP712_DOMAIN_SPRITE_TYPE_SUFFIX);
+        bytes32 domainSeparator;
+        assembly ("memory-safe") {
+            mstore(encodedStart, keccak256(typeStart, sub(typeCursor, typeStart)))
+            domainSeparator := keccak256(encodedStart, sub(encodedCursor, encodedStart))
+        }
+        return domainSeparator;
     }
 
     /// @notice Parses one field value as its 32 byte ABI encoding.
@@ -265,11 +286,11 @@ library LibParseLiteralEIP712Domain {
     }
 
     /// @notice Maps a field keyword region to its canonical index.
+    /// @param sprite `EIP712_DOMAIN_SPRITE` in memory.
     /// @param start The start of the field keyword.
     /// @param end The end of the field keyword.
     /// @return The field index, or `EIP712_DOMAIN_FIELD_UNKNOWN`.
-    function fieldIndex(uint256 start, uint256 end) internal pure returns (uint256) {
-        bytes memory sprite = EIP712_DOMAIN_SPRITE;
+    function fieldIndex(bytes memory sprite, uint256 start, uint256 end) internal pure returns (uint256) {
         if (regionEqualsSprite(sprite, start, end, EIP712_DOMAIN_SPRITE_KEYWORD_NAME)) {
             return EIP712_DOMAIN_FIELD_NAME;
         }
@@ -288,23 +309,38 @@ library LibParseLiteralEIP712Domain {
         return EIP712_DOMAIN_FIELD_UNKNOWN;
     }
 
-    /// @notice The `EIP712Domain` type string member for a field index.
+    /// @notice The sprite entry of the `EIP712Domain` type string member for a
+    /// field index.
     /// @param field A known field index.
-    /// @return The member, e.g. `string name`.
-    function fieldType(uint256 field) internal pure returns (bytes memory) {
+    /// @return The sprite entry of the member, e.g. `string name`.
+    function fieldType(uint256 field) internal pure returns (uint256) {
         if (field == EIP712_DOMAIN_FIELD_NAME) {
-            return EIP712_DOMAIN_MEMBER_NAME;
+            return EIP712_DOMAIN_SPRITE_MEMBER_NAME;
         }
         if (field == EIP712_DOMAIN_FIELD_VERSION) {
-            return EIP712_DOMAIN_MEMBER_VERSION;
+            return EIP712_DOMAIN_SPRITE_MEMBER_VERSION;
         }
         if (field == EIP712_DOMAIN_FIELD_CHAIN_ID) {
-            return EIP712_DOMAIN_MEMBER_CHAIN_ID;
+            return EIP712_DOMAIN_SPRITE_MEMBER_CHAIN_ID;
         }
         if (field == EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT) {
-            return EIP712_DOMAIN_MEMBER_VERIFYING_CONTRACT;
+            return EIP712_DOMAIN_SPRITE_MEMBER_VERIFYING_CONTRACT;
         }
-        return EIP712_DOMAIN_MEMBER_SALT;
+        return EIP712_DOMAIN_SPRITE_MEMBER_SALT;
+    }
+
+    /// @notice Copies a sprite entry to `cursor`. Writes a full word, so up to
+    /// 31 bytes past the entry are overwritten.
+    /// @param sprite `EIP712_DOMAIN_SPRITE` in memory.
+    /// @param cursor Where to copy the entry.
+    /// @param entry The sprite entry, `(offset << 8) | length`.
+    /// @return The cursor after the copied entry.
+    function copySprite(bytes memory sprite, uint256 cursor, uint256 entry) internal pure returns (uint256) {
+        assembly ("memory-safe") {
+            mstore(cursor, mload(add(add(sprite, 0x20), shr(8, entry))))
+            cursor := add(cursor, and(entry, 0xFF))
+        }
+        return cursor;
     }
 
     /// @notice Whether the memory region `[start, end)` equals `expected`.
