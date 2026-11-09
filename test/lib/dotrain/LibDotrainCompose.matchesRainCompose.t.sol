@@ -107,6 +107,10 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         checkMatchesRainCompose("/* a\n---\n#x 5\n#e\n_: x; /* b */", "e", new DotrainBinding[](0));
     }
 
+    function testCommentClosesAtFirstStarSlashMatchesRainCompose() external {
+        checkMatchesRainCompose("---\n#x 5\n#e\n/*/ a / x */\n_: x;", "e", new DotrainBinding[](0));
+    }
+
     function testGeneratedDotrainMatchesRainCompose(uint256 seed) external {
         (string memory dotrain, DotrainBinding[] memory bound) = generate(seed);
         checkMatchesRainCompose(dotrain, "weighting", bound);
