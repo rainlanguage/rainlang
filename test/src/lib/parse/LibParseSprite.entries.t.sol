@@ -77,9 +77,7 @@ contract LibParseSpriteEntriesTest is Test {
             "type member separator"
         );
         assertEq(spriteSlice(PARSE_SPRITE_EIP712_DOMAIN_MEMBER_NAME), EIP712_DOMAIN_MEMBER_NAME, "member name");
-        assertEq(
-            spriteSlice(PARSE_SPRITE_EIP712_DOMAIN_MEMBER_VERSION), EIP712_DOMAIN_MEMBER_VERSION, "member version"
-        );
+        assertEq(spriteSlice(PARSE_SPRITE_EIP712_DOMAIN_MEMBER_VERSION), EIP712_DOMAIN_MEMBER_VERSION, "member version");
         assertEq(
             spriteSlice(PARSE_SPRITE_EIP712_DOMAIN_MEMBER_CHAIN_ID), EIP712_DOMAIN_MEMBER_CHAIN_ID, "member chainId"
         );
