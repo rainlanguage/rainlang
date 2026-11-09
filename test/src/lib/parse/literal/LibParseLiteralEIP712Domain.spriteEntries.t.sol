@@ -53,9 +53,7 @@ contract LibParseLiteralEIP712DomainSpriteEntriesTest is Test {
         assertEq(spriteSlice(EIP712_DOMAIN_SPRITE_DISPATCH), EIP712_DOMAIN_SEPARATOR_DISPATCH, "dispatch");
         assertEq(spriteSlice(EIP712_DOMAIN_SPRITE_KEYWORD_NAME), EIP712_DOMAIN_KEYWORD_NAME, "keyword name");
         assertEq(spriteSlice(EIP712_DOMAIN_SPRITE_KEYWORD_VERSION), EIP712_DOMAIN_KEYWORD_VERSION, "keyword version");
-        assertEq(
-            spriteSlice(EIP712_DOMAIN_SPRITE_KEYWORD_CHAIN_ID), EIP712_DOMAIN_KEYWORD_CHAIN_ID, "keyword chain-id"
-        );
+        assertEq(spriteSlice(EIP712_DOMAIN_SPRITE_KEYWORD_CHAIN_ID), EIP712_DOMAIN_KEYWORD_CHAIN_ID, "keyword chain-id");
         assertEq(
             spriteSlice(EIP712_DOMAIN_SPRITE_KEYWORD_VERIFYING_CONTRACT),
             EIP712_DOMAIN_KEYWORD_VERIFYING_CONTRACT,
