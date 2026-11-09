@@ -24,26 +24,6 @@ import {
 } from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
 
-bytes constant EIP712_DOMAIN_SEPARATOR_DISPATCH = "eip712-domain-separator";
-
-bytes constant EIP712_DOMAIN_KEYWORD_NAME = "name";
-bytes constant EIP712_DOMAIN_KEYWORD_VERSION = "version";
-bytes constant EIP712_DOMAIN_KEYWORD_CHAIN_ID = "chain-id";
-bytes constant EIP712_DOMAIN_KEYWORD_VERIFYING_CONTRACT = "verifying-contract";
-bytes constant EIP712_DOMAIN_KEYWORD_SALT = "salt";
-
-bytes constant EIP712_DOMAIN_CHAIN_ID_CURRENT = "current";
-
-bytes constant EIP712_DOMAIN_TYPE_PREFIX = "EIP712Domain(";
-bytes constant EIP712_DOMAIN_TYPE_SUFFIX = ")";
-bytes constant EIP712_DOMAIN_TYPE_MEMBER_SEPARATOR = ",";
-
-bytes constant EIP712_DOMAIN_MEMBER_NAME = "string name";
-bytes constant EIP712_DOMAIN_MEMBER_VERSION = "string version";
-bytes constant EIP712_DOMAIN_MEMBER_CHAIN_ID = "uint256 chainId";
-bytes constant EIP712_DOMAIN_MEMBER_VERIFYING_CONTRACT = "address verifyingContract";
-bytes constant EIP712_DOMAIN_MEMBER_SALT = "bytes32 salt";
-
 bytes constant EIP712_DOMAIN_SPRITE =
     "eip712-domain-separatorchain-idverifying-contractcurrentEIP712Domain(string namestring versionuint256 chainIdaddress verifyingContractbytes32 salt,)";
 
@@ -341,23 +321,6 @@ library LibParseLiteralEIP712Domain {
             cursor := add(cursor, and(entry, 0xFF))
         }
         return cursor;
-    }
-
-    /// @notice Whether the memory region `[start, end)` equals `expected`.
-    /// @param start The start of the region.
-    /// @param end The end of the region.
-    /// @param expected The bytes to compare against.
-    /// @return True if equal.
-    function regionEquals(uint256 start, uint256 end, bytes memory expected) internal pure returns (bool) {
-        uint256 length = end - start;
-        if (length != expected.length) {
-            return false;
-        }
-        bytes32 regionHash;
-        assembly ("memory-safe") {
-            regionHash := keccak256(start, length)
-        }
-        return regionHash == keccak256(expected);
     }
 
     /// @notice Whether the memory region `[start, end)` equals a sprite entry.
