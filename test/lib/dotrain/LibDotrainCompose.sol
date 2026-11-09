@@ -484,7 +484,8 @@ library LibDotrainCompose {
             bytes1 head = blanked[cursor];
             uint256 argEnd = skipNonWhitespace(blanked, cursor, end);
             if (head == "\"" || head == "[") {
-                bytes1 closer = head == "[" ? bytes1("]") : head;
+                bytes1 closer = head;
+                if (closer == "[") closer = "]";
                 bool closed = argEnd - cursor > 1 && blanked[argEnd - 1] == closer;
                 while (!closed) {
                     cursor = skipWhitespace(blanked, argEnd, end);
