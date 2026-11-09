@@ -395,9 +395,14 @@ library LibDotrainCompose {
             } else if (c == "<") {
                 uint256 close = closeAt(blanked, cursor + 1, end, ">");
                 for (uint256 i = cursor + 1; i < close; i++) {
+                    bytes1 prev = blanked[i - 1];
                     if (
-                        charMask(blanked, i) & CMASK_IDENTIFIER_HEAD != 0
-                            && charMask(blanked, i - 1) & (CMASK_TRIM | CMASK_LESS_THAN_SIGN) != 0
+                        blanked[i] == "'"
+                            || (
+                                charMask(blanked, i) & CMASK_IDENTIFIER_HEAD != 0
+                                    && charMask(blanked, i - 1) & (CMASK_IDENTIFIER_TAIL | CMASK_NUMERIC_0_9) == 0
+                                    && prev != "\"" && prev != "["
+                            )
                     ) revert DotrainUnsupported(i);
                 }
                 cursor = close + 1;
