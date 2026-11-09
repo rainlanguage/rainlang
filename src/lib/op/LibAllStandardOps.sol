@@ -99,6 +99,9 @@ import {LibOpUint256Sub} from "./math/uint256/LibOpUint256Sub.sol";
 
 import {LibOpGet} from "./store/LibOpGet.sol";
 import {LibOpSet} from "./store/LibOpSet.sol";
+import {LibOpStringCount} from "./string/LibOpStringCount.sol";
+import {LibOpStringStartsWith} from "./string/LibOpStringStartsWith.sol";
+import {LibOpStringStripPrefix} from "./string/LibOpStringStripPrefix.sol";
 
 import {ParseState, LITERAL_PARSERS_LENGTH} from "../parse/literal/LibParseLiteral.sol";
 import {LibParseLiteralString} from "../parse/literal/LibParseLiteralString.sol";
@@ -107,7 +110,7 @@ import {LibParseLiteralHex} from "../parse/literal/LibParseLiteralHex.sol";
 import {LibParseLiteralSubParseable} from "../parse/literal/LibParseLiteralSubParseable.sol";
 
 /// @dev Number of ops currently provided by `AllStandardOps`.
-uint256 constant ALL_STANDARD_OPS_LENGTH = 77;
+uint256 constant ALL_STANDARD_OPS_LENGTH = 80;
 
 /// @title LibAllStandardOps
 /// @notice Every opcode available from the core repository laid out as a single
@@ -347,6 +350,13 @@ library LibAllStandardOps {
             AuthoringMetaV2(
                 "set",
                 "Sets a value in storage. The first operand is the key to set and the second operand is the value to set."
+            ),
+            // string/
+            AuthoringMetaV2("string-count", "The byte length of a string."),
+            AuthoringMetaV2("string-starts-with", "1 if the first string starts with the second string, else 0."),
+            AuthoringMetaV2(
+                "string-strip-prefix",
+                "The first string without the second string as its prefix, or the first string unchanged if it does not start with the second."
             )
         ];
         AuthoringMetaV2[] memory wordsDynamic;
@@ -557,6 +567,12 @@ library LibAllStandardOps {
                     // get
                     LibParseOperand.handleOperandDisallowed,
                     // set
+                    LibParseOperand.handleOperandDisallowed,
+                    // string-count
+                    LibParseOperand.handleOperandDisallowed,
+                    // string-starts-with
+                    LibParseOperand.handleOperandDisallowed,
+                    // string-strip-prefix
                     LibParseOperand.handleOperandDisallowed
                 ];
             uint256[] memory pointersDynamic;
@@ -667,7 +683,10 @@ library LibAllStandardOps {
                     LibOpUint256Power.integrity,
                     LibOpUint256Sub.integrity,
                     LibOpGet.integrity,
-                    LibOpSet.integrity
+                    LibOpSet.integrity,
+                    LibOpStringCount.integrity,
+                    LibOpStringStartsWith.integrity,
+                    LibOpStringStripPrefix.integrity
                 ];
             uint256[] memory pointersDynamic;
             assembly ("memory-safe") {
@@ -776,7 +795,10 @@ library LibAllStandardOps {
                     LibOpUint256Power.run,
                     LibOpUint256Sub.run,
                     LibOpGet.run,
-                    LibOpSet.run
+                    LibOpSet.run,
+                    LibOpStringCount.run,
+                    LibOpStringStartsWith.run,
+                    LibOpStringStripPrefix.run
                 ];
             uint256[] memory pointersDynamic;
             assembly ("memory-safe") {
