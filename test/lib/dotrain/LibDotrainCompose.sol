@@ -19,7 +19,7 @@ import {
 } from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {PRAGMA_KEYWORD_BYTES} from "../../../src/lib/parse/LibParsePragma.sol";
 
-/// @dev Rust `str::trim` whitespace within the ASCII dotrain accepts.
+/// @dev Rust `char::is_whitespace`, `str::trim` and regex `\s` within the ASCII dotrain accepts.
 uint256 constant CMASK_TRIM = CMASK_WHITESPACE | CMASK_VERTICAL_TAB | CMASK_FORM_FEED;
 
 /// @dev Ends a bare word: dotrain splits on `( ) < >` and whitespace within a line.
@@ -170,7 +170,7 @@ library LibDotrainCompose {
         DotrainParsedBinding[] memory bindings = new DotrainParsedBinding[](count);
         uint256 cursor = bodyStart;
         while (cursor < blanked.length && blanked[cursor] != "#") {
-            if (charMask(blanked, cursor) & CMASK_WHITESPACE == 0) revert DotrainUnsupported(cursor);
+            if (charMask(blanked, cursor) & CMASK_TRIM == 0) revert DotrainUnsupported(cursor);
             cursor++;
         }
         for (uint256 b = 0; b < count; b++) {
@@ -229,7 +229,7 @@ library LibDotrainCompose {
         if (head == "\"" || head == "[") return DOTRAIN_KIND_LITERAL;
         if (charMask(blanked, start) & CMASK_NUMERIC_0_9 != 0) {
             for (uint256 i = start; i < end; i++) {
-                if (charMask(blanked, i) & CMASK_WHITESPACE != 0) return DOTRAIN_KIND_EXPRESSION;
+                if (charMask(blanked, i) & CMASK_TRIM != 0) return DOTRAIN_KIND_EXPRESSION;
             }
             return DOTRAIN_KIND_LITERAL;
         }
@@ -354,14 +354,14 @@ library LibDotrainCompose {
         uint256 keywordEnd = cursor + keyword.length;
         if (
             keywordEnd > end || keccak256(slice(blanked, cursor, keywordEnd)) != keccak256(keyword)
-                || (keywordEnd < end && charMask(blanked, keywordEnd) & CMASK_WHITESPACE == 0)
+                || (keywordEnd < end && charMask(blanked, keywordEnd) & CMASK_TRIM == 0)
         ) return cursor;
         cursor = keywordEnd;
         while (true) {
             cursor = skipWhitespace(blanked, cursor, end);
             if (cursor == end) break;
             uint256 tokenEnd = cursor;
-            while (tokenEnd < end && charMask(blanked, tokenEnd) & CMASK_WHITESPACE == 0) {
+            while (tokenEnd < end && charMask(blanked, tokenEnd) & CMASK_TRIM == 0) {
                 tokenEnd++;
             }
             bytes memory token = slice(blanked, cursor, tokenEnd);
