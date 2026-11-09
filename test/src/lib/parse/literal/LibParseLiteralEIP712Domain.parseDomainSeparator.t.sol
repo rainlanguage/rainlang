@@ -8,8 +8,6 @@ import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";
 import {LibBytes, Pointer} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
 import {LibConformString} from "rain-string-0.3.9/src/lib/mut/LibConformString.sol";
 import {
-    CMASK_PRINTABLE,
-    CMASK_WHITESPACE,
     CMASK_QUOTATION_MARK,
     CMASK_RIGHT_SQUARE_BRACKET,
     CMASK_STRING_LITERAL_TAIL
@@ -26,7 +24,23 @@ import {
 } from "rain-math-float-0.3.11/src/error/ErrDecimalFloat.sol";
 import {ParseState, LibParseState} from "../../../../../src/lib/parse/LibParseState.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
-import {LibParseLiteralEIP712Domain} from "../../../../../src/lib/parse/literal/LibParseLiteralEIP712Domain.sol";
+import {
+    LibParseLiteralEIP712Domain,
+    EIP712_DOMAIN_KEYWORD_NAME,
+    EIP712_DOMAIN_KEYWORD_VERSION,
+    EIP712_DOMAIN_KEYWORD_CHAIN_ID,
+    EIP712_DOMAIN_KEYWORD_VERIFYING_CONTRACT,
+    EIP712_DOMAIN_KEYWORD_SALT,
+    EIP712_DOMAIN_CHAIN_ID_CURRENT,
+    EIP712_DOMAIN_VERIFYING_CONTRACT_HEX_DIGITS,
+    EIP712_DOMAIN_SALT_HEX_DIGITS,
+    CMASK_EIP712_DOMAIN_TOKEN,
+    EIP712_DOMAIN_FIELD_NAME,
+    EIP712_DOMAIN_FIELD_VERSION,
+    EIP712_DOMAIN_FIELD_CHAIN_ID,
+    EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT,
+    EIP712_DOMAIN_FIELD_SALT
+} from "../../../../../src/lib/parse/literal/LibParseLiteralEIP712Domain.sol";
 import {
     UnknownEIP712DomainField,
     EIP712DomainFieldOutOfOrder,
@@ -54,11 +68,13 @@ struct DomainLayout {
 /// @dev The `{name: "prices", version: "1"}` separator st0x signs prices under.
 bytes32 constant PRICES_V1_DOMAIN_SEPARATOR = 0x7fcea108f1d99ecebbc296ddbd0cb92b55c1f11c5124d455748e1d8a4345a5b3;
 
+uint256 constant FIELD_COUNT = EIP712_DOMAIN_FIELD_SALT + 1;
+
 contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
     using LibBytes for bytes;
 
     /// @dev Any body char that can be part of a field keyword token.
-    uint256 constant TOKEN_MASK = CMASK_PRINTABLE & ~CMASK_WHITESPACE & ~CMASK_RIGHT_SQUARE_BRACKET;
+    uint256 constant TOKEN_MASK = CMASK_EIP712_DOMAIN_TOKEN & ~CMASK_RIGHT_SQUARE_BRACKET;
 
     function openZeppelinSeparator(
         bytes1 fields,
@@ -91,11 +107,11 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
     }
 
     function keyword(uint256 field) internal pure returns (bytes memory) {
-        if (field == 0) return "name";
-        if (field == 1) return "version";
-        if (field == 2) return "chain-id";
-        if (field == 3) return "verifying-contract";
-        return "salt";
+        if (field == EIP712_DOMAIN_FIELD_NAME) return EIP712_DOMAIN_KEYWORD_NAME;
+        if (field == EIP712_DOMAIN_FIELD_VERSION) return EIP712_DOMAIN_KEYWORD_VERSION;
+        if (field == EIP712_DOMAIN_FIELD_CHAIN_ID) return EIP712_DOMAIN_KEYWORD_CHAIN_ID;
+        if (field == EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT) return EIP712_DOMAIN_KEYWORD_VERIFYING_CONTRACT;
+        return EIP712_DOMAIN_KEYWORD_SALT;
     }
 
     function quote(bytes memory value) internal pure returns (bytes memory) {
@@ -115,13 +131,13 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
     }
 
     /// The body text of every field in `mask`, in canonical order.
-    function domainBody(uint256 mask, bytes[5] memory values, bytes memory separator)
+    function domainBody(uint256 mask, bytes[FIELD_COUNT] memory values, bytes memory separator)
         internal
         pure
         returns (bytes memory)
     {
         bytes memory body;
-        for (uint256 field = 0; field < 5; field++) {
+        for (uint256 field = EIP712_DOMAIN_FIELD_NAME; field < FIELD_COUNT; field++) {
             //forge-lint: disable-next-line(incorrect-shift)
             if (mask & (1 << field) == 0) continue;
             if (body.length > 0) {
@@ -132,14 +148,14 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         return body;
     }
 
-    function validValues() internal pure returns (bytes[5] memory) {
-        return [
-            bytes("\"x\""),
-            bytes("\"x\""),
-            bytes("1"),
-            bytes("0x0000000000000000000000000000000000000000"),
-            bytes("0x0000000000000000000000000000000000000000000000000000000000000000")
-        ];
+    function validValues() internal pure returns (bytes[FIELD_COUNT] memory) {
+        bytes[FIELD_COUNT] memory values;
+        values[EIP712_DOMAIN_FIELD_NAME] = "\"x\"";
+        values[EIP712_DOMAIN_FIELD_VERSION] = "\"x\"";
+        values[EIP712_DOMAIN_FIELD_CHAIN_ID] = "1";
+        values[EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT] = "0x0000000000000000000000000000000000000000";
+        values[EIP712_DOMAIN_FIELD_SALT] = "0x0000000000000000000000000000000000000000000000000000000000000000";
+        return values;
     }
 
     /// Every one of the 31 non-empty field masks hashes to OpenZeppelin's
@@ -157,19 +173,16 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         bytes memory leading = conformWhitespace(layout.leading, false);
         bytes memory trailing = conformWhitespace(layout.trailing, false);
 
-        bytes[5] memory spelled = [
-            quote(bytes(values.name)),
-            quote(bytes(values.version)),
-            bytes(vm.toString(values.chainId)),
-            bytes(
-                layout.checksumAddress
-                    ? vm.toString(values.verifyingContract)
-                    : Strings.toHexString(values.verifyingContract)
-            ),
-            bytes(vm.toString(values.salt))
-        ];
+        bytes[FIELD_COUNT] memory spelled;
+        spelled[EIP712_DOMAIN_FIELD_NAME] = quote(bytes(values.name));
+        spelled[EIP712_DOMAIN_FIELD_VERSION] = quote(bytes(values.version));
+        spelled[EIP712_DOMAIN_FIELD_CHAIN_ID] = bytes(vm.toString(values.chainId));
+        spelled[EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT] = bytes(
+            layout.checksumAddress ? vm.toString(values.verifyingContract) : Strings.toHexString(values.verifyingContract)
+        );
+        spelled[EIP712_DOMAIN_FIELD_SALT] = bytes(vm.toString(values.salt));
 
-        for (uint256 mask = 1; mask < 32; mask++) {
+        for (uint256 mask = 1; mask < 1 << FIELD_COUNT; mask++) {
             bytes memory body = bytes.concat(leading, domainBody(mask, spelled, separator), trailing);
             assertEq(
                 this.parseDomainSeparatorExternal(body),
@@ -200,15 +213,15 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         vm.chainId(chainId);
         bytes memory sep = conformWhitespace(separator, true);
         bytes memory trail = conformWhitespace(trailing, false);
-        bytes[5] memory spelled = [
-            bytes("\"prices\""),
-            bytes("\"1\""),
-            bytes("current"),
-            bytes(vm.toString(verifyingContract)),
-            bytes(vm.toString(salt))
-        ];
-        for (uint256 mask = 4; mask < 32; mask++) {
-            if (mask & 4 == 0) continue;
+        bytes[FIELD_COUNT] memory spelled;
+        spelled[EIP712_DOMAIN_FIELD_NAME] = "\"prices\"";
+        spelled[EIP712_DOMAIN_FIELD_VERSION] = "\"1\"";
+        spelled[EIP712_DOMAIN_FIELD_CHAIN_ID] = EIP712_DOMAIN_CHAIN_ID_CURRENT;
+        spelled[EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT] = bytes(vm.toString(verifyingContract));
+        spelled[EIP712_DOMAIN_FIELD_SALT] = bytes(vm.toString(salt));
+        uint256 chainIdBit = 1 << EIP712_DOMAIN_FIELD_CHAIN_ID;
+        for (uint256 mask = chainIdBit; mask < 1 << FIELD_COUNT; mask++) {
+            if (mask & chainIdBit == 0) continue;
             bytes memory body = bytes.concat(domainBody(mask, spelled, sep), trail);
             assertEq(
                 this.parseDomainSeparatorExternal(body),
@@ -363,10 +376,10 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         if (bytes(token)[0] >= "0" && bytes(token)[0] <= "9") {
             bytes(token)[0] = "x";
         }
-        vm.assume(keccak256(bytes(token)) != keccak256("current"));
+        vm.assume(keccak256(bytes(token)) != keccak256(EIP712_DOMAIN_CHAIN_ID_CURRENT));
         checkRefusal(bytes.concat("chain-id ", bytes(token)), MalformedEIP712DomainValue.selector, 9);
         checkRefusal(
-            bytes.concat("name \"x\" chain-id ", bytes(token), " ", validValues()[4]),
+            bytes.concat("name \"x\" chain-id ", bytes(token), " ", validValues()[EIP712_DOMAIN_FIELD_SALT]),
             MalformedEIP712DomainValue.selector,
             18
         );
@@ -375,8 +388,8 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
     /// `chain-id` followed by a field keyword refuses at that keyword, with
     /// or without the keyword's own value after it.
     function testDomainSeparatorChainIdKeywordAsValueRefuses() external {
-        bytes[5] memory values = validValues();
-        for (uint256 field = 0; field < 5; field++) {
+        bytes[FIELD_COUNT] memory values = validValues();
+        for (uint256 field = EIP712_DOMAIN_FIELD_NAME; field < FIELD_COUNT; field++) {
             checkRefusal(bytes.concat("chain-id ", keyword(field)), MalformedEIP712DomainValue.selector, 9);
             checkRefusal(
                 bytes.concat("chain-id ", keyword(field), " ", values[field]), MalformedEIP712DomainValue.selector, 9
@@ -445,7 +458,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         if (bytes(token)[0] == "\"") {
             bytes(token)[0] = "x";
         }
-        bytes memory field = isVersion ? bytes("version ") : bytes("name ");
+        bytes memory field = bytes.concat(isVersion ? EIP712_DOMAIN_KEYWORD_VERSION : EIP712_DOMAIN_KEYWORD_NAME, " ");
         checkRefusal(bytes.concat(field, bytes(token)), MalformedEIP712DomainValue.selector, field.length);
         checkRefusal(bytes.concat("name \"x\" version ", bytes(token)), MalformedEIP712DomainValue.selector, 17);
     }
@@ -476,7 +489,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
     /// is a field keyword: quoted it is that string, unquoted it refuses at
     /// its start.
     function testDomainSeparatorKeywordAsStringValue(uint256 field) external {
-        field = bound(field, 0, 4);
+        field = bound(field, EIP712_DOMAIN_FIELD_NAME, EIP712_DOMAIN_FIELD_SALT);
         bytes memory value = quote(keyword(field));
         assertEq(
             this.parseDomainSeparatorExternal(bytes.concat("name ", value)),
@@ -499,18 +512,18 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
     /// After `verifying-contract` and `salt` a field keyword is a malformed
     /// value at its offset.
     function testDomainSeparatorKeywordAsHexValueRefuses(uint256 field) external {
-        field = bound(field, 0, 4);
+        field = bound(field, EIP712_DOMAIN_FIELD_NAME, EIP712_DOMAIN_FIELD_SALT);
         checkRefusal(bytes.concat("verifying-contract ", keyword(field)), MalformedEIP712DomainValue.selector, 19);
         checkRefusal(bytes.concat("salt ", keyword(field)), MalformedEIP712DomainValue.selector, 5);
     }
 
     /// A field with no value refuses at the body end.
     function testDomainSeparatorValuelessFieldRefuses(uint256 field, string memory trailing) external {
-        field = bound(field, 0, 4);
+        field = bound(field, EIP712_DOMAIN_FIELD_NAME, EIP712_DOMAIN_FIELD_SALT);
         bytes memory body = bytes.concat(keyword(field), conformWhitespace(trailing, false));
         checkRefusal(body, MalformedEIP712DomainValue.selector, body.length);
         body = bytes.concat("name \"x\" ", body);
-        if (field == 0) {
+        if (field == EIP712_DOMAIN_FIELD_NAME) {
             checkRefusal(body, EIP712DomainFieldOutOfOrder.selector, 9);
         } else {
             checkRefusal(body, MalformedEIP712DomainValue.selector, body.length);
@@ -529,7 +542,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         if (bytes(token).length == 0) {
             token = "x";
         }
-        for (uint256 field = 0; field < 5; field++) {
+        for (uint256 field = EIP712_DOMAIN_FIELD_NAME; field < FIELD_COUNT; field++) {
             vm.assume(keccak256(bytes(token)) != keccak256(keyword(field)));
         }
         bytes memory lead = conformWhitespace(leading, false);
@@ -562,9 +575,9 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
 
     /// Every repeated or out of order pair refuses at the second keyword.
     function testDomainSeparatorFieldOutOfOrderRefuses() external {
-        bytes[5] memory values = validValues();
-        for (uint256 first = 0; first < 5; first++) {
-            for (uint256 second = 0; second <= first; second++) {
+        bytes[FIELD_COUNT] memory values = validValues();
+        for (uint256 first = EIP712_DOMAIN_FIELD_NAME; first < FIELD_COUNT; first++) {
+            for (uint256 second = EIP712_DOMAIN_FIELD_NAME; second <= first; second++) {
                 bytes memory head = bytes.concat(keyword(first), " ", values[first], " ");
                 checkRefusal(
                     bytes.concat(head, keyword(second), " ", values[second]),
@@ -592,16 +605,16 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
     /// Hex values need `0x` and exactly 40 (address) or 64 (salt) digits;
     /// anything else refuses at the value start.
     function testDomainSeparatorHexDigitCountRefuses(uint256 digits) external {
-        digits = bound(digits, 0, 80);
+        digits = bound(digits, 0, 2 * EIP712_DOMAIN_SALT_HEX_DIGITS);
         bytes memory hexDigits = new bytes(digits);
         for (uint256 i = 0; i < digits; i++) {
             hexDigits[i] = "a";
         }
         bytes memory value = bytes.concat("0x", hexDigits);
-        if (digits != 40) {
+        if (digits != EIP712_DOMAIN_VERIFYING_CONTRACT_HEX_DIGITS) {
             checkRefusal(bytes.concat("verifying-contract ", value), MalformedEIP712DomainValue.selector, 19);
         }
-        if (digits != 64) {
+        if (digits != EIP712_DOMAIN_SALT_HEX_DIGITS) {
             checkRefusal(bytes.concat("salt ", value), MalformedEIP712DomainValue.selector, 5);
         }
     }
@@ -635,15 +648,14 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
 
     /// Uppercase hex digits parse.
     function testDomainSeparatorUppercaseHexDigits() external view {
-        bytes memory saltZeros = new bytes(58);
-        for (uint256 i = 0; i < 58; i++) {
+        bytes memory saltTail = "ABCDEF";
+        bytes memory saltZeros = new bytes(EIP712_DOMAIN_SALT_HEX_DIGITS - saltTail.length);
+        for (uint256 i = 0; i < saltZeros.length; i++) {
             saltZeros[i] = "0";
         }
         assertEq(
             this.parseDomainSeparatorExternal(
-                bytes.concat(
-                    "verifying-contract 0xABCDEFABCDEFABCDEFABCDEFABCDEFABCDEFABCD salt 0x", saltZeros, "ABCDEF"
-                )
+                bytes.concat("verifying-contract 0xABCDEFABCDEFABCDEFABCDEFABCDEFABCDEFABCD salt 0x", saltZeros, saltTail)
             ),
             openZeppelinSeparator(
                 bytes1(0x18),
