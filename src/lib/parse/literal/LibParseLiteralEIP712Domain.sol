@@ -132,27 +132,27 @@ library LibParseLiteralEIP712Domain {
         uint256 nextField = 0;
         cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
         if (cursor >= end) {
-            revert EIP712DomainNoFields(state.parseErrorOffset(cursor));
+            state.revertParseError(cursor, EIP712DomainNoFields.selector);
         }
         while (cursor < end) {
             uint256 fieldStart = cursor;
             cursor = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
             uint256 field = fieldIndex(sprite, fieldStart, cursor);
             if (field == EIP712_DOMAIN_FIELD_UNKNOWN) {
-                revert UnknownEIP712DomainField(state.parseErrorOffset(fieldStart));
+                state.revertParseError(fieldStart, UnknownEIP712DomainField.selector);
             }
             if (field < nextField) {
-                revert EIP712DomainFieldOutOfOrder(state.parseErrorOffset(fieldStart));
+                state.revertParseError(fieldStart, EIP712DomainFieldOutOfOrder.selector);
             }
             nextField = field + 1;
             cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
             if (cursor >= end) {
-                revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+                state.revertParseError(cursor, MalformedEIP712DomainValue.selector);
             }
             (uint256 valueEnd, bytes32 value) = parseValue(state, sprite, field, cursor, end);
             cursor = LibParseChar.skipMask(valueEnd, end, CMASK_WHITESPACE);
             if (cursor == valueEnd && cursor < end) {
-                revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+                state.revertParseError(cursor, MalformedEIP712DomainValue.selector);
             }
 
             if (encodedCursor > encodedStart + 0x20) {
@@ -211,12 +211,12 @@ library LibParseLiteralEIP712Domain {
         returns (uint256, bytes32)
     {
         if (LibParseChar.isMask(cursor, end, CMASK_STRING_LITERAL_HEAD) == 0) {
-            revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+            state.revertParseError(cursor, MalformedEIP712DomainValue.selector);
         }
         uint256 innerStart = cursor + 1;
         uint256 innerEnd = LibParseChar.skipMask(innerStart, end, CMASK_STRING_LITERAL_TAIL);
         if (LibParseChar.isMask(innerEnd, end, CMASK_STRING_LITERAL_END) == 0) {
-            revert MalformedEIP712DomainValue(state.parseErrorOffset(innerEnd));
+            state.revertParseError(innerEnd, MalformedEIP712DomainValue.selector);
         }
         bytes32 stringHash;
         assembly ("memory-safe") {
@@ -241,14 +241,14 @@ library LibParseLiteralEIP712Domain {
         if (LibParseChar.isMask(cursor, end, CMASK_NUMERIC_0_9) == 0) {
             uint256 tokenEnd = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
             if (!regionEqualsSprite(sprite, cursor, tokenEnd, EIP712_DOMAIN_SPRITE_CHAIN_ID_CURRENT)) {
-                revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+                state.revertParseError(cursor, MalformedEIP712DomainValue.selector);
             }
             return (tokenEnd, bytes32(block.chainid));
         }
         (uint256 valueEnd, bytes32 packed) = LibParseLiteralDecimal.parseDecimalFloatPacked(state, cursor, end);
         (uint256 chainId, bool lossless) = LibDecimalFloat.toFixedDecimalLossy(Float.wrap(packed), 0);
         if (!lossless) {
-            revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+            state.revertParseError(cursor, MalformedEIP712DomainValue.selector);
         }
         return (valueEnd, bytes32(chainId));
     }
@@ -276,12 +276,12 @@ library LibParseLiteralEIP712Domain {
         }
         bool hexDispatch = (head & CMASK_NUMERIC_0_9) != 0 && (head | disambiguate) == CMASK_LITERAL_HEX_DISPATCH;
         if (cursor + 1 >= end || !hexDispatch) {
-            revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+            state.revertParseError(cursor, MalformedEIP712DomainValue.selector);
         }
         //slither-disable-next-line unused-return
         (uint256 hexStart, uint256 hexEnd,) = state.boundHex(cursor, end);
         if (hexEnd - hexStart != digits) {
-            revert MalformedEIP712DomainValue(state.parseErrorOffset(cursor));
+            state.revertParseError(cursor, MalformedEIP712DomainValue.selector);
         }
         (uint256 valueEnd, bytes32 value) = state.parseHex(cursor, end);
         return (valueEnd, value);

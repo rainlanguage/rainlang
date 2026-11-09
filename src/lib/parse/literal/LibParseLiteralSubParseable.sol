@@ -62,7 +62,7 @@ library LibParseLiteralSubParseable {
             uint256 dispatchEnd = cursor;
 
             if (dispatchEnd == dispatchStart) {
-                revert SubParseableMissingDispatch(state.parseErrorOffset(cursor));
+                state.revertParseError(cursor, SubParseableMissingDispatch.selector);
             }
 
             // Skip any whitespace.
@@ -78,7 +78,7 @@ library LibParseLiteralSubParseable {
             uint256 bodyEnd = cursor;
 
             if (cursor >= end) {
-                revert UnclosedSubParseableLiteral(state.parseErrorOffset(cursor));
+                state.revertParseError(cursor, UnclosedSubParseableLiteral.selector);
             }
             {
                 uint256 finalChar;
@@ -87,7 +87,7 @@ library LibParseLiteralSubParseable {
                     finalChar := shl(byte(0, mload(cursor)), 1)
                 }
                 if ((finalChar & CMASK_SUB_PARSEABLE_LITERAL_END) == 0) {
-                    revert UnclosedSubParseableLiteral(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, UnclosedSubParseableLiteral.selector);
                 }
             }
 

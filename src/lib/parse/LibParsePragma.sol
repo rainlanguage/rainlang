@@ -87,7 +87,7 @@ library LibParsePragma {
                 // If the input ends exactly at the keyword there is no
                 // whitespace char to read.
                 if (cursor >= end) {
-                    revert NoWhitespaceAfterUsingWordsFrom(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, NoWhitespaceAfterUsingWordsFrom.selector);
                 }
 
                 // Need at least one whitespace char after the pragma keyword.
@@ -97,7 +97,7 @@ library LibParsePragma {
                     char := shl(byte(0, mload(cursor)), 1)
                 }
                 if (char & CMASK_WHITESPACE == 0) {
-                    revert NoWhitespaceAfterUsingWordsFrom(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, NoWhitespaceAfterUsingWordsFrom.selector);
                 }
                 ++cursor;
             }

@@ -44,7 +44,7 @@ library LibParseInterstitial {
             // It's an error if we can't fit the comment sequences in the
             // remaining data to parse.
             if (cursor + 4 > end) {
-                revert UnclosedComment(state.parseErrorOffset(cursor));
+                state.revertParseError(cursor, UnclosedComment.selector);
             }
 
             // First check the comment opening sequence is not malformed.
@@ -53,7 +53,7 @@ library LibParseInterstitial {
                 startSequence := shr(COMMENT_SEQUENCE_SHIFT, mload(cursor))
             }
             if (startSequence != COMMENT_START_SEQUENCE) {
-                revert MalformedCommentStart(state.parseErrorOffset(cursor));
+                state.revertParseError(cursor, MalformedCommentStart.selector);
             }
 
             // Move past the start sequence.
@@ -87,7 +87,7 @@ library LibParseInterstitial {
 
             // If we didn't find the end of the comment, it's an error.
             if (!foundEnd) {
-                revert UnclosedComment(state.parseErrorOffset(cursor));
+                state.revertParseError(cursor, UnclosedComment.selector);
             }
 
             return cursor;
