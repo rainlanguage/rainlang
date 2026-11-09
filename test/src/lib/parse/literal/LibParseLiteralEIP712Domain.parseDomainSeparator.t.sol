@@ -184,7 +184,7 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         );
         spelled[EIP712_DOMAIN_FIELD_SALT] = bytes(vm.toString(values.salt));
 
-        for (uint256 mask = 1; mask < 1 << FIELD_COUNT; mask++) {
+        for (uint256 mask = 1; mask < 2 ** FIELD_COUNT; mask++) {
             bytes memory body = bytes.concat(leading, domainBody(mask, spelled, separator), trailing);
             assertEq(
                 this.parseDomainSeparatorExternal(body),
@@ -221,8 +221,8 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         spelled[EIP712_DOMAIN_FIELD_CHAIN_ID] = EIP712_DOMAIN_CHAIN_ID_CURRENT;
         spelled[EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT] = bytes(vm.toString(verifyingContract));
         spelled[EIP712_DOMAIN_FIELD_SALT] = bytes(vm.toString(salt));
-        for (uint256 mask = 1 << EIP712_DOMAIN_FIELD_CHAIN_ID; mask < 1 << FIELD_COUNT; mask++) {
-            if (mask & (1 << EIP712_DOMAIN_FIELD_CHAIN_ID) == 0) continue;
+        for (uint256 mask = 2 ** EIP712_DOMAIN_FIELD_CHAIN_ID; mask < 2 ** FIELD_COUNT; mask++) {
+            if (mask & 2 ** EIP712_DOMAIN_FIELD_CHAIN_ID == 0) continue;
             bytes memory body = bytes.concat(domainBody(mask, spelled, sep), trail);
             assertEq(
                 this.parseDomainSeparatorExternal(body),
