@@ -131,6 +131,10 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         checkMatchesRainCompose("---\n#x 0x01\n#e using-words-from\x0bx\n_: 1;", "e", new DotrainBinding[](0));
     }
 
+    function testVerticalTabBeforePragmaMatchesRainCompose() external {
+        checkMatchesRainCompose("---\n#x 0x01\n#e /* c */\x0busing-words-from x\n_: 1;", "e", new DotrainBinding[](0));
+    }
+
     function testVerticalTabAndFormFeedSplitPragmaTokensMatchesRainCompose() external {
         checkMatchesRainCompose("---\n#x 0x01\n#e using-words-from 0x02\x0cx\n_: 1;", "e", new DotrainBinding[](0));
         checkMatchesRainCompose("---\n#x 0x01\n#e using-words-from x\x0b0x02\n_: 1;", "e", new DotrainBinding[](0));
