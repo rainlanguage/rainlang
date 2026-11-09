@@ -23,6 +23,25 @@ import {
     CMASK_LITERAL_HEX_DISPATCH
 } from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
+import {
+    LibParseSprite,
+    PARSE_SPRITE,
+    PARSE_SPRITE_EIP712_DOMAIN_DISPATCH,
+    PARSE_SPRITE_EIP712_DOMAIN_KEYWORD_NAME,
+    PARSE_SPRITE_EIP712_DOMAIN_KEYWORD_VERSION,
+    PARSE_SPRITE_EIP712_DOMAIN_KEYWORD_CHAIN_ID,
+    PARSE_SPRITE_EIP712_DOMAIN_KEYWORD_VERIFYING_CONTRACT,
+    PARSE_SPRITE_EIP712_DOMAIN_KEYWORD_SALT,
+    PARSE_SPRITE_EIP712_DOMAIN_CHAIN_ID_CURRENT,
+    PARSE_SPRITE_EIP712_DOMAIN_TYPE_PREFIX,
+    PARSE_SPRITE_EIP712_DOMAIN_TYPE_SUFFIX,
+    PARSE_SPRITE_EIP712_DOMAIN_TYPE_MEMBER_SEPARATOR,
+    PARSE_SPRITE_EIP712_DOMAIN_MEMBER_NAME,
+    PARSE_SPRITE_EIP712_DOMAIN_MEMBER_VERSION,
+    PARSE_SPRITE_EIP712_DOMAIN_MEMBER_CHAIN_ID,
+    PARSE_SPRITE_EIP712_DOMAIN_MEMBER_VERIFYING_CONTRACT,
+    PARSE_SPRITE_EIP712_DOMAIN_MEMBER_SALT
+} from "../LibParseSprite.sol";
 
 bytes constant EIP712_DOMAIN_SEPARATOR_DISPATCH = "eip712-domain-separator";
 
@@ -44,27 +63,7 @@ bytes constant EIP712_DOMAIN_MEMBER_CHAIN_ID = "uint256 chainId";
 bytes constant EIP712_DOMAIN_MEMBER_VERIFYING_CONTRACT = "address verifyingContract";
 bytes constant EIP712_DOMAIN_MEMBER_SALT = "bytes32 salt";
 
-bytes constant EIP712_DOMAIN_SPRITE =
-    "eip712-domain-separatorchain-idverifying-contractcurrentEIP712Domain(string namestring versionuint256 chainIdaddress verifyingContractbytes32 salt,)";
-
-/// @dev Sprite entries: `(offset << 8) | length`.
-uint256 constant EIP712_DOMAIN_SPRITE_DISPATCH = 23;
-uint256 constant EIP712_DOMAIN_SPRITE_KEYWORD_CHAIN_ID = (23 << 8) | 8;
-uint256 constant EIP712_DOMAIN_SPRITE_KEYWORD_VERIFYING_CONTRACT = (31 << 8) | 18;
-uint256 constant EIP712_DOMAIN_SPRITE_CHAIN_ID_CURRENT = (49 << 8) | 7;
-uint256 constant EIP712_DOMAIN_SPRITE_TYPE_PREFIX = (56 << 8) | 13;
-uint256 constant EIP712_DOMAIN_SPRITE_MEMBER_NAME = (69 << 8) | 11;
-uint256 constant EIP712_DOMAIN_SPRITE_KEYWORD_NAME = (76 << 8) | 4;
-uint256 constant EIP712_DOMAIN_SPRITE_MEMBER_VERSION = (80 << 8) | 14;
-uint256 constant EIP712_DOMAIN_SPRITE_KEYWORD_VERSION = (87 << 8) | 7;
-uint256 constant EIP712_DOMAIN_SPRITE_MEMBER_CHAIN_ID = (94 << 8) | 15;
-uint256 constant EIP712_DOMAIN_SPRITE_MEMBER_VERIFYING_CONTRACT = (109 << 8) | 25;
-uint256 constant EIP712_DOMAIN_SPRITE_MEMBER_SALT = (134 << 8) | 12;
-uint256 constant EIP712_DOMAIN_SPRITE_KEYWORD_SALT = (142 << 8) | 4;
-uint256 constant EIP712_DOMAIN_SPRITE_TYPE_MEMBER_SEPARATOR = (146 << 8) | 1;
-uint256 constant EIP712_DOMAIN_SPRITE_TYPE_SUFFIX = (147 << 8) | 1;
-
-/// @dev Longest type string (95 bytes) plus a word of `copySprite` overrun.
+/// @dev Longest type string (95 bytes) plus a word of `LibParseSprite.copy` overrun.
 uint256 constant EIP712_DOMAIN_TYPE_BUFFER_LENGTH = 0x80;
 /// @dev The type hash and the five encoded field values.
 uint256 constant EIP712_DOMAIN_ENCODED_BUFFER_LENGTH = 0xC0;
@@ -106,7 +105,8 @@ library LibParseLiteralEIP712Domain {
     /// @param dispatchEnd The end of the dispatch.
     /// @return True if the dispatch matches.
     function isDispatch(uint256 dispatchStart, uint256 dispatchEnd) internal pure returns (bool) {
-        return regionEqualsSprite(EIP712_DOMAIN_SPRITE, dispatchStart, dispatchEnd, EIP712_DOMAIN_SPRITE_DISPATCH);
+        return
+            LibParseSprite.regionEquals(PARSE_SPRITE, dispatchStart, dispatchEnd, PARSE_SPRITE_EIP712_DOMAIN_DISPATCH);
     }
 
     /// @notice Computes the domain separator from a literal body.
@@ -119,7 +119,7 @@ library LibParseLiteralEIP712Domain {
         view
         returns (bytes32)
     {
-        bytes memory sprite = EIP712_DOMAIN_SPRITE;
+        bytes memory sprite = PARSE_SPRITE;
         uint256 typeStart;
         uint256 encodedStart;
         assembly ("memory-safe") {
@@ -127,7 +127,7 @@ library LibParseLiteralEIP712Domain {
             encodedStart := add(typeStart, EIP712_DOMAIN_TYPE_BUFFER_LENGTH)
             mstore(0x40, add(encodedStart, EIP712_DOMAIN_ENCODED_BUFFER_LENGTH))
         }
-        uint256 typeCursor = copySprite(sprite, typeStart, EIP712_DOMAIN_SPRITE_TYPE_PREFIX);
+        uint256 typeCursor = LibParseSprite.copy(sprite, typeStart, PARSE_SPRITE_EIP712_DOMAIN_TYPE_PREFIX);
         uint256 encodedCursor = encodedStart + 0x20;
         uint256 nextField = 0;
         cursor = LibParseChar.skipMask(cursor, end, CMASK_WHITESPACE);
@@ -159,15 +159,15 @@ library LibParseLiteralEIP712Domain {
             }
 
             if (encodedCursor > encodedStart + 0x20) {
-                typeCursor = copySprite(sprite, typeCursor, EIP712_DOMAIN_SPRITE_TYPE_MEMBER_SEPARATOR);
+                typeCursor = LibParseSprite.copy(sprite, typeCursor, PARSE_SPRITE_EIP712_DOMAIN_TYPE_MEMBER_SEPARATOR);
             }
-            typeCursor = copySprite(sprite, typeCursor, fieldType(field));
+            typeCursor = LibParseSprite.copy(sprite, typeCursor, fieldType(field));
             assembly ("memory-safe") {
                 mstore(encodedCursor, value)
             }
             encodedCursor += 0x20;
         }
-        typeCursor = copySprite(sprite, typeCursor, EIP712_DOMAIN_SPRITE_TYPE_SUFFIX);
+        typeCursor = LibParseSprite.copy(sprite, typeCursor, PARSE_SPRITE_EIP712_DOMAIN_TYPE_SUFFIX);
         bytes32 domainSeparator;
         assembly ("memory-safe") {
             mstore(encodedStart, keccak256(typeStart, sub(typeCursor, typeStart)))
@@ -178,7 +178,7 @@ library LibParseLiteralEIP712Domain {
 
     /// @notice Parses one field value as its 32 byte ABI encoding.
     /// @param state The current parse state.
-    /// @param sprite `EIP712_DOMAIN_SPRITE` in memory.
+    /// @param sprite `PARSE_SPRITE` in memory.
     /// @param field The field index.
     /// @param cursor The start of the value, before `end`.
     /// @param end The end of the body.
@@ -231,7 +231,7 @@ library LibParseLiteralEIP712Domain {
     /// @notice Parses `current` as the parsing chain's `block.chainid`, or a
     /// decimal literal value that is a non-negative integer.
     /// @param state The current parse state.
-    /// @param sprite `EIP712_DOMAIN_SPRITE` in memory.
+    /// @param sprite `PARSE_SPRITE` in memory.
     /// @param cursor The start of the value, at a non-whitespace char.
     /// @param end The end of the body.
     /// @return The cursor after the value.
@@ -243,7 +243,7 @@ library LibParseLiteralEIP712Domain {
     {
         if (LibParseChar.isMask(cursor, end, CMASK_NUMERIC_0_9) == 0) {
             uint256 tokenEnd = LibParseChar.skipMask(cursor, end, CMASK_EIP712_DOMAIN_TOKEN);
-            if (!regionEqualsSprite(sprite, cursor, tokenEnd, EIP712_DOMAIN_SPRITE_CHAIN_ID_CURRENT)) {
+            if (!LibParseSprite.regionEquals(sprite, cursor, tokenEnd, PARSE_SPRITE_EIP712_DOMAIN_CHAIN_ID_CURRENT)) {
                 state.revertParseError(cursor, MalformedEIP712DomainValue.selector);
             }
             return (tokenEnd, bytes32(block.chainid));
@@ -291,24 +291,24 @@ library LibParseLiteralEIP712Domain {
     }
 
     /// @notice Maps a field keyword region to its canonical index.
-    /// @param sprite `EIP712_DOMAIN_SPRITE` in memory.
+    /// @param sprite `PARSE_SPRITE` in memory.
     /// @param start The start of the field keyword.
     /// @param end The end of the field keyword.
     /// @return The field index, or `EIP712_DOMAIN_FIELD_UNKNOWN`.
     function fieldIndex(bytes memory sprite, uint256 start, uint256 end) internal pure returns (uint256) {
-        if (regionEqualsSprite(sprite, start, end, EIP712_DOMAIN_SPRITE_KEYWORD_NAME)) {
+        if (LibParseSprite.regionEquals(sprite, start, end, PARSE_SPRITE_EIP712_DOMAIN_KEYWORD_NAME)) {
             return EIP712_DOMAIN_FIELD_NAME;
         }
-        if (regionEqualsSprite(sprite, start, end, EIP712_DOMAIN_SPRITE_KEYWORD_VERSION)) {
+        if (LibParseSprite.regionEquals(sprite, start, end, PARSE_SPRITE_EIP712_DOMAIN_KEYWORD_VERSION)) {
             return EIP712_DOMAIN_FIELD_VERSION;
         }
-        if (regionEqualsSprite(sprite, start, end, EIP712_DOMAIN_SPRITE_KEYWORD_CHAIN_ID)) {
+        if (LibParseSprite.regionEquals(sprite, start, end, PARSE_SPRITE_EIP712_DOMAIN_KEYWORD_CHAIN_ID)) {
             return EIP712_DOMAIN_FIELD_CHAIN_ID;
         }
-        if (regionEqualsSprite(sprite, start, end, EIP712_DOMAIN_SPRITE_KEYWORD_VERIFYING_CONTRACT)) {
+        if (LibParseSprite.regionEquals(sprite, start, end, PARSE_SPRITE_EIP712_DOMAIN_KEYWORD_VERIFYING_CONTRACT)) {
             return EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT;
         }
-        if (regionEqualsSprite(sprite, start, end, EIP712_DOMAIN_SPRITE_KEYWORD_SALT)) {
+        if (LibParseSprite.regionEquals(sprite, start, end, PARSE_SPRITE_EIP712_DOMAIN_KEYWORD_SALT)) {
             return EIP712_DOMAIN_FIELD_SALT;
         }
         return EIP712_DOMAIN_FIELD_UNKNOWN;
@@ -320,53 +320,17 @@ library LibParseLiteralEIP712Domain {
     /// @return The sprite entry of the member, e.g. `string name`.
     function fieldType(uint256 field) internal pure returns (uint256) {
         if (field == EIP712_DOMAIN_FIELD_NAME) {
-            return EIP712_DOMAIN_SPRITE_MEMBER_NAME;
+            return PARSE_SPRITE_EIP712_DOMAIN_MEMBER_NAME;
         }
         if (field == EIP712_DOMAIN_FIELD_VERSION) {
-            return EIP712_DOMAIN_SPRITE_MEMBER_VERSION;
+            return PARSE_SPRITE_EIP712_DOMAIN_MEMBER_VERSION;
         }
         if (field == EIP712_DOMAIN_FIELD_CHAIN_ID) {
-            return EIP712_DOMAIN_SPRITE_MEMBER_CHAIN_ID;
+            return PARSE_SPRITE_EIP712_DOMAIN_MEMBER_CHAIN_ID;
         }
         if (field == EIP712_DOMAIN_FIELD_VERIFYING_CONTRACT) {
-            return EIP712_DOMAIN_SPRITE_MEMBER_VERIFYING_CONTRACT;
+            return PARSE_SPRITE_EIP712_DOMAIN_MEMBER_VERIFYING_CONTRACT;
         }
-        return EIP712_DOMAIN_SPRITE_MEMBER_SALT;
-    }
-
-    /// @notice Copies a sprite entry to `cursor`. Writes a full word, so up to
-    /// 31 bytes past the entry are overwritten.
-    /// @param sprite `EIP712_DOMAIN_SPRITE` in memory.
-    /// @param cursor Where to copy the entry.
-    /// @param entry The sprite entry, `(offset << 8) | length`.
-    /// @return The cursor after the copied entry.
-    function copySprite(bytes memory sprite, uint256 cursor, uint256 entry) internal pure returns (uint256) {
-        assembly ("memory-safe") {
-            mstore(cursor, mload(add(add(sprite, 0x20), shr(8, entry))))
-            cursor := add(cursor, and(entry, 0xFF))
-        }
-        return cursor;
-    }
-
-    /// @notice Whether the memory region `[start, end)` equals a sprite entry.
-    /// @param sprite `EIP712_DOMAIN_SPRITE` in memory.
-    /// @param start The start of the region.
-    /// @param end The end of the region.
-    /// @param entry The sprite entry, `(offset << 8) | length`.
-    /// @return True if equal.
-    function regionEqualsSprite(bytes memory sprite, uint256 start, uint256 end, uint256 entry)
-        internal
-        pure
-        returns (bool)
-    {
-        uint256 length = entry & 0xFF;
-        if (end - start != length) {
-            return false;
-        }
-        bool equal;
-        assembly ("memory-safe") {
-            equal := eq(keccak256(start, length), keccak256(add(add(sprite, 0x20), shr(8, entry)), length))
-        }
-        return equal;
+        return PARSE_SPRITE_EIP712_DOMAIN_MEMBER_SALT;
     }
 }
