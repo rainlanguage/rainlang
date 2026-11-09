@@ -206,12 +206,13 @@ library LibDotrainCompose {
         }
         binding.nameStart = nameStart;
         binding.nameEnd = nameEnd;
-        (uint256 contentStart, uint256 contentEnd) = trim(source, nameEnd, end);
+        (uint256 contentStart, uint256 contentEnd) = trim(blanked, nameEnd, end);
+        if (contentStart == contentEnd) revert DotrainUnsupported(nameEnd);
+        binding.kind = classify(blanked, contentStart, contentEnd);
+        // A literal's value is its comment-blanked text; other content keeps comments.
+        if (binding.kind != DOTRAIN_KIND_LITERAL) (contentStart, contentEnd) = trim(source, nameEnd, end);
         binding.contentStart = contentStart;
         binding.contentEnd = contentEnd;
-        (uint256 classStart, uint256 classEnd) = trim(blanked, nameEnd, end);
-        if (classStart == classEnd) revert DotrainUnsupported(nameEnd);
-        binding.kind = classify(blanked, classStart, classEnd);
         return end;
     }
 
@@ -435,19 +436,19 @@ library LibDotrainCompose {
         pure
     {
         state.out = bytes.concat(
-            state.out, slice(state.source, state.copied, start), resolve(state.source, state.bindings[index], name)
+            state.out, slice(state.source, state.copied, start), resolve(state.blanked, state.bindings[index], name)
         );
         state.copied = end;
     }
 
     /// The text a reference to `binding` composes to.
-    function resolve(bytes memory source, DotrainParsedBinding memory binding, bytes memory name)
+    function resolve(bytes memory blanked, DotrainParsedBinding memory binding, bytes memory name)
         internal
         pure
         returns (bytes memory)
     {
         if (binding.bound) return bytes(hexLiteral(binding.value));
-        if (binding.kind == DOTRAIN_KIND_LITERAL) return slice(source, binding.contentStart, binding.contentEnd);
+        if (binding.kind == DOTRAIN_KIND_LITERAL) return slice(blanked, binding.contentStart, binding.contentEnd);
         if (binding.kind == DOTRAIN_KIND_ELIDED) revert DotrainElidedBinding(string(name));
         revert DotrainNotALiteralBinding(string(name));
     }
