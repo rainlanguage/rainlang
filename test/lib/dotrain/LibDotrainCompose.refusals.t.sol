@@ -167,6 +167,12 @@ contract LibDotrainComposeRefusalsTest is Test {
         checkUnsupported("---\n#e _: ", "foo<1 2", 7);
     }
 
+    function testUnclosedOperandGroupReverts() external {
+        checkUnsupported("---\n#e _: foo<", "\"a>();", 0);
+        checkUnsupported("---\n#e _: foo<", "[a>();", 0);
+        checkUnsupported("---\n#e _: foo<", "1 \"a b>();", 2);
+    }
+
     function testTextBeforeFirstBindingReverts() external {
         checkUnsupported("---\n", "stray\n#e _: 1;", 0);
     }
