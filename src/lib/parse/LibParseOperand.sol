@@ -92,7 +92,7 @@ library LibParseOperand {
                     // We can't exceed the initial length of the operand values
                     // that was allocated when the parse state was created.
                     if (i == OPERAND_VALUES_LENGTH) {
-                        revert OperandValuesOverflow(state.parseErrorOffset(cursor));
+                        state.revertParseError(cursor, OperandValuesOverflow.selector);
                     }
                     bytes32 value;
                     (cursor, value) = state.parseLiteral(cursor, end);
@@ -115,11 +115,11 @@ library LibParseOperand {
                 // the operand, which is a little arbitrary but at least it's
                 // a consistent error.
                 else {
-                    revert UnclosedOperand(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, UnclosedOperand.selector);
                 }
             }
             if (!success) {
-                revert UnclosedOperand(state.parseErrorOffset(cursor));
+                state.revertParseError(cursor, UnclosedOperand.selector);
             }
             assembly ("memory-safe") {
                 mstore(operandValues, i)

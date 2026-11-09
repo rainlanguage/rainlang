@@ -332,7 +332,7 @@ library LibParseState {
     /// @param subParser The sub parser address as a bytes32.
     function pushSubParser(ParseState memory state, uint256 cursor, bytes32 subParser) internal pure {
         if (uint256(subParser) > uint256(type(uint160).max)) {
-            revert InvalidSubParser(state.parseErrorOffset(cursor));
+            state.revertParseError(cursor, InvalidSubParser.selector);
         }
 
         bytes32 tail = state.subParsers;
@@ -423,7 +423,7 @@ library LibParseState {
                     parenOffset := byte(0, mload(add(state, parenTracker0Offset)))
                 }
                 if (parenOffset > 0) {
-                    revert UnclosedLeftParen(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, UnclosedLeftParen.selector);
                 }
             }
 
@@ -458,7 +458,7 @@ library LibParseState {
             // the FSM to not accepting inputs.
             if (lineRHSTopLevel == 0) {
                 if (state.fsm & FSM_ACCEPTING_INPUTS_MASK == 0) {
-                    revert NotAcceptingInputs(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, NotAcceptingInputs.selector);
                 } else {
                     // As there are no RHS opcodes yet we can simply set topLevel0 directly.
                     // This is the only case where we defer to the LHS to tell
@@ -480,9 +480,9 @@ library LibParseState {
             // item on that line.
             else if (lineRHSTopLevel > 1) {
                 if (lineLHSItems < lineRHSTopLevel) {
-                    revert ExcessRHSItems(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, ExcessRHSItems.selector);
                 } else if (lineLHSItems > lineRHSTopLevel) {
-                    revert ExcessLHSItems(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, ExcessLHSItems.selector);
                 }
             }
 
@@ -492,9 +492,11 @@ library LibParseState {
             for (uint256 offset = 0x20; offset < end; offset += 0x10) {
                 uint256 itemSourceHead = (state.lineTracker >> offset) & 0xFFFF;
                 uint256 opsDepth;
-                uint256 topLevel0Offset = PARSE_STATE_TOP_LEVEL0_OFFSET;
-                assembly ("memory-safe") {
-                    opsDepth := byte(0, mload(add(state, add(topLevel0Offset, topLevelOffset))))
+                {
+                    uint256 topLevel0Offset = PARSE_STATE_TOP_LEVEL0_OFFSET;
+                    assembly ("memory-safe") {
+                        opsDepth := byte(0, mload(add(state, add(topLevel0Offset, topLevelOffset))))
+                    }
                 }
                 for (uint256 i = 1; i <= opsDepth; i++) {
                     {
@@ -523,7 +525,7 @@ library LibParseState {
 
                         // Merge the op outputs and inputs into a single byte.
                         if (opOutputs > 0x0F || opInputs > 0x0F) {
-                            revert OpcodeIOOverflow(state.parseErrorOffset(cursor));
+                            state.revertParseError(cursor, OpcodeIOOverflow.selector);
                         }
                         assembly ("memory-safe") {
                             mstore8(add(itemSourceHead, 1), or(shl(4, opOutputs), opInputs))
@@ -613,7 +615,7 @@ library LibParseState {
             (success, cursor, constantValue) = state.tryParseLiteral(cursor, end);
             // Don't continue trying to push something that we can't parse.
             if (!success) {
-                revert UnsupportedLiteralType(state.parseErrorOffset(cursor));
+                state.revertParseError(cursor, UnsupportedLiteralType.selector);
             }
 
             // Whether the constant is a duplicate.
