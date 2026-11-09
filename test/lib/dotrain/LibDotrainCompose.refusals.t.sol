@@ -144,6 +144,7 @@ contract LibDotrainComposeRefusalsTest is Test {
         checkInvalidBindingName("---\n#", "x_y 1\n#e _: 1;", 1);
         checkInvalidBindingName("---\n#", "xY 1\n#e _: 1;", 1);
         checkInvalidBindingName("---\n#", " 1\n#e _: 1;", 0);
+        checkInvalidBindingName("---\n#e _: 1;\n#", "", 0);
     }
 
     function testDuplicateBindingReverts() external {
