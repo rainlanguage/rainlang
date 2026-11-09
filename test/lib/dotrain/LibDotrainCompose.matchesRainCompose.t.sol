@@ -127,6 +127,10 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         checkMatchesRainCompose("---\n#x1f 5\n#e18 6\n#e\n_ _ _ _: 0x1f x1f 1e18 e18;", "e", new DotrainBinding[](0));
     }
 
+    function testVerticalTabEndsPragmaKeywordMatchesRainCompose() external {
+        checkMatchesRainCompose("---\n#x 0x01\n#e using-words-from\x0bx\n_: 1;", "e", new DotrainBinding[](0));
+    }
+
     function testGeneratedDotrainMatchesRainCompose(uint256 seed) external {
         (string memory dotrain, DotrainBinding[] memory bound) = generate(seed);
         checkMatchesRainCompose(dotrain, "weighting", bound);
