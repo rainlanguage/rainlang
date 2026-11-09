@@ -398,11 +398,10 @@ library LibDotrainCompose {
                     bytes1 prev = blanked[i - 1];
                     if (
                         blanked[i] == "'"
-                            || (
-                                charMask(blanked, i) & CMASK_IDENTIFIER_HEAD != 0
-                                    && charMask(blanked, i - 1) & (CMASK_IDENTIFIER_TAIL | CMASK_NUMERIC_0_9) == 0
-                                    && prev != "\"" && prev != "["
-                            )
+                            || (charMask(blanked, i) & CMASK_IDENTIFIER_HEAD != 0
+                                && charMask(blanked, i - 1) & (CMASK_IDENTIFIER_TAIL | CMASK_NUMERIC_0_9) == 0
+                                && prev != "\""
+                                && prev != "[")
                     ) revert DotrainUnsupported(i);
                 }
                 cursor = close + 1;
