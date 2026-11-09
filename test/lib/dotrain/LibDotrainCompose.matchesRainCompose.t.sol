@@ -163,6 +163,12 @@ contract LibDotrainComposeMatchesRainComposeTest is Test {
         checkMatchesRainCompose("---\n#e _: foo<[a b]>();", "e", new DotrainBinding[](0));
     }
 
+    function testOperandArgWhitespaceMatchesRainCompose() external {
+        checkMatchesRainCompose("---\n#e _: foo< 1>();", "e", new DotrainBinding[](0));
+        checkMatchesRainCompose("---\n#e _: foo<1 >();", "e", new DotrainBinding[](0));
+        checkMatchesRainCompose("---\n#e _: foo<1\x0b2>();", "e", new DotrainBinding[](0));
+    }
+
     function testGeneratedDotrainMatchesRainCompose(uint256 seed) external {
         (string memory dotrain, DotrainBinding[] memory bound) = generate(seed);
         checkMatchesRainCompose(dotrain, "weighting", bound);
