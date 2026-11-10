@@ -202,6 +202,30 @@ contract LibParseLiteralEIP712DomainParseDomainSeparatorTest is Test {
         }
     }
 
+    /// Every non-empty mask writes nothing past the memory it allocates.
+    function testDomainSeparatorWritesInsideItsAllocation() external view {
+        bytes[FIELD_COUNT] memory values = validValues();
+        for (uint256 mask = 1; mask < 2 ** FIELD_COUNT; mask++) {
+            bytes memory body = domainBody(mask, values, " ");
+            ParseState memory state = LibParseState.newState(body, "", "", "");
+            uint256 cursor = Pointer.unwrap(body.dataPointer());
+            uint256 sentinelEnd;
+            assembly ("memory-safe") {
+                let start := mload(0x40)
+                sentinelEnd := add(start, 0x400)
+                for { let p := start } lt(p, sentinelEnd) { p := add(p, 0x20) } { mstore(p, not(0)) }
+            }
+            LibParseLiteralEIP712Domain.parseDomainSeparator(state, cursor, cursor + body.length);
+            bool writtenPastAllocation;
+            assembly ("memory-safe") {
+                for { let p := mload(0x40) } lt(p, sentinelEnd) { p := add(p, 0x20) } {
+                    if iszero(eq(mload(p), not(0))) { writtenPastAllocation := 1 }
+                }
+            }
+            assertFalse(writtenPastAllocation, string(body));
+        }
+    }
+
     /// Every non-empty mask with `chain-id current` uses the parsing chain's
     /// id, whether `current` ends the body or whitespace and a later field
     /// follow it.

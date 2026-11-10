@@ -51,7 +51,7 @@ library LibParseLiteralString {
                     }
                 }
                 if (i == 0x20) {
-                    revert StringTooLong(state.parseErrorOffset(cursor));
+                    state.revertParseError(cursor, StringTooLong.selector);
                 }
                 innerEnd = innerStart + i;
                 uint256 finalChar;
@@ -64,7 +64,7 @@ library LibParseLiteralString {
                 //slither-disable-next-line incorrect-shift
                 //forge-lint: disable-next-line(incorrect-shift)
                 if (1 << finalChar & CMASK_STRING_LITERAL_END == 0 || end == innerEnd) {
-                    revert UnclosedStringLiteral(state.parseErrorOffset(innerEnd));
+                    state.revertParseError(innerEnd, UnclosedStringLiteral.selector);
                 }
                 // Outer end is after the final `"`.
                 outerEnd = innerEnd + 1;

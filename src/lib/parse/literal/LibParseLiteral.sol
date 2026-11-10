@@ -71,7 +71,7 @@ library LibParseLiteral {
         if (success) {
             return (newCursor, value);
         } else {
-            revert UnsupportedLiteralType(state.parseErrorOffset(cursor));
+            state.revertParseError(cursor, UnsupportedLiteralType.selector);
         }
     }
 
@@ -121,7 +121,7 @@ library LibParseLiteral {
                     // Uppercase 0X is not valid — revert explicitly rather
                     // than silently parsing as decimal zero.
                     else if ((head | disambiguate) == (CMASK_ZERO | CMASK_UPPER_X)) {
-                        revert UppercaseHexPrefix(state.parseErrorOffset(cursor));
+                        state.revertParseError(cursor, UppercaseHexPrefix.selector);
                     } else {
                         index = LITERAL_PARSER_INDEX_DECIMAL;
                     }

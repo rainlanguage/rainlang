@@ -74,11 +74,11 @@ library LibParseLiteralHex {
 
             uint256 hexLength = hexEnd - hexStart;
             if (hexLength > 0x40) {
-                revert HexLiteralOverflow(state.parseErrorOffset(hexStart));
+                state.revertParseError(hexStart, HexLiteralOverflow.selector);
             } else if (hexLength == 0) {
-                revert ZeroLengthHexLiteral(state.parseErrorOffset(hexStart));
+                state.revertParseError(hexStart, ZeroLengthHexLiteral.selector);
             } else if (hexLength % 2 == 1) {
-                revert OddLengthHexLiteral(state.parseErrorOffset(hexStart));
+                state.revertParseError(hexStart, OddLengthHexLiteral.selector);
             } else {
                 // Loop the cursor backwards over the hex string, we'll return
                 // the hex end instead.
@@ -116,7 +116,7 @@ library LibParseLiteralHex {
                         // cursor range to CMASK_HEX characters. Retained
                         // as a defensive fallback in case the upstream
                         // mask is ever modified.
-                        revert MalformedHexLiteral(state.parseErrorOffset(cursor));
+                        state.revertParseError(cursor, MalformedHexLiteral.selector);
                     }
 
                     value |= nybble << valueOffset;

@@ -88,6 +88,20 @@ contract LibParsePragmaKeywordTest is Test {
         assertEq(cursorAfter, cursor);
     }
 
+    /// The keyword with any one byte changed is not a pragma, even when a sub
+    /// parser address follows it.
+    function testPragmaKeywordOneByteOffNoop(uint8 flip, address subParser) external view {
+        flip = uint8(bound(flip, 1, type(uint8).max));
+        for (uint256 i = 0; i < PRAGMA_KEYWORD_BYTES_LENGTH; i++) {
+            bytes memory str = bytes.concat(PRAGMA_KEYWORD_BYTES, " ", bytes(subParser.toHexString()));
+            str[i] ^= bytes1(flip);
+            ParseState memory state =
+                LibParseState.newState(str, "", "", LibAllStandardOps.literalParserFunctionPointers());
+            uint256 cursor = Pointer.unwrap(str.dataPointer());
+            assertEq(state.parsePragma(cursor, Pointer.unwrap(str.endDataPointer())), cursor);
+        }
+    }
+
     /// Input ends exactly at the keyword boundary with no trailing bytes.
     /// Hits the `cursor >= end` revert at line 55.
     function testPragmaKeywordEndAtKeyword() external {
