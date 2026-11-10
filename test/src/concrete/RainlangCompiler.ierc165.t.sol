@@ -8,6 +8,7 @@ import {IERC165} from "@openzeppelin-contracts-5.7.0/utils/introspection/IERC165
 import {TestRainlangCompiler} from "test/concrete/TestRainlangCompiler.sol";
 import {IParserPragmaV1} from "../../../src/interface/IParserPragmaV1.sol";
 import {IParserV2} from "../../../src/interface/IParserV2.sol";
+import {IParserDotrainV1} from "../../../src/interface/IParserDotrainV1.sol";
 import {IDescribedByMetaV1} from "rain-metadata-0.1.45/src/interface/IDescribedByMetaV1.sol";
 import {IIntegrityToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IIntegrityToolingV1.sol";
 
@@ -17,6 +18,7 @@ contract RainlangCompilerIERC165Test is Test {
         vm.assume(badInterfaceId != type(IERC165).interfaceId);
         vm.assume(badInterfaceId != type(IDescribedByMetaV1).interfaceId);
         vm.assume(badInterfaceId != type(IParserV2).interfaceId);
+        vm.assume(badInterfaceId != type(IParserDotrainV1).interfaceId);
         vm.assume(badInterfaceId != type(IParserPragmaV1).interfaceId);
         vm.assume(badInterfaceId != type(IIntegrityToolingV1).interfaceId);
 
@@ -24,6 +26,7 @@ contract RainlangCompilerIERC165Test is Test {
         assertTrue(compiler.supportsInterface(type(IERC165).interfaceId));
         assertTrue(compiler.supportsInterface(type(IDescribedByMetaV1).interfaceId));
         assertTrue(compiler.supportsInterface(type(IParserV2).interfaceId));
+        assertTrue(compiler.supportsInterface(type(IParserDotrainV1).interfaceId));
         assertTrue(compiler.supportsInterface(type(IParserPragmaV1).interfaceId));
         assertTrue(compiler.supportsInterface(type(IIntegrityToolingV1).interfaceId));
 
