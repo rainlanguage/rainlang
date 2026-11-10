@@ -18,6 +18,7 @@ import {
     CMASK_COLON
 } from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
 import {PRAGMA_KEYWORD_BYTES} from "../parse/LibParsePragma.sol";
+import {DotrainBinding} from "../../interface/IParserDotrainV1.sol";
 import {
     DotrainMissingFrontMatter,
     DotrainEntrypointNotFound,
@@ -65,14 +66,6 @@ struct DotrainComposeState {
     DotrainParsedBinding[] bindings;
     bytes out;
     uint256 copied;
-}
-
-/// A `-b name=value` binding as passed to `rain dotrain compose`.
-/// @param name The dotrain binding name to rebind.
-/// @param value The value, rendered as a 64 digit hex literal.
-struct DotrainBinding {
-    string name;
-    bytes32 value;
 }
 
 /// Composes one entrypoint of a dotrain into rainlang, matching
