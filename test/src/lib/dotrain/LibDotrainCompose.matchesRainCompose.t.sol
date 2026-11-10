@@ -4,7 +4,8 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.17.0/src/Test.sol";
 import {VmSafe} from "forge-std-1.17.0/src/Vm.sol";
-import {LibDotrainCompose, DotrainBinding} from "./LibDotrainCompose.sol";
+import {LibDotrainCompose} from "../../../../src/lib/dotrain/LibDotrainCompose.sol";
+import {DotrainBinding} from "../../../../src/interface/IParserDotrainV1.sol";
 
 uint256 constant NAME_COUNT = 8;
 uint256 constant KIND_ABSENT = 0;

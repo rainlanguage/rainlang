@@ -3,7 +3,8 @@
 pragma solidity =0.8.25;
 
 import {ParseTest} from "test/abstract/ParseTest.sol";
-import {LibDotrainCompose, DotrainBinding} from "./LibDotrainCompose.sol";
+import {LibDotrainCompose} from "../../../../src/lib/dotrain/LibDotrainCompose.sol";
+import {DotrainBinding} from "../../../../src/interface/IParserDotrainV1.sol";
 
 contract LibDotrainComposeBoundValueParsesTest is ParseTest {
     function testHexLiteralIsLowercaseHex(bytes32 value) external pure {

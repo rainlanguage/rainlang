@@ -3,9 +3,9 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.17.0/src/Test.sol";
+import {LibDotrainCompose} from "../../../../src/lib/dotrain/LibDotrainCompose.sol";
+import {DotrainBinding} from "../../../../src/interface/IParserDotrainV1.sol";
 import {
-    LibDotrainCompose,
-    DotrainBinding,
     DotrainMissingFrontMatter,
     DotrainEntrypointNotFound,
     DotrainEntrypointNotExpression,
@@ -17,7 +17,7 @@ import {
     DotrainDuplicateBinding,
     DotrainBindingNotFound,
     DotrainBindingNotRebindable
-} from "./LibDotrainCompose.sol";
+} from "../../../../src/error/ErrDotrain.sol";
 
 contract LibDotrainComposeRefusalsTest is Test {
     function externalCompose(string memory dotrain, string memory entrypoint, DotrainBinding[] memory bound)
