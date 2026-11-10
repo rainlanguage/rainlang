@@ -4,7 +4,11 @@ pragma solidity =0.8.25;
 
 import {RainlangCompilerDeploymentTest} from "test/abstract/RainlangCompilerDeploymentTest.sol";
 import {DotrainComposeCasesTest} from "test/abstract/DotrainComposeCasesTest.sol";
-import {LibDotrainCompose} from "../../../src/lib/dotrain/LibDotrainCompose.sol";
+import {
+    LibDotrainCompose,
+    DOTRAIN_COMPOSE_HEADER_OPEN,
+    DOTRAIN_COMPOSE_HEADER_CLOSE
+} from "../../../src/lib/dotrain/LibDotrainCompose.sol";
 import {IParserDotrainV1, DotrainBinding} from "../../../src/interface/IParserDotrainV1.sol";
 import {MissingFinalSemi} from "../../../src/error/ErrParse.sol";
 import {BadOpInputsLength} from "../../../src/error/ErrIntegrity.sol";
@@ -107,7 +111,12 @@ contract BaseRainlangCompilerParseDotrain2IsParse2OfComposeTest is
     function testParseErrorsRevertFromParseDotrain2() external {
         DotrainBinding[] memory none = new DotrainBinding[](0);
         checkRefusal(
-            abi.encodeWithSelector(MissingFinalSemi.selector, LibParseError.tagErrorOffset(4)),
+            abi.encodeWithSelector(
+                MissingFinalSemi.selector,
+                LibParseError.tagErrorOffset(
+                    bytes(string.concat(DOTRAIN_COMPOSE_HEADER_OPEN, "e", DOTRAIN_COMPOSE_HEADER_CLOSE)).length + 4
+                )
+            ),
             "---\n#e _: 1",
             "e",
             none
