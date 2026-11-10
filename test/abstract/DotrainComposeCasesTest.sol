@@ -23,13 +23,9 @@ abstract contract DotrainComposeCasesTest is Test {
 
     function checkCase(string memory dotrain, string memory entrypoint, DotrainBinding[] memory bound) internal virtual;
 
-    function testFixedShape(
-        bytes32 subParser,
-        bytes32 signer,
-        bytes32 x,
-        bytes32 maxPrice,
-        bool bindMaxPrice
-    ) external {
+    function testFixedShape(bytes32 subParser, bytes32 signer, bytes32 x, bytes32 maxPrice, bool bindMaxPrice)
+        external
+    {
         string memory dotrain = "# License: LicenseRef-DCL-1.0\n" "# Front matter # with @ is dropped.\n" "---\n"
             "#sub-parser !Sub parser address.\n\n" "#signer !Signer.\n" "#source \"alpaca\"\n"
             "#x !A value also called as a word.\n" "#max-price 1000\n\n" "#helper _: 1;\n\n" "#weighting\n"

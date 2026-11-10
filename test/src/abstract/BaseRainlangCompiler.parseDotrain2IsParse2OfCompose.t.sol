@@ -42,8 +42,8 @@ contract BaseRainlangCompilerParseDotrain2IsParse2OfComposeTest is
     {
         (bool expectedSuccess, bytes memory expected) =
             address(this).staticcall(abi.encodeCall(this.composeThenParse2, (dotrain, entrypoint, bound)));
-        (bool success, bytes memory actual) = address(I_COMPILER)
-            .staticcall(abi.encodeCall(IParserDotrainV1.parseDotrain2, (dotrain, entrypoint, bound)));
+        (bool success, bytes memory actual) =
+            address(I_COMPILER).staticcall(abi.encodeCall(IParserDotrainV1.parseDotrain2, (dotrain, entrypoint, bound)));
         assertEq(success, expectedSuccess, dotrain);
         assertEq(actual, expected, dotrain);
         return success;
@@ -96,7 +96,9 @@ contract BaseRainlangCompilerParseDotrain2IsParse2OfComposeTest is
         checkRefusal(
             abi.encodeWithSelector(DotrainDuplicateBinding.selector, "x"), "---\n#x 1\n#x 2\n#e _: 1;", "e", none
         );
-        checkRefusal(abi.encodeWithSelector(DotrainBindingNotFound.selector, "nope"), "---\n#x 1\n#e _: x;", "e", unknown);
+        checkRefusal(
+            abi.encodeWithSelector(DotrainBindingNotFound.selector, "nope"), "---\n#x 1\n#e _: x;", "e", unknown
+        );
         checkRefusal(
             abi.encodeWithSelector(DotrainBindingNotRebindable.selector, "e"), "---\n#x 1\n#e _: x;", "e", expression
         );
@@ -105,7 +107,10 @@ contract BaseRainlangCompilerParseDotrain2IsParse2OfComposeTest is
     function testParseErrorsRevertFromParseDotrain2() external {
         DotrainBinding[] memory none = new DotrainBinding[](0);
         checkRefusal(
-            abi.encodeWithSelector(MissingFinalSemi.selector, LibParseError.tagErrorOffset(4)), "---\n#e _: 1", "e", none
+            abi.encodeWithSelector(MissingFinalSemi.selector, LibParseError.tagErrorOffset(4)),
+            "---\n#e _: 1",
+            "e",
+            none
         );
         checkRefusal(abi.encodeWithSelector(BadOpInputsLength.selector, 1, 2, 1), "---\n#e _: add(1);", "e", none);
     }
