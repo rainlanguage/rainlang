@@ -6,22 +6,22 @@ import {Test} from "forge-std-1.17.0/src/Test.sol";
 import {MessageHashUtils} from "@openzeppelin-contracts-5.7.0/utils/cryptography/MessageHashUtils.sol";
 import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";
 import {LibBytes, Pointer} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
-import {LibConformString} from "rain-string-0.3.9/src/lib/mut/LibConformString.sol";
+import {LibConformString} from "rain-string-0.3.10/src/lib/mut/LibConformString.sol";
 import {
     CMASK_QUOTATION_MARK,
     CMASK_RIGHT_SQUARE_BRACKET,
     CMASK_STRING_LITERAL_TAIL
-} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
+} from "rain-string-0.3.10/src/lib/parse/LibParseCMask.sol";
 import {
     ParseDecimalPrecisionLoss,
     MalformedExponentDigits,
     MalformedDecimalPoint
-} from "rain-math-float-0.3.11/src/error/ErrParse.sol";
+} from "rain-math-float-0.3.12/src/error/ErrParse.sol";
 import {
     ExponentOverflow,
     FixedDecimalOverflow,
     LossyConversionToFloat
-} from "rain-math-float-0.3.11/src/error/ErrDecimalFloat.sol";
+} from "rain-math-float-0.3.12/src/error/ErrDecimalFloat.sol";
 import {ParseState, LibParseState} from "../../../../../src/lib/parse/LibParseState.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {

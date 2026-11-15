@@ -9,10 +9,10 @@ import {
     COMMENT_END_SEQUENCE,
     COMMENT_START_SEQUENCE,
     COMMENT_END_SEQUENCE_END
-} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
+} from "rain-string-0.3.10/src/lib/parse/LibParseCMask.sol";
 import {MalformedCommentStart, UnclosedComment} from "../../error/ErrParse.sol";
 import {LibParseError} from "./LibParseError.sol";
-import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
+import {LibParseChar} from "rain-string-0.3.10/src/lib/parse/LibParseChar.sol";
 
 /// @dev Shift to extract a packed 2-byte comment delimiter sequence from the
 /// high bits of a 256-bit mload.
