@@ -23,7 +23,7 @@ import {FullyQualifiedNamespace, StateNamespace} from "../../src/interface/IInte
 import {SignedContextV2} from "../../src/interface/IInterpreterCallerV5.sol";
 import {LibNamespace} from "../../src/lib/ns/LibNamespace.sol";
 import {ExponentOverflow} from "rain-math-float-0.3.11/src/error/ErrDecimalFloat.sol";
-import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.4/src/lib/LibTOFUTokenDecimals.sol";
+import {LibTOFUTokenDecimals} from "rain-tofu-erc20-decimals-0.1.5/src/lib/LibTOFUTokenDecimals.sol";
 
 import {console2} from "forge-std-1.17.0/src/console2.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
