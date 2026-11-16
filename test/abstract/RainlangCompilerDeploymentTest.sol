@@ -7,7 +7,7 @@ import {BaseRainlangStore} from "../../src/abstract/BaseRainlangStore.sol";
 import {BaseRainlangParser} from "../../src/abstract/BaseRainlangParser.sol";
 import {BaseRainlangInterpreter} from "../../src/abstract/BaseRainlangInterpreter.sol";
 import {BaseRainlangCompiler} from "../../src/abstract/BaseRainlangCompiler.sol";
-import {LibRainDeploy} from "rain-deploy-0.1.32/src/lib/LibRainDeploy.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.33/src/lib/LibRainDeploy.sol";
 import {
     LibTestInterpreterDeploy,
     TEST_PARSER_ADDRESS,
@@ -20,7 +20,7 @@ import {
     CREATION_CODE as DECIMAL_FLOAT_CREATION_CODE,
     DEPLOYED_ADDRESS as DECIMAL_FLOAT_ADDRESS,
     BYTECODE_HASH as DECIMAL_FLOAT_BYTECODE_HASH
-} from "rain-math-float-deploy-0.1.9/src/generated/0_1_6/DecimalFloat.sol";
+} from "rain-math-float-deploy-0.1.10/src/generated/0_1_6/DecimalFloat.sol";
 
 /// @title RainlangCompilerDeploymentTest
 /// @notice Binds a parser, store, interpreter and compiler for the

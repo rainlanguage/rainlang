@@ -15,7 +15,7 @@ import {SignedContextV2} from "../../../../../src/interface/IInterpreterCallerV5
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.12/src/lib/LibDecimalFloat.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 
 /// @title LibOpUtf8HashTest

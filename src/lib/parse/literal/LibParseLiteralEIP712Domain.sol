@@ -6,7 +6,7 @@ import {ParseState} from "../LibParseState.sol";
 import {LibParseError} from "../LibParseError.sol";
 import {LibParseLiteralHex} from "./LibParseLiteralHex.sol";
 import {LibParseLiteralDecimal} from "./LibParseLiteralDecimal.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.12/src/lib/LibDecimalFloat.sol";
 import {
     UnknownEIP712DomainField,
     EIP712DomainFieldOutOfOrder,
@@ -21,8 +21,8 @@ import {
     CMASK_STRING_LITERAL_TAIL,
     CMASK_STRING_LITERAL_END,
     CMASK_LITERAL_HEX_DISPATCH
-} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
-import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
+} from "rain-string-0.3.10/src/lib/parse/LibParseCMask.sol";
+import {LibParseChar} from "rain-string-0.3.10/src/lib/parse/LibParseChar.sol";
 import {
     LibParseSprite,
     PARSE_SPRITE,
