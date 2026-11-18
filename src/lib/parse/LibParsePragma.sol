@@ -3,7 +3,7 @@
 pragma solidity ^0.8.25;
 
 import {LibParseState, ParseState} from "./LibParseState.sol";
-import {CMASK_WHITESPACE} from "rain-string-0.3.10/src/lib/parse/LibParseCMask.sol";
+import {CMASK_WHITESPACE} from "rain-string-0.3.11/src/lib/parse/LibParseCMask.sol";
 import {NoWhitespaceAfterUsingWordsFrom} from "../../error/ErrParse.sol";
 import {LibParseError} from "./LibParseError.sol";
 import {LibParseInterstitial} from "./LibParseInterstitial.sol";

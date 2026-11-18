@@ -8,14 +8,14 @@ import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseSt
 import {LibBytes, Pointer} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
 import {LibParseLiteralDecimal} from "../../../../../src/lib/parse/literal/LibParseLiteralDecimal.sol";
 import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";
-import {ParseEmptyDecimalString} from "rain-string-0.3.10/src/error/ErrParse.sol";
+import {ParseEmptyDecimalString} from "rain-string-0.3.11/src/error/ErrParse.sol";
 import {
     ParseDecimalPrecisionLoss,
     MalformedExponentDigits,
     MalformedDecimalPoint
-} from "rain-math-float-0.3.12/src/error/ErrParse.sol";
-import {ExponentOverflow} from "rain-math-float-0.3.12/src/error/ErrDecimalFloat.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.3.12/src/lib/LibDecimalFloat.sol";
+} from "rain-math-float-0.3.13/src/error/ErrParse.sol";
+import {ExponentOverflow} from "rain-math-float-0.3.13/src/error/ErrDecimalFloat.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.13/src/lib/LibDecimalFloat.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 
 /// @title LibParseLiteralDecimalParseDecimalFloatTest

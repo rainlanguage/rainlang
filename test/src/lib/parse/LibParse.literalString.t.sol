@@ -8,7 +8,7 @@ import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
 import {StringTooLong, UnclosedStringLiteral} from "../../../../src/error/ErrParse.sol";
-import {LibConformString} from "rain-string-0.3.10/src/lib/mut/LibConformString.sol";
+import {LibConformString} from "rain-string-0.3.11/src/lib/mut/LibConformString.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 

@@ -9,7 +9,7 @@ import {LibParse} from "../../../../src/lib/parse/LibParse.sol";
 import {ParseState} from "../../../../src/lib/parse/LibParseState.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 import {MalformedEIP712DomainValue} from "../../../../src/error/ErrParse.sol";
-import {MalformedDecimalPoint} from "rain-math-float-0.3.12/src/error/ErrParse.sol";
+import {MalformedDecimalPoint} from "rain-math-float-0.3.13/src/error/ErrParse.sol";
 import {ISubParserV4} from "../../../../src/interface/ISubParserV4.sol";
 import {LibMetaFixture} from "test/lib/parse/LibMetaFixture.sol";
 import {ConstantReturningSubParser} from "./ConstantReturningSubParser.sol";

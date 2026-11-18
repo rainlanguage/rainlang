@@ -5,7 +5,7 @@ pragma solidity =0.8.25;
 import {Test} from "forge-std-1.17.0/src/Test.sol";
 import {LibBytes, Pointer} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
 import {LibParseLiteralString} from "../../../../../src/lib/parse/literal/LibParseLiteralString.sol";
-import {LibConformString} from "rain-string-0.3.10/src/lib/mut/LibConformString.sol";
+import {LibConformString} from "rain-string-0.3.11/src/lib/mut/LibConformString.sol";
 import {StringTooLong, UnclosedStringLiteral} from "../../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseState.sol";

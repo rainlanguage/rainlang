@@ -18,8 +18,8 @@ import {
     CMASK_LHS_STACK_TAIL,
     CMASK_LHS_STACK_HEAD,
     CMASK_IDENTIFIER_HEAD
-} from "rain-string-0.3.10/src/lib/parse/LibParseCMask.sol";
-import {LibParseChar} from "rain-string-0.3.10/src/lib/parse/LibParseChar.sol";
+} from "rain-string-0.3.11/src/lib/parse/LibParseCMask.sol";
+import {LibParseChar} from "rain-string-0.3.11/src/lib/parse/LibParseChar.sol";
 import {LibParseMeta} from "./LibParseMeta.sol";
 import {LibParseOperand} from "./LibParseOperand.sol";
 import {OperandV2, OPCODE_STACK, OPCODE_UNKNOWN} from "../../interface/IInterpreterV4.sol";
