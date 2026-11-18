@@ -14,17 +14,17 @@ integrity = "fa706c8a7caf3426c90f75e6aafa3224b0a6c899b490800cf6944e4ec42f9344"
 
 [[dependencies]]
 name = "rain-deploy"
-version = "0.1.35"
-url = "https://soldeer-revisions.s3.amazonaws.com/rain-deploy/0_1_35_18-11-2026_15:11:38_rain.zip"
-checksum = "541c5559c45b53825cf875f7096ed6871d80e12d50603a1064827e2c889a37db"
-integrity = "656aea56aae6b1216dce8ce8c25ee4293c30728c43f45d960e713efabd8a89ed"
+version = "0.1.36"
+url = "https://soldeer-revisions.s3.amazonaws.com/rain-deploy/0_1_36_18-11-2026_21:23:31_rain.zip"
+checksum = "948f51e922eb87998b28a0b83936215a7dbcabac8754efb32cc54a7c76d1d34d"
+integrity = "1c9ab753452f2e8c93a1487413391eb3147d17f02223e63f98791673147bfcb6"
 
 [[dependencies]]
 name = "rain-extrospection"
-version = "0.1.30"
-url = "https://soldeer-revisions.s3.amazonaws.com/rain-extrospection/0_1_30_18-11-2026_14:52:31_rain.zip"
-checksum = "f3d81df51da76236d3d2a44657095053903fe9141ace8cba7e1d6f00f86d430d"
-integrity = "4b2e3e36e6bdc6db37bcf314bb255c32b02a4a53076aa095227e7db6f01a5997"
+version = "0.1.31"
+url = "https://soldeer-revisions.s3.amazonaws.com/rain-extrospection/0_1_31_18-11-2026_20:54:33_rain.zip"
+checksum = "6f1c533ac442ba8d6182dae2a5454bbb2edb2e5af197187b101ddaa7594ddec9"
+integrity = "4461fd2a06e375ef893fdf8d61df431a0cb69bd6c7a2d8ab51c42c2a7480d9c0"
 
 [[dependencies]]
 name = "rain-intorastring"
@@ -63,10 +63,10 @@ integrity = "e0b9cfd9cf19f826b996724a61b078eea9f341183a4cd8f0a8c4e4a5599f7e8c"
 
 [[dependencies]]
 name = "rain-math-float-deploy"
-version = "0.1.11"
-url = "https://soldeer-revisions.s3.amazonaws.com/rain-math-float-deploy/0_1_11_18-11-2026_15:36:35_rain.math.float.zip"
-checksum = "fb86dac5b6742624cff5ea390307572c955960a73dceb7281277fa4f4e9cc125"
-integrity = "442f948e3c1056d9abc4a099b2c8955ee6bf7f7d7aeae645e5a1227b4f72f99f"
+version = "0.1.12"
+url = "https://soldeer-revisions.s3.amazonaws.com/rain-math-float-deploy/0_1_12_18-11-2026_22:10:33_rain.math.float.zip"
+checksum = "4b5e65e5d5c5df59ef2487462bf856815a3e98e68f9c1da507980efd1e88313c"
+integrity = "e1716251d957df7bd469e55674f7890194b86d451d577a4d6a7c0e102d60c319"
 
 [[dependencies]]
 name = "rain-metadata"
