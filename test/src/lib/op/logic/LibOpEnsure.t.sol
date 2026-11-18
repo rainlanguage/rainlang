@@ -9,7 +9,7 @@ import {LibOpEnsure} from "../../../../../src/lib/op/logic/LibOpEnsure.sol";
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {OperandV2, StackItem} from "../../../../../src/interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
-import {LibIntOrAString, IntOrAString} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
+import {LibIntOrAString, IntOrAString} from "rain-intorastring-0.1.5/src/lib/LibIntOrAString.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.3.13/src/lib/LibDecimalFloat.sol";
 
