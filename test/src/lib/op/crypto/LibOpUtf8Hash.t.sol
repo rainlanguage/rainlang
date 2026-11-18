@@ -7,7 +7,7 @@ import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpUtf8Hash} from "../../../../../src/lib/op/crypto/LibOpUtf8Hash.sol";
 import {LibContext} from "../../../../../src/lib/caller/LibContext.sol";
 
-import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
+import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.5/src/lib/LibIntOrAString.sol";
 
 import {OperandV2, SourceIndexV2, EvalV4, StackItem} from "../../../../../src/interface/IInterpreterV4.sol";
 import {FullyQualifiedNamespace} from "../../../../../src/interface/IInterpreterStoreV3.sol";
