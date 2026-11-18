@@ -14,7 +14,7 @@ import {
     CMASK_LOWER_ALPHA_A_F,
     CMASK_NUMERIC_0_9,
     CMASK_HEX
-} from "rain-string-0.3.10/src/lib/parse/LibParseCMask.sol";
+} from "rain-string-0.3.11/src/lib/parse/LibParseCMask.sol";
 import {LibParseError} from "../LibParseError.sol";
 
 /// @title LibParseLiteralHex

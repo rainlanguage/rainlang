@@ -9,11 +9,11 @@ import {
     CMASK_WHITESPACE,
     CMASK_SUB_PARSEABLE_LITERAL_END,
     CMASK_PRINTABLE
-} from "rain-string-0.3.10/src/lib/parse/LibParseCMask.sol";
+} from "rain-string-0.3.11/src/lib/parse/LibParseCMask.sol";
 import {LibParseInterstitial} from "../LibParseInterstitial.sol";
 import {LibParseError} from "../LibParseError.sol";
 import {LibSubParse} from "../LibSubParse.sol";
-import {LibParseChar} from "rain-string-0.3.10/src/lib/parse/LibParseChar.sol";
+import {LibParseChar} from "rain-string-0.3.11/src/lib/parse/LibParseChar.sol";
 import {LibParseLiteralEIP712Domain} from "./LibParseLiteralEIP712Domain.sol";
 
 /// @title LibParseLiteralSubParseable
