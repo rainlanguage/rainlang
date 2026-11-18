@@ -28,10 +28,10 @@ integrity = "4b2e3e36e6bdc6db37bcf314bb255c32b02a4a53076aa095227e7db6f01a5997"
 
 [[dependencies]]
 name = "rain-intorastring"
-version = "0.1.4"
-url = "https://soldeer-revisions.s3.amazonaws.com/rain-intorastring/0_1_4_06-09-2026_09:01:02_rain.zip"
-checksum = "653feaa47d7b05b10fad3daf7346a1d47b42755b310d2c0c5f8fa64da9e44a0c"
-integrity = "30ca2e895ebcb79303897b53010793d9357b2c98210aba40014db69a304b8231"
+version = "0.1.5"
+url = "https://soldeer-revisions.s3.amazonaws.com/rain-intorastring/0_1_5_18-11-2026_18:59:17_rain.zip"
+checksum = "88142790d681d824015ff88c4414b16027975b7c8aef3230fd8701b360f3330d"
+integrity = "cde0233ecd88f7cc2a1df05a40c6a8b4b123ce8894dbacbf5e8d3afba2666873"
 
 [[dependencies]]
 name = "rain-lib-hash"
