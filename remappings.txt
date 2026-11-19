@@ -1,13 +1,13 @@
 @openzeppelin-contracts-5.7.0/=dependencies/@openzeppelin-contracts-5.7.0/
 forge-std-1.17.0/=dependencies/forge-std-1.17.0/
-rain-deploy-0.1.36/=dependencies/rain-deploy-0.1.36/
+rain-deploy-0.1.37/=dependencies/rain-deploy-0.1.37/
 rain-extrospection-0.1.31/=dependencies/rain-extrospection-0.1.31/
 rain-intorastring-0.1.5/=dependencies/rain-intorastring-0.1.5/
 rain-lib-memkv-0.2.0/=dependencies/rain-lib-memkv-0.2.0/
 rain-lib-typecast-0.1.4/=dependencies/rain-lib-typecast-0.1.4/
 rain-math-binary-0.1.4/=dependencies/rain-math-binary-0.1.4/
 rain-math-float-0.3.13/=dependencies/rain-math-float-0.3.13/
-rain-math-float-deploy-0.1.12/=dependencies/rain-math-float-deploy-0.1.12/
+rain-math-float-deploy-0.1.13/=dependencies/rain-math-float-deploy-0.1.13/
 rain-metadata-0.1.46/=dependencies/rain-metadata-0.1.46/
 rain-sol-codegen-0.1.39/=dependencies/rain-sol-codegen-0.1.39/
 rain-solmem-0.1.28/=dependencies/rain-solmem-0.1.28/
