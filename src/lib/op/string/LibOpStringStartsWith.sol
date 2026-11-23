@@ -3,7 +3,7 @@
 pragma solidity ^0.8.25;
 
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
-import {IntOrAString, LibIntOrAString, LENGTH_MASK_V3} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
+import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.5/src/lib/LibIntOrAString.sol";
 import {OperandV2, StackItem} from "../../../interface/IInterpreterV4.sol";
 import {InterpreterState} from "../../state/LibInterpreterState.sol";
 import {IntegrityCheckState} from "../../integrity/LibIntegrityCheck.sol";
@@ -26,17 +26,16 @@ library LibOpStringStartsWith {
     /// @param stackTop Pointer to the top of the stack.
     /// @return The new stack top pointer after execution.
     function run(InterpreterState memory, OperandV2, Pointer stackTop) internal pure returns (Pointer) {
-        uint256 lengthMask = LENGTH_MASK_V3;
+        IntOrAString s;
+        IntOrAString p;
         assembly ("memory-safe") {
-            let s := mload(stackTop)
-            let p := mload(add(stackTop, 0x20))
-            let sLength := and(s, lengthMask)
-            let pLength := and(p, lengthMask)
-            let sLeft := shl(sub(256, mul(8, sLength)), shr(8, s))
-            let pLeft := shl(sub(256, mul(8, pLength)), shr(8, p))
-            let shift := sub(256, mul(8, pLength))
+            s := mload(stackTop)
             stackTop := add(stackTop, 0x20)
-            mstore(stackTop, and(iszero(gt(pLength, sLength)), eq(shr(shift, sLeft), shr(shift, pLeft))))
+            p := mload(stackTop)
+        }
+        bool startsWith = s.startsWithV3(p);
+        assembly ("memory-safe") {
+            mstore(stackTop, startsWith)
         }
         return stackTop;
     }
