@@ -9,11 +9,11 @@ import {LibBytes, Pointer} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
 //forge-lint: disable-next-line(unused-import)
 import {ISubParserV4, AuthoringMetaV2} from "../interface/ISubParserV4.sol";
 import {LibSubParse, ParseState} from "../lib/parse/LibSubParse.sol";
-import {CMASK_RHS_WORD_TAIL} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
+import {CMASK_RHS_WORD_TAIL} from "rain-string-0.3.11/src/lib/parse/LibParseCMask.sol";
 import {LibParse, OperandV2} from "../lib/parse/LibParse.sol";
 import {LibParseMeta} from "../lib/parse/LibParseMeta.sol";
 import {LibParseOperand} from "../lib/parse/LibParseOperand.sol";
-import {IDescribedByMetaV1} from "rain-metadata-0.1.45/src/interface/IDescribedByMetaV1.sol";
+import {IDescribedByMetaV1} from "rain-metadata-0.1.46/src/interface/IDescribedByMetaV1.sol";
 import {IParserToolingV1} from "rain-sol-codegen-0.1.39/src/interface/IParserToolingV1.sol";
 import {ISubParserToolingV1} from "rain-sol-codegen-0.1.39/src/interface/ISubParserToolingV1.sol";
 import {SubParserIndexOutOfBounds} from "../error/ErrSubParse.sol";

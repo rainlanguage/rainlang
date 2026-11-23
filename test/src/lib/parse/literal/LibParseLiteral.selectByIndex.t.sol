@@ -7,8 +7,8 @@ import {LibBytes, Pointer} from "rain-solmem-0.1.28/src/lib/LibBytes.sol";
 import {LibParseState, ParseState} from "../../../../../src/lib/parse/LibParseState.sol";
 import {LibParseLiteral} from "../../../../../src/lib/parse/literal/LibParseLiteral.sol";
 import {LibAllStandardOps} from "../../../../../src/lib/op/LibAllStandardOps.sol";
-import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
-import {Float, LibDecimalFloat} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
+import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.5/src/lib/LibIntOrAString.sol";
+import {Float, LibDecimalFloat} from "rain-math-float-0.3.13/src/lib/LibDecimalFloat.sol";
 
 /// @title LibParseLiteralSelectByIndexTest
 /// @notice Directly tests selectLiteralParserByIndex by calling the returned

@@ -16,8 +16,8 @@ import {
     CMASK_INTERSTITIAL_HEAD,
     CMASK_LITERAL_HEAD,
     CMASK_HEX
-} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
-import {LibConformString} from "rain-string-0.3.9/src/lib/mut/LibConformString.sol";
+} from "rain-string-0.3.11/src/lib/parse/LibParseCMask.sol";
+import {LibConformString} from "rain-string-0.3.11/src/lib/mut/LibConformString.sol";
 import {NoWhitespaceAfterUsingWordsFrom} from "../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../src/lib/parse/LibParseError.sol";
 import {Strings} from "@openzeppelin-contracts-5.7.0/utils/Strings.sol";

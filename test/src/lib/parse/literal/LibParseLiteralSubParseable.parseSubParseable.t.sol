@@ -16,13 +16,13 @@ import {
 } from "../../../../../src/error/ErrParse.sol";
 import {LibParseError} from "../../../../../src/lib/parse/LibParseError.sol";
 import {ISubParserV4} from "../../../../../src/interface/ISubParserV4.sol";
-import {LibConformString} from "rain-string-0.3.9/src/lib/mut/LibConformString.sol";
+import {LibConformString} from "rain-string-0.3.11/src/lib/mut/LibConformString.sol";
 import {
     CMASK_WHITESPACE,
     CMASK_SUB_PARSEABLE_LITERAL_END,
     CMASK_PRINTABLE
-} from "rain-string-0.3.9/src/lib/parse/LibParseCMask.sol";
-import {LibParseChar} from "rain-string-0.3.9/src/lib/parse/LibParseChar.sol";
+} from "rain-string-0.3.11/src/lib/parse/LibParseCMask.sol";
+import {LibParseChar} from "rain-string-0.3.11/src/lib/parse/LibParseChar.sol";
 import {MessageHashUtils} from "@openzeppelin-contracts-5.7.0/utils/cryptography/MessageHashUtils.sol";
 import {EIP712_DOMAIN_SEPARATOR_DISPATCH} from "../../../../../src/lib/parse/literal/LibParseLiteralEIP712Domain.sol";
 

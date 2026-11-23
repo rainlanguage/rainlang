@@ -7,7 +7,7 @@ import {OpTest, UnexpectedOperand} from "test/abstract/OpTest.sol";
 import {LibOpUtf8Hash} from "../../../../../src/lib/op/crypto/LibOpUtf8Hash.sol";
 import {LibContext} from "../../../../../src/lib/caller/LibContext.sol";
 
-import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.4/src/lib/LibIntOrAString.sol";
+import {IntOrAString, LibIntOrAString} from "rain-intorastring-0.1.5/src/lib/LibIntOrAString.sol";
 
 import {OperandV2, SourceIndexV2, EvalV4, StackItem} from "../../../../../src/interface/IInterpreterV4.sol";
 import {FullyQualifiedNamespace} from "../../../../../src/interface/IInterpreterStoreV3.sol";
@@ -15,7 +15,7 @@ import {SignedContextV2} from "../../../../../src/interface/IInterpreterCallerV5
 import {IntegrityCheckState} from "../../../../../src/lib/integrity/LibIntegrityCheck.sol";
 import {InterpreterState} from "../../../../../src/lib/state/LibInterpreterState.sol";
 import {LibOperand} from "test/lib/operand/LibOperand.sol";
-import {LibDecimalFloat, Float} from "rain-math-float-0.3.11/src/lib/LibDecimalFloat.sol";
+import {LibDecimalFloat, Float} from "rain-math-float-0.3.13/src/lib/LibDecimalFloat.sol";
 import {Pointer} from "rain-solmem-0.1.28/src/lib/LibPointer.sol";
 
 /// @title LibOpUtf8HashTest
